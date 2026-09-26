@@ -135,13 +135,20 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
  return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
 }
 if(require.main===module){
- const rows=[],improvements=[],bestByBuild={},buyPill=process.argv.includes('--pill');
+ const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual');
  const outIndex=process.argv.indexOf('--best-out');
  if(outIndex>=0&&!process.argv[outIndex+1])throw Error('--best-out requires a file path');
  const count=Number(process.argv.find(x=>/^\d+$/.test(x))||1);
  for(const origin of origins)for(const talent of talents)for(const route of routes)for(const policy of policies)for(let seed=1;seed<=count;seed++){
   const x=simulate({origin,talent,route,policy,seed,buyPill});rows.push(x);
   if(x.successMonth==null)continue;
+  if(groupByManual){
+   const manual=String(x.manual);
+   if(!bestByManual[manual]||x.successMonth<bestByManual[manual].successMonth){
+    bestByManual[manual]={manual:x.manual,manualName:G.ITEMS.manual[x.manual]?.name||manual,origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
+    manualImprovements.push({manual,...bestByManual[manual]});
+   }
+  }
   const key=[origin,talent,route].join('/');
   if(!bestByBuild[key]||x.successMonth<bestByBuild[key].successMonth){
    bestByBuild[key]={origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
@@ -151,7 +158,13 @@ if(require.main===module){
  const best=Object.values(bestByBuild).sort((a,b)=>a.successMonth-b.successMonth||a.seed-b.seed)[0]||null;
  const replay=best?simulate({...best,trace:true}):null;
  if(replay&&replay.successMonth!==best.successMonth)throw Error('Best route replay did not reproduce');
- const bestResult={objective:'earliest successful meridian opening (month)',seedCount:count,buyPill,best,improvements,bestByBuild,bestActions:replay?.actions||[]};
+ const manualResults={};
+ if(groupByManual)for(const [manual,winner] of Object.entries(bestByManual)){
+  const replay=simulate({...winner,trace:true});
+  if(replay.successMonth!==winner.successMonth||replay.manual!==winner.manual)throw Error(`Manual ${manual} route replay did not reproduce`);
+  manualResults[manual]={...winner,actions:replay.actions};
+ }
+ const bestResult={objective:'earliest successful meridian opening (month)',seedCount:count,buyPill,best,improvements,bestByBuild,bestActions:replay?.actions||[],...(groupByManual?{manualImprovements,bestByManual:manualResults}:{})};
  if(outIndex>=0)fs.writeFileSync(process.argv[outIndex+1],JSON.stringify(bestResult,null,2)+'\n');
  const by={};for(const x of rows){const key=[x.origin,x.route,x.reason].join('/');by[key]=(by[key]||0)+1;}
  console.log(JSON.stringify({count:rows.length,by,attempted:rows.filter(x=>x.attemptMonth!=null).length,records:rows.map(({state,...x})=>x),failures:rows.filter(x=>x.attemptMonth==null).map(x=>({origin:x.origin,talent:x.talent,route:x.route,policy:x.policy,seed:x.seed,reason:x.reason,month:x.month||x.state?.month,command:x.command||x.last,stage:x.state?.stage,manual:x.state?.manual,focus:x.state?.focus,grain:x.state?.grain,pending:x.state?.pending,story:x.state?.story})).slice(0,30),bestResult},null,2));
