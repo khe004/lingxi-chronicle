@@ -35,3 +35,15 @@
 .affinity-levels{border:1px solid #668774;background:#213c35;padding:14px 16px;margin:0 0 16px}.affinity-levels h3{font:600 16px 'Noto Serif SC',serif;color:#e2c995;margin:5px 0 9px}.affinity-levels>div{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}.affinity-levels span{border:1px solid #647e6e;padding:5px 9px;font-size:13px;color:#d1e0ce}.affinity-levels b{color:#ead09b;margin-left:5px}.affinity-levels p{color:#b8cdbd;font-size:13px;line-height:1.65;margin:8px 0 0}
 
 .spar-result{display:inline-block;padding:3px 10px;border:1px solid;vertical-align:middle;font-weight:600}.spar-win{color:#baf1d1;background:#24563e;border-color:#73b98d}.spar-loss{color:#ffd0c9;background:#60352f;border-color:#cf8375}.spar-other{color:#e8d8b3;background:#4b4835;border-color:#a99b71}.spar-last h4{font:500 15px 'Noto Serif SC',serif;color:#d9cbab;margin:17px 0 6px}.spar-last .full-history{max-height:none;overflow:visible}
+
+
+/* v2.41: let the middle process pane use the full desktop sheet height. */
+@media(min-width:1121px){
+ .layout{align-items:stretch}
+ .sheet{height:auto}
+ .narrative{min-height:700px}
+ .story-content,.books-content{max-height:none;min-height:0;flex:1;overflow:auto}
+}
+.story-battle-report{border:1px solid #718b70;background:#203e35;margin:14px 0;padding:10px 12px}
+.story-battle-report summary{cursor:pointer;color:#e7d19b;font:600 14px 'Noto Serif SC',serif}
+.story-battle-report .spar-history{margin-top:12px}
