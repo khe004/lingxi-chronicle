@@ -197,6 +197,7 @@ function finishSpar(s,result){const c=s.combat,storyEncounter=c.storyEncounter,r
   record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']=(record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']||0)+1;
   record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity}};
  }
+ if(storyEncounter)record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity},storyEncounter};
  s.combat=null;
 }
 function sparRound(s,id,rng){const c=s.combat;if(!c||!combatOptions(s).some(o=>o.id===id&&!o.disabled))return;
@@ -373,7 +374,8 @@ function sceneEvent(s,rng){
  const id=remaining[Math.floor(rand(rng)*remaining.length)];e.seen.push(id);e.nextMonth=s.month+8;s.pending=`scene-${id}`;
  note(s,`你在${LOCATIONS[s.location].name}遇见一桩意料之外的事，需要亲自作主。`,'人情');
 }
-function earnManual(s,n,source){if(!s.manuals.includes(n))s.manuals.push(n);const ready=!affinityMissing(s,ITEMS.manual[n]).length;if(ready)s.manual=n;note(s,`${source}，你取得${ITEMS.manual[n].name}。${ready?'已转修此法。':'属性未足，暂存法卷；日后练功养足亲和再转修。'}`,'法门');}
+function attuneManualAffinity(s,n){const item=ITEMS.manual[n],need=affinityRequirement(item);if(!item||item.rarity!=='仙品'||!need)return [];if(!s.affinityPoints)s.affinityPoints=innatePoints(s.elements,s.polarity);const raised=[];if(item.elements?.length){const key=item.elements.slice().sort((a,b)=>(s.affinityPoints[b]||0)-(s.affinityPoints[a]||0))[0];if((s.affinityPoints[key]||0)<need){s.affinityPoints[key]=need;raised.push(`${ELEMENTS[key]}亲和 → ${need}`);}}if(item.polarity&&item.polarity!=='harmony'&&(s.affinityPoints[item.polarity]||0)<need){s.affinityPoints[item.polarity]=need;raised.push(`${POLARITIES[item.polarity]}亲和 → ${need}`);}return raised;}
+function earnManual(s,n,source){if(!s.manuals.includes(n))s.manuals.push(n);const attuned=attuneManualAffinity(s,n),ready=!affinityMissing(s,ITEMS.manual[n]).length;if(ready)s.manual=n;note(s,`${source}，你取得${ITEMS.manual[n].name}。${attuned.length?'求法历练使自身气机与真章相契（'+attuned.join('、')+'）。':''}${ready?'已转修此法。':'属性未足，暂存法卷；需另寻契合机缘后再转修。'}`,'法门',attuned.join(' · '));}
 function canReadStar(s){return (s.practice[1]||0)>=8||(s.practice[2]||0)>=6||(s.practice[6]||0)>=8;}
 function canNurtureVein(s){return (s.practice[1]||0)>=10||(s.practice[2]||0)>=6||(s.practice[6]||0)>=10;}
 function canRedeem(s){const contractAptitude=s.root>=4||s.root>=3&&s.social>=5&&(s.practice[6]||0)>=18;return (s.practice[6]||0)>=10&&s.insight>=7&&contractAptitude&&s.wit>=4&&s.dao>=3&&s.social>=4;}
