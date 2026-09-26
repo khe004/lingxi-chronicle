@@ -120,19 +120,20 @@ function command(s,route,policy,buyPill){
 }
 function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
- let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[];
+ let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
  while(!s.ending&&steps<1500&&s.month<750){const c=command(s,route,policy,buyPill);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,state:s};
   const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage]);last=c;
   if(c==='choice:steady'||c==='choice:bold'){attemptMonth=s.month;attemptChance=G.chance(s,c==='choice:bold'?'bold':'steady');}
   if(c==='action:buyelixir')pillsBought++;
   const at=s.month;s=G.step(s,c,random);steps++;minGrain=Math.min(minGrain,s.grain);
+  for(const milestone of [60,120,168])if(at<milestone&&s.month>=milestone)affinityAt[milestone]={...G.points(s)};
   if(trace)actions.push({month:at,command:c,monthAfter:s.month});
   if(!firstSpirit&&(s.manuals.includes(2)||s.manuals.includes(6)))firstSpirit=s.month;
   if(!firstManual&&s.manuals.includes(route==='star'?4:route==='green'?5:3))firstManual=s.month;
   if(!firstSpring&&s.spring>=3)firstSpring=s.month;
   if(JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,command:c,state:s};
  }
- return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
+ return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
 }
 if(require.main===module){
  const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual');

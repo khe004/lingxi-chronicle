@@ -68,8 +68,8 @@ function matchup(offense,defense){const a=affinity(offense?.elements,offense?.po
 const STAGES=['入门吐纳','凝元显意','淬元去芜','元成入真'];
 const NEED=[36,52,70,88];
 const OLD_NEED=[38,62,83,110];
-const MANUAL_BONUS=[0,20,40,60,75,60,30];
-const SPEED=[.12,2.25,3.75,9.6,6.6,6.4,3.1];
+const MANUAL_BONUS=[0,12,20,26,30,26,18];
+const SPEED=[.12,3.5,5.4,11.5,10.5,10.5,5.2];
 const REQUIREMENTS=[null,{root:2,wit:2},{root:3,wit:3},{root:4,wit:4,dao:4},{root:3,wit:5,dao:3},{root:4,wit:3,body:4},{root:3,wit:3}];
 const ORIGINS={scholar:{name:'寒门书生',text:'识字解文，盘缠将尽；认识校卷人。',silver:5,grain:5,herbs:0,root:2,wit:5,body:2,social:3,insight:2,life:67},merchant:{name:'行商子弟',text:'带着资粮上山；旧识愿介绍商路护卷。',silver:14,grain:7,herbs:0,root:3,wit:3,body:3,social:5,insight:0,life:69},herbalist:{name:'采药人家',text:'熟悉山路与药径，欠缺典籍。',silver:3,grain:6,herbs:2,root:5,wit:2,body:5,social:2,insight:0,life:72}};
 const TALENTS={clarity:{name:'慧心',text:'善解蚀文，参悟更快。'},meridian:{name:'清脉',text:'经脉稳固，冲关更有把握。'},vitality:{name:'长息',text:'寿元较长，休养更见成效。'}};
@@ -585,7 +585,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(id==='cultivate'){const gained=Math.min(cultivationGain(s),Math.max(0,cap(s)-s.progress));s.progress=Math.round((s.progress+gained)*100)/100;s.totalProgress=Math.round((s.totalProgress+gained)*100)/100;add(s,{focus:-22});trainAttribute(s);if((s.elixirBoost||0)>0)s.elixirBoost--;note(s,`你依${ITEMS.manual[s.manual].name}吐纳行气，积累这一层的功行。`,'修行',`功行 +${gained.toFixed(2)}${s.elixirBoost>0?` · 聚气余效 ${s.elixirBoost} 次`:''}`);turn(s);if(!s.ending&&s.stage<3&&s.progress>=cap(s))s.pending='stage';}
   if(id==='rest'){const body=effectiveBody(s);add(s,{focus:48+(body-3)*4+(s.talent==='vitality'?12:0),wounds:body>=5?-2:-1});note(s,'你暂歇一月，收束杂念，调养经脉。','日常');turn(s);}
   if(id==='study'){add(s,{focus:-16,insight:s.talent==='clarity'?2:1,silver:s.insight>=5?2:0});note(s,'你推演蚀文，一字多解，终于窥见道书中隐藏的行气之理。','研经');study(s);turn(s);if(!s.ending&&!s.flags.scroll){s.flags.scroll=true;s.pending='scroll';}}
-  if(id==='gather'){add(s,{focus:-15,herbs:rand(rng)<.28?2:1,grain:2});if(s.story.yeText&&s.story.yeText!=='complete')s.story.yeHerbWork=Math.min(2,(s.story.yeHerbWork||0)+1);note(s,'你沿山径采下灵草，也带回一些野菜与谷物，足够维持几日生计。','采集');turn(s);if(!s.ending&&!s.flags.herbalist){s.flags.herbalist=true;s.pending='herbalist';}}
+  if(id==='gather'){add(s,{focus:-15,herbs:rand(rng)<.28?2:1,grain:5});if(s.story.yeText&&s.story.yeText!=='complete')s.story.yeHerbWork=Math.min(2,(s.story.yeHerbWork||0)+1);note(s,'你沿山径采下灵草，也带回一些野菜与谷物，足够支撑一阵子。','采集');turn(s);if(!s.ending&&!s.flags.herbalist){s.flags.herbalist=true;s.pending='herbalist';}}
   if(id==='yeFollowup')s.pending='yeFollowup';
   if(id==='stoneScout')s.pending='stoneScout';
   if(['guFollowup','guReturn','chengFollowup','chengReturn','guText','guFinish','yeText','yeFinish','luMeet','luReturn','sealAudience','stoneScout'].includes(id))s.pending=id;
