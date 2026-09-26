@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101b1c">
+  <meta name="description" content="一款关于修炼、游历与抉择的文字修仙游戏。">
+  <title>灵溪纪 · 文字修仙</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <div class="brand"><span class="seal">灵</span><div><strong>灵溪纪</strong><small>一卷山中岁月</small></div></div>
+      <div class="header-right"><span id="season" class="season"></span><button id="reset" class="plain-button" type="button">重开此生</button></div>
+    </header>
+    <main class="layout">
+      <aside class="character card" aria-label="人物状态">
+        <div class="section-label">修行者 · PERSONA</div>
+        <div class="identity"><div class="avatar">修</div><div><div id="name" class="name">无名散修</div><div id="realm" class="realm">炼气一层</div></div></div>
+        <div class="divider"></div>
+        <div class="stat-head"><span>修为</span><b id="cultivation-text"></b></div><div class="track"><div id="cultivation-bar" class="fill gold"></div></div>
+        <div class="stat-head"><span>气血</span><b id="health-text"></b></div><div class="track"><div id="health-bar" class="fill red"></div></div>
+        <div class="stat-head"><span>灵气</span><b id="energy-text"></b></div><div class="track"><div id="energy-bar" class="fill teal"></div></div>
+        <div class="divider"></div>
+        <div class="resources"><div><span>灵石</span><b id="stones"></b></div><div><span>聚气丹</span><b id="pills"></b></div><div><span>灵草</span><b id="herbs"></b></div><div><span>修行年月</span><b id="age"></b></div></div>
+        <div class="side-note">山中无甲子，寒尽不知年。<br>每次行动，时光都会向前。</div>
+      </aside>
+      <section class="story card" aria-label="游戏记录">
+        <div class="story-head"><div><div class="section-label">山海见闻 · CHRONICLE</div><h1>且行且修</h1></div><span id="chapter" class="chapter">第一章 · 初入仙途</span></div>
+        <div id="log" class="log" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <div id="encounter" class="encounter" hidden></div>
+        <div id="toast" class="toast" role="status"></div>
+      </section>
+      <aside class="actions card" aria-label="修行行动">
+        <div class="section-label">今日何为 · ACTIONS</div>
+        <h2>道途由你</h2>
+        <div class="action-list">
+          <button type="button" data-action="meditate" class="action"><span class="action-icon">☯</span><span><strong>闭关修炼</strong><small>耗时一月 · 增长修为</small></span><span class="chevron">›</span></button>
+          <button type="button" data-action="explore" class="action"><span class="action-icon">⌁</span><span><strong>下山历练</strong><small>耗时一月 · 邂逅机缘</small></span><span class="chevron">›</span></button>
+          <button type="button" data-action="gather" class="action"><span class="action-icon">✣</span><span><strong>采集灵草</strong><small>耗时一月 · 寻药换石</small></span><span class="chevron">›</span></button>
+          <button type="button" data-action="rest" class="action"><span class="action-icon">◌</span><span><strong>静养调息</strong><small>耗时一月 · 恢复气血灵气</small></span><span class="chevron">›</span></button>
+        </div>
+        <div class="divider"></div>
+        <div class="section-label">洞府杂事 · PROVISIONS</div>
+        <div class="small-actions"><button data-action="pill" type="button">服用聚气丹 <span id="pill-count"></span></button><button data-action="buy" type="button">购买丹药 <span>8 灵石</span></button><button data-action="sell" type="button">售出灵草 <span>3 灵石</span></button></div>
+        <button id="breakthrough" class="breakthrough" type="button">冲击下一境 <span id="breakthrough-hint"></span></button>
+        <p class="save-note">进度自动保存在当前浏览器</p>
+      </aside>
+    </main>
+    <footer>灵溪纪 · 一段属于你的修仙小传 <span>○</span> 凡心未泯，道心初成</footer>
+  </div>
+  <dialog id="reset-dialog"><form method="dialog"><h2>重开此生？</h2><p>当前修行记录会被清除，从炼气一层重新开始。</p><div class="dialog-actions"><button value="cancel">再想想</button><button value="confirm" class="danger">重新开始</button></div></form></dialog>
+</body>
+</html>
