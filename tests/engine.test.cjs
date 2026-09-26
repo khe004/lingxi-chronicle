@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const G=require('../dist/engine.js');
 const run=(s,command,roll=0)=>G.step(s,command,()=>roll);
 let s=G.create({name:'闻山',origin:'scholar',talent:'clarity'});s.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));
-assert.equal(s.version,8);
+assert.equal(s.version,9);
 assert.equal(s.manual,0);
 assert.deepEqual(s.manuals,[0]);
 assert.equal(G.ITEMS.manual[0].name,'《养息吐纳诀》');
@@ -101,15 +101,17 @@ let woodSpar=G.create({elements:['wood']});woodSpar.location='arena';woodSpar=ru
 woodSpar.combat.player.currentQi-=10;const hurtQi=woodSpar.combat.player.currentQi;
 woodSpar=run(woodSpar,'combat:guard',.99);
 assert.ok(woodSpar.combat.player.currentQi>hurtQi);assert.ok(woodSpar.combat.history.at(-1).includes('回生'));
-// Every 12 actual practice sessions raise all of the manual's tagged affinities together.
-function cultivateTwelve(method){let disciple=G.create();disciple.manual=method;disciple.manuals.push(method);disciple.grain=100;
- for(let i=0;i<12;i++){if(disciple.focus<18)disciple=run(disciple,'action:rest',1);disciple=run(disciple,'action:cultivate',1);}
+// Affinity growth rewards specialization: broad low-level growth is possible, but high affinity takes sustained practice.
+function cultivate(method,count){let disciple=G.create();disciple.manual=method;if(!disciple.manuals.includes(method))disciple.manuals.push(method);disciple.grain=300;disciple.events.nextMonth=999;
+ for(let i=0;i<count&&!disciple.ending;i++){if(disciple.focus<18)disciple=run(disciple,'action:rest',1);disciple=run(disciple,'action:cultivate',1);}
  return disciple;
 }
-const universal=cultivateTwelve(0);for(const key of G.AFFINITY_KEYS)assert.equal(universal.affinityPoints[key],2,`basic ${key}`);
-const dual=cultivateTwelve(5);for(const key of ['wood','fire','yang'])assert.equal(dual.affinityPoints[key],2,`dual ${key}`);
+const universal=cultivate(0,35);for(const key of G.AFFINITY_KEYS)assert.equal(universal.affinityPoints[key],1,`basic ${key} must not rise before 36 actual sessions`);
+const universal36=cultivate(0,36);for(const key of G.AFFINITY_KEYS)assert.equal(universal36.affinityPoints[key],2,`basic ${key}`);
+const specialist=cultivate(3,60);assert.ok(specialist.affinityPoints.metal>=4&&specialist.affinityPoints.yang>=4,'immortal specialization deepens tagged axes');
+assert.ok(specialist.affinityPoints.wood<=1&&specialist.affinityPoints.water<=1,'specialization leaves unrelated axes low');
+const dual=cultivate(5,10);for(const key of ['wood','fire','yang'])assert.equal(dual.affinityPoints[key],2,`dual ${key}`);
 assert.equal(dual.affinityPoints.water,1);assert.equal(dual.affinityPoints.yin,1);
-const balanced=cultivateTwelve(6);for(const key of ['earth','metal','yin','yang'])assert.equal(balanced.affinityPoints[key],2,`balanced ${key}`);
 // The practice grounds reuse character stats while isolating story, resources and lasting injuries.
 let arena=G.create({name:'演武试客',elements:['water','wood'],polarity:'yang'});arena.affinityPoints.yin=3;arena.affinityPoints.earth=3;arena=run(arena,'travel:arena');
 assert.equal(G.LOCATIONS.arena.name,'苍梧演武坪');
@@ -701,7 +703,7 @@ for(const [origin,route] of [['scholar','star'],['merchant','taiwei'],['herbalis
 let preview=G.create();preview.story.yeRoute='help';preview.story.yeMonth=0;preview.month=3;preview.pending='yeFollowup';const previewMonth=preview.month,previewFavor=preview.npcFavor.ye;
 assert.ok(G.options(preview).some(o=>o.id==='back'));preview=run(preview,'choice:back');assert.equal(preview.month,previewMonth);assert.equal(preview.npcFavor.ye,previewFavor);assert.equal(preview.story.yeFollowup,null);
 
-let affinityRetreat=G.create();affinityRetreat.manuals.push(1);affinityRetreat.manual=1;affinityRetreat.practice[1]=11;affinityRetreat.grain=30;affinityRetreat.focus=100;affinityRetreat.events.nextMonth=999;affinityRetreat=run(affinityRetreat,'action:secludeYear',0.99);
+let affinityRetreat=G.create();affinityRetreat.manuals.push(1);affinityRetreat.manual=1;affinityRetreat.practice[1]=11;affinityRetreat.affinityTraining[1]=17;affinityRetreat.grain=30;affinityRetreat.focus=100;affinityRetreat.events.nextMonth=999;affinityRetreat=run(affinityRetreat,'action:secludeYear',0.99);
 const retreatLog=affinityRetreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.ok(retreatLog?.effect.includes('木亲和'),retreatLog?.effect||'missing retreat affinity summary');
 
 // A natural thirty-round draw is reachable with ordinary stats, without mutating combat values.
@@ -712,3 +714,19 @@ assert.equal(drawCheck.sparRecord.last.result,'平局');
 
 let recoveredRetreat=G.create();recoveredRetreat.manuals.push(1);recoveredRetreat.manual=1;recoveredRetreat.month=12;recoveredRetreat.ageMonths+=12;recoveredRetreat.grain=30;recoveredRetreat.focus=40;recoveredRetreat.events={seen:[],nextMonth:0};
 recoveredRetreat=run(recoveredRetreat,'action:secludeYear',0);assert.ok(recoveredRetreat.pending?.startsWith('scene-'));assert.ok(recoveredRetreat.focus>40,'retreat event should surface after a recovery month');
+
+
+// v2.43 regressions: 16-to-30 chapter window, mutually exclusive Taiwei acquisition, localized chronicle, simplified retreat UI.
+let deadline=G.create();deadline.grain=500;deadline.events.nextMonth=999;
+for(let i=0;i<168&&!deadline.ending;i++)deadline=run(deadline,'action:rest',1);
+assert.equal(deadline.ending?.kind,'retired');assert.equal(Math.floor(deadline.ageMonths/12),30);
+
+let taiweiFromMentor=G.create({origin:'merchant'});taiweiFromMentor.manuals.push(3);taiweiFromMentor.story.luHeard=true;taiweiFromMentor.story.luRoute='pledge';taiweiFromMentor.story.luMonth=0;taiweiFromMentor.month=10;taiweiFromMentor.location='market';
+assert.equal(G.available(taiweiFromMentor).some(a=>a.id==='luReturn'),false);
+let taiweiFromLu=G.create();taiweiFromLu.manuals.push(3);taiweiFromLu.story.trueTextReady=true;taiweiFromLu.pending='mentor';
+assert.equal(G.options(taiweiFromLu).some(o=>o.id==='raretext'),false);
+
+let chron=G.create();chron.story.afterManual={gu:{first:'publish',second:'annotate',month:1},ye:{first:'treat',second:'visit',month:1},lu:{first:'honor',second:'credit',month:1},cheng:{first:'teach',second:'guide',month:1}};chron.ending={kind:'retired'};
+const chronText=G.lifeSummary(chron).join('\n');
+for(const token of ['publish','annotate','treat','visit','honor','credit','teach','guide'])assert.equal(chronText.includes(token),false,`chronicle leaked ${token}`);
+assert.equal(G.available(G.create()).some(a=>a.id==='seclusion'),false);
