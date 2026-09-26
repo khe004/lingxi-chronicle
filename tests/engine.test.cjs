@@ -689,3 +689,6 @@ const retreatLog=retreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.ok(retre
 let drawCheck=G.create();drawCheck.location='arena';drawCheck=run(drawCheck,'action:spar-keeper');drawCheck.combat.player.attack=0;drawCheck.combat.enemy.attack=0;drawCheck.combat.player.counter=0;drawCheck.combat.enemy.counter=0;drawCheck.combat.player.qi=9999;drawCheck.combat.player.currentQi=9999;drawCheck.combat.enemy.qi=9999;drawCheck.combat.enemy.currentQi=9999;
 for(let n=0;n<30&&drawCheck.combat;n++)drawCheck=run(drawCheck,'combat:guard',0.99);
 assert.equal(drawCheck.sparRecord.last.result,'平局');
+
+let interrupted=G.create();interrupted.manuals.push(1);interrupted.manual=1;interrupted.month=12;interrupted.ageMonths+=12;interrupted.grain=30;interrupted.focus=40;interrupted.events={seen:[],nextMonth:0};
+interrupted=run(interrupted,'action:secludeYear',0);assert.ok(interrupted.pending?.startsWith('scene-'));assert.ok(interrupted.focus>40,'retreat event should surface after a recovery month');
