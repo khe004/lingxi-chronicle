@@ -57,10 +57,10 @@ assert.ok(G.matchup(G.combatStats(partial).attackAspect,G.SPAR_OPPONENTS.novice)
 const noIndependent=structuredClone(trained);noIndependent.affinityPoints.metal=1;noIndependent.affinityPoints.yin=1;noIndependent.affinityPoints.plain=99;noIndependent.affinityPoints.harmony=99;
 assert.equal(G.points(noIndependent).plain,1);assert.equal(G.points(noIndependent).harmony,1);
 const migrated=G.migrate(noIndependent);assert.equal(Object.hasOwn(migrated.affinityPoints,'plain'),false);
-const grown=G.create();grown.location='cliff';grown.grain=40;grown.focus=100;
+const grown=G.create();grown.location='cliff';grown.grain=100;grown.focus=100;grown.events.nextMonth=999;
 assert.equal(G.available(grown).some(a=>a.id.startsWith('attune-')),false);
 assert.deepEqual(run(grown,'action:attune-water'),grown);
-let nurtured=grown;for(let i=0;i<12;i++){if(nurtured.focus<18)nurtured=run(nurtured,'action:rest');nurtured=run(nurtured,'action:cultivate');}
+let nurtured=grown;for(let i=0;i<36;i++){if(nurtured.focus<18)nurtured=run(nurtured,'action:rest');nurtured=run(nurtured,'action:cultivate');}
 assert.equal(G.points(nurtured).plain,2);
 let springVisitor=G.create({elements:['fire'],polarity:'yin'});
 const beforeSpringAge=springVisitor.ageMonths;springVisitor=run(springVisitor,'travel:mountain');
