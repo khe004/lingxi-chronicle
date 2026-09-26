@@ -670,3 +670,22 @@ assert.equal(attuneStar.manualId,'star-script');assert.ok(attuneStar.affinityPoi
 let attuneGreen=G.create({origin:'herbalist'});attuneGreen.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneGreen.location='mountain';attuneGreen.flags.herbalist=true;attuneGreen.story.yeText='tend';attuneGreen.story.yeTextMonth=0;attuneGreen.story.yeHerbWork=2;attuneGreen.month=2;attuneGreen.insight=5;attuneGreen.root=4;attuneGreen.wit=3;attuneGreen.body=4;attuneGreen.practice[1]=10;attuneGreen.herbs=4;attuneGreen.grain=20;attuneGreen.focus=100;
 attuneGreen=run(attuneGreen,'action:yeFinish');attuneGreen=run(attuneGreen,'choice:healVein');
 assert.equal(attuneGreen.manualId,'green-vein');assert.ok(attuneGreen.affinityPoints.wood>=4||attuneGreen.affinityPoints.fire>=4);assert.equal(attuneGreen.manual,5);
+
+
+// v2.42 feedback/regression checks.
+let pill=G.create({origin:'merchant'});pill.location='market';pill.silver=20;const baseGain=G.cultivationGain(pill);
+pill=run(pill,'action:buyelixir');assert.equal(pill.elixirBoost,6);assert.equal(pill.silver,10);assert.ok(G.cultivationGain(pill)>baseGain);
+pill.grain=20;pill.focus=100;pill=run(pill,'action:cultivate',0);assert.equal(pill.elixirBoost,5);
+
+let wen=G.create({origin:'herbalist'});wen.location='mountain';wen.pending='stoneScout';wen=run(wen,'choice:yieldSpring');assert.ok(wen.codex.people.includes('wen'));assert.equal(wen.npcFavor.wen,1);
+
+let preview=G.create();preview.story.yeRoute='help';preview.story.yeMonth=0;preview.month=3;preview.pending='yeFollowup';const previewMonth=preview.month,previewFavor=preview.npcFavor.ye;
+assert.ok(G.options(preview).some(o=>o.id==='back'));preview=run(preview,'choice:back');assert.equal(preview.month,previewMonth);assert.equal(preview.npcFavor.ye,previewFavor);assert.equal(preview.story.yeFollowup,null);
+
+let retreat=G.create();retreat.manuals.push(1);retreat.manual=1;retreat.practice[1]=11;retreat.grain=30;retreat.focus=100;retreat.events.nextMonth=999;retreat=run(retreat,'action:secludeYear',0.99);
+const retreatLog=retreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.ok(retreatLog?.effect.includes('木亲和'),retreatLog?.effect||'missing retreat affinity summary');
+
+// Thirty rounds without a knockout is a deliberate draw path, not dead UI.
+let drawCheck=G.create();drawCheck.location='arena';drawCheck=run(drawCheck,'action:spar-keeper');drawCheck.combat.player.attack=0;drawCheck.combat.enemy.attack=0;drawCheck.combat.player.counter=0;drawCheck.combat.enemy.counter=0;
+for(let n=0;n<30&&drawCheck.combat;n++)drawCheck=run(drawCheck,'combat:guard',0.99);
+assert.equal(drawCheck.sparRecord.last.result,'平局');
