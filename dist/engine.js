@@ -363,6 +363,28 @@ function grade(s,roll,mode){
  return names[clamp(base+shift,0,names.length-1)];
 }
 function canRevealTrueText(s){return !s.story?.trueTextReady&&!s.manuals.includes(3)&&s.manuals.includes(2)&&s.flags.mentor&&s.practice[2]>=14&&s.npcFavor.cheng>=3&&s.insight>=6&&s.root>=4&&s.wit>=4&&s.dao>=4&&s.month>=(s.story?.trueTextNextMonth||0);}
+const SCENE_DESCRIPTIONS={
+ templeLamp:'夜里灯火将尽，值夜弟子却在旧卷里发现半页模糊蚀文。抄录的人各执一说，若今晚不辨清，明日这页便要随卷入库。',
+ templeLedger:'月末清点粮库时，执事发现入库粟米与厨房支取的数目对不上。几笔旧账字迹潦草，还有一处像是重复记了两次；山下取粮的人已经在催。',
+ cliffDebate:'午后几名同门在崖下争论一段导脉旧说，从经义一路争到各自修法。有人见你经过，索性把问题抛给了你。',
+ cliffWind:'山风忽然转急，崖边几处石缝发出长短不同的啸声。你听出其中似乎暗合吐纳节律，风口石壁上又隐约露出旧刻。',
+ mountainHerbs:'后山药径旁新翻的泥土里露出几株可用灵草，却也有猿踪压过草叶。若继续采摘，可能要与护食的灵猿周旋。',
+ mountainMist:'雾气忽从山坳漫上来，熟悉的药径很快只剩几步可见。有人说抄近路能早下山，也有人宁愿在原地等雾散。',
+ marketGrain:'粮铺临收摊时忽然改了价，几名客人与掌柜争得不可开交。你看得出账里有可商量的余地，也可以趁机换些陈谷。',
+ marketTome:'旧书摊上压着一张来历不明的拓本，摊主只当奇字招徕客人。你却看出其中几笔与蚀文相近，真假一时难辨。',
+ templeMeridian:'静坐时你察觉气机在一处经络间反复滞涩，像是功行渐深后留下的小结；旁边同门也正为类似问题发愁。',
+ cliffPulse:'崖风拍壁，石纹与自身脉动竟有片刻相合。若顺势参照，也许能把这点体会化进当前功行。',
+ mountainVein:'山腹湿气里夹着一缕与平日不同的土腥味，像有浅层地脉翻动。附近药株的根须都朝着同一方向伸展。',
+ marketScript:'旧书摊新收了一页残缺符文，摊主只当奇字卖。你看出其中有几笔与蚀文相近，或许值得细究。',
+ templeSeal:'观中一处旧封禁松动，执事正在找人帮忙稳住阵脚。此事不算凶险，却最考验根基是否扎实。',
+ cliffFormation:'千丈岩几块天然巨石在日影下连成奇异方位，像极了粗浅阵势。风从其中穿过时，气机也随之偏转。',
+ mountainCave:'雨后山坡塌开一道窄缝，里面透出冷风。洞不深，却有旧兽痕与灵气残留，深处似乎还有水声。',
+ marketPact:'两名行商为一纸旧约争得面红耳赤，都想请你作中人。契书牵涉道书运送，谁也不肯先退一步。',
+ templeBreath:'夜半行功时，你忽觉呼吸与周遭灯火一齐慢了下来，像是开脉前最后一道关隘在体内显形。',
+ cliffVision:'云开月现的一瞬，崖下群山层层铺展，气象与平日迥异。你心中隐约生出一线明悟，风势却正在散去。',
+ mountainSpring:'后山深处一眼旧泉忽然泛起细碎灵光，与先前所见已大不相同。泉意虽淡，却足以让将近圆满的根基再受一次洗炼。',
+ marketExchange:'集市将散时，一名老客拿出几件彼此不搭的旧物求换。旁人只看价钱，你却察觉其中藏着修行上的取舍。'
+};
 const SCENES={temple:['templeLamp','templeLedger'],cliff:['cliffDebate','cliffWind'],mountain:['mountainHerbs','mountainMist'],market:['marketGrain','marketTome']};
 const REALM_SCENES={1:{temple:['templeMeridian'],cliff:['cliffPulse'],mountain:['mountainVein'],market:['marketScript']},2:{temple:['templeSeal'],cliff:['cliffFormation'],mountain:['mountainCave'],market:['marketPact']},3:{temple:['templeBreath'],cliff:['cliffVision'],mountain:['mountainSpring'],market:['marketExchange']}};
 function sceneEvent(s,rng){
@@ -372,7 +394,7 @@ function sceneEvent(s,rng){
  const remaining=(s.stage===0?SCENES[s.location]||[]:REALM_SCENES[s.stage]?.[s.location]||[]).filter(id=>!e.seen.includes(id));
  if(!remaining.length||rand(rng)>=.24)return;
  const id=remaining[Math.floor(rand(rng)*remaining.length)];e.seen.push(id);e.nextMonth=s.month+8;s.pending=`scene-${id}`;
- note(s,`你在${LOCATIONS[s.location].name}遇见一桩意料之外的事，需要亲自作主。`,'人情');
+ note(s,`你在${LOCATIONS[s.location].name}遇见一桩意料之外的事。${SCENE_DESCRIPTIONS[id]||'事情来得突然，需要你亲自作主。'}`,'人情');
 }
 function attuneManualAffinity(s,n){const item=ITEMS.manual[n],need=affinityRequirement(item);if(!item||item.rarity!=='仙品'||!need)return [];if(!s.affinityPoints)s.affinityPoints=innatePoints(s.elements,s.polarity);const raised=[];if(item.elements?.length){const key=item.elements.slice().sort((a,b)=>(s.affinityPoints[b]||0)-(s.affinityPoints[a]||0))[0];if((s.affinityPoints[key]||0)<need){s.affinityPoints[key]=need;raised.push(`${ELEMENTS[key]}亲和 → ${need}`);}}if(item.polarity&&item.polarity!=='harmony'&&(s.affinityPoints[item.polarity]||0)<need){s.affinityPoints[item.polarity]=need;raised.push(`${POLARITIES[item.polarity]}亲和 → ${need}`);}return raised;}
 function earnManual(s,n,source){if(!s.manuals.includes(n))s.manuals.push(n);const attuned=attuneManualAffinity(s,n),ready=!affinityMissing(s,ITEMS.manual[n]).length;if(ready)s.manual=n;note(s,`${source}，你取得${ITEMS.manual[n].name}。${attuned.length?'求法历练使自身气机与真章相契（'+attuned.join('、')+'）。':''}${ready?'已转修此法。':'属性未足，暂存法卷；需另寻契合机缘后再转修。'}`,'法门',attuned.join(' · '));}
