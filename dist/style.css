@@ -55,3 +55,7 @@
 .travel-block{border:1px solid #607666;background:#1d322d;padding:13px 12px 12px;margin:10px 0 16px}.travel-block .section-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.travel-block .section-heading small{font:11px 'Noto Sans SC',sans-serif;color:#91aa99}.action-rule{margin:16px 0}.manual-growth{border-left:2px solid #9f875d;padding-left:10px;color:#d9e2d4}
 @media(max-width:720px){.status{padding:12px 14px}.status-details>summary{margin:0;padding:7px 0}.status-details[open]>summary{margin-bottom:13px}.status-details:not([open])+.status-body{display:none}.decisions{order:1;padding:15px 16px}.narrative{order:2}.status{order:3}.travel-block{margin:4px 0 12px}.travel-list{grid-template-columns:repeat(4,minmax(0,1fr))}.travel-list button{padding:9px 2px;font-size:12px}.action-rule{margin:12px 0}.decisions h2{margin:9px 0 14px}.foot-note{display:none}}
 @media(max-width:430px){.travel-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v2.42 feedback pass */
+.technique-progress{margin-top:.45rem;padding:.5rem .65rem;border-left:3px solid currentColor;background:rgba(255,255,255,.28)}
+.catalog-person .npc-portrait.wen{background-image:linear-gradient(145deg,rgba(86,105,75,.28),rgba(219,204,166,.35));}
