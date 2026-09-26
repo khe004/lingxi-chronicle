@@ -257,7 +257,7 @@ assert.equal(direct.month,1);
 assert.equal(retreat.batchActive,undefined);
 assert.ok(retreat.logs.at(-1).text.includes('闭关6个月'));
 assert.ok(retreat.logs.some(e=>e.batch));
-let annual=G.create();annual.manual=3;annual.manuals.push(3);annual.grain=20;
+let annual=G.create();annual.manual=3;annual.manuals.push(3);annual.grain=20;annual.events.nextMonth=999;
 annual=run(annual,'action:secludeYear');
 assert.equal(annual.month,12);
 assert.equal(annual.books[0].title,'第1卷 · 山中岁华');
@@ -273,7 +273,7 @@ const noFunds=run(market,'action:buymax');assert.equal(noFunds.silver,market.sil
 let purchase=G.create({origin:'merchant',elements:['wood']});purchase.location='market';purchase=run(purchase,'action:buymanual');
 assert.equal(purchase.manual,1);assert.equal(purchase.month,0);
 let tonic=G.create();tonic.location='market';tonic.silver=16;const beforeTonic=tonic.lifeLimitMonths;
-tonic=run(tonic,'action:buyelixir');assert.equal(tonic.lifeLimitMonths,beforeTonic+24);assert.equal(tonic.month,0);
+tonic=run(tonic,'action:buyelixir');assert.equal(tonic.lifeLimitMonths,beforeTonic);assert.equal(tonic.elixirBoost,6);assert.equal(tonic.month,0);
 let harvest=G.create({origin:'herbalist'});harvest.location='mountain';harvest.flags.herbalist=true;harvest.grain=2;
 let manualHarvest=structuredClone(harvest);
 harvest=run(harvest,'action:gatherSeason');
@@ -340,12 +340,12 @@ assert.equal(slow.stage,0);
 assert.ok(slow.progress<G.cap(slow));
 // Follow the NPC route and earn the manuals, satisfying attributes through practice.
 s=run(s,'travel:cliff');s=run(s,'action:study');s=run(s,'choice:share');
-assert.deepEqual(s.npcFavor,{gu:2,ye:0,cheng:1,lu:0});
+assert.deepEqual(s.npcFavor,{gu:2,ye:0,cheng:1,lu:0,wen:0});
 s=run(s,'travel:mountain');s=run(s,'action:gather');
 const encounter=structuredClone(s);
 const paid=run(encounter,'choice:trade');
 assert.equal(paid.silver,encounter.silver+8);
-assert.deepEqual(paid.npcFavor,{gu:2,ye:-1,cheng:1,lu:0});
+assert.deepEqual(paid.npcFavor,{gu:2,ye:-1,cheng:1,lu:0,wen:0});
 const bypassed=run(encounter,'choice:leave');
 assert.equal(bypassed.month,encounter.month);
 assert.deepEqual(bypassed.npcFavor,encounter.npcFavor);
@@ -522,7 +522,7 @@ delete oldest.body;delete oldest.dao;delete oldest.social;delete oldest.npcFavor
 oldest.logs.push({month:1,text:'你将残卷的隐义如实告诉同门顾闻溪。她记下这份人情，也替你带来两两润笔银。',tag:'人情'});
 const converted=G.migrate(oldest);
 assert.equal(converted.version,7);
-assert.deepEqual(converted.npcFavor,{gu:2,ye:0,cheng:1,lu:0});
+assert.deepEqual(converted.npcFavor,{gu:2,ye:0,cheng:1,lu:0,wen:0});
 assert.equal('trust' in converted,false);
 const prev=G.create({name:'上代修士'});prev.version=4;delete prev.studyWork;prev.wit=6;prev.progress=12.5;
 const continued=G.migrate(prev);
@@ -676,19 +676,39 @@ assert.equal(attuneGreen.manualId,'green-vein');assert.ok(attuneGreen.affinityPo
 let pill=G.create({origin:'merchant'});pill.location='market';pill.silver=20;const baseGain=G.cultivationGain(pill);
 pill=run(pill,'action:buyelixir');assert.equal(pill.elixirBoost,6);assert.equal(pill.silver,10);assert.ok(G.cultivationGain(pill)>baseGain);
 pill.grain=20;pill.focus=100;pill=run(pill,'action:cultivate',0);assert.equal(pill.elixirBoost,5);
+const boostedGain=G.cultivationGain(pill);assert.ok(boostedGain>baseGain);
+pill=run(pill,'action:rest',0.99);assert.equal(pill.elixirBoost,5,'rest must not spend a dose');
+for(let n=0;n<5;n++){if(pill.focus<18)pill=run(pill,'action:rest',0.99);pill=run(pill,'action:cultivate',0.99);}
+assert.equal(pill.elixirBoost,0,'the sixth actual cultivation spends the last dose');
+assert.equal(G.cultivationGain(pill),baseGain);
+pill=run(pill,'travel:market');pill.silver=10;pill=run(pill,'action:buyelixir');assert.equal(pill.elixirBoost,6,'a finished course may be bought again');
 
 let wen=G.create({origin:'herbalist'});wen.location='mountain';wen.pending='stoneScout';wen=run(wen,'choice:yieldSpring');assert.ok(wen.codex.people.includes('wen'));assert.equal(wen.npcFavor.wen,1);
+let escorted=G.create({origin:'herbalist',elements:['wood']});escorted.location='market';escorted.story.luHeard=true;escorted.wit=3;escorted=run(escorted,'action:luMeet');escorted=run(escorted,'choice:escort',0.99);
+assert.equal(escorted.manual,6,'earning a spirit manual should attune its core aspect');assert.ok(escorted.affinityPoints.earth>=3||escorted.affinityPoints.metal>=3);
+escorted.story.luMonth=0;escorted.month=8;escorted.practice[6]=10;escorted.insight=7;escorted.wit=4;escorted.dao=3;escorted.root=4;escorted.silver=8;escorted.focus=100;escorted=run(escorted,'action:luReturn');
+assert.equal(G.options(escorted).find(o=>o.id==='redeemSilver').disabled,false,'an escort with low social may redeem after actual practice');
+let pledged=G.create({origin:'merchant'});pledged.location='market';pledged=run(pledged,'action:luMeet');pledged=run(pledged,'choice:pledge',0.99);pledged.month=8;pledged.practice[6]=10;pledged.insight=7;pledged.wit=4;pledged.root=4;pledged.social=2;pledged.silver=8;pledged=run(pledged,'action:luReturn');
+assert.equal(G.options(pledged).find(o=>o.id==='redeemSilver').disabled,true,'pledged trade must retain its social requirement');
+const {simulate}=require('./balance-matrix.cjs');
+for(const [origin,route] of [['scholar','star'],['merchant','taiwei'],['herbalist','green']]){
+ const runSpec={origin,talent:'meridian',route,policy:'quest',seed:17};
+ const first=simulate(runSpec),second=simulate(runSpec);
+ assert.deepEqual(first,second,'identical seeded action routes must replay exactly');
+ assert.ok(first.firstManual!=null&&first.firstSpring!=null&&first.attemptMonth!=null,`${origin}/${route} must actually earn both rewards and reach an attempt`);
+}
 
 let preview=G.create();preview.story.yeRoute='help';preview.story.yeMonth=0;preview.month=3;preview.pending='yeFollowup';const previewMonth=preview.month,previewFavor=preview.npcFavor.ye;
 assert.ok(G.options(preview).some(o=>o.id==='back'));preview=run(preview,'choice:back');assert.equal(preview.month,previewMonth);assert.equal(preview.npcFavor.ye,previewFavor);assert.equal(preview.story.yeFollowup,null);
 
-let retreat=G.create();retreat.manuals.push(1);retreat.manual=1;retreat.practice[1]=11;retreat.grain=30;retreat.focus=100;retreat.events.nextMonth=999;retreat=run(retreat,'action:secludeYear',0.99);
-const retreatLog=retreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.ok(retreatLog?.effect.includes('木亲和'),retreatLog?.effect||'missing retreat affinity summary');
+let affinityRetreat=G.create();affinityRetreat.manuals.push(1);affinityRetreat.manual=1;affinityRetreat.practice[1]=11;affinityRetreat.grain=30;affinityRetreat.focus=100;affinityRetreat.events.nextMonth=999;affinityRetreat=run(affinityRetreat,'action:secludeYear',0.99);
+const retreatLog=affinityRetreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.ok(retreatLog?.effect.includes('木亲和'),retreatLog?.effect||'missing retreat affinity summary');
 
-// Thirty rounds without a knockout is a deliberate draw path, not dead UI.
-let drawCheck=G.create();drawCheck.location='arena';drawCheck=run(drawCheck,'action:spar-keeper');drawCheck.combat.player.attack=0;drawCheck.combat.enemy.attack=0;drawCheck.combat.player.counter=0;drawCheck.combat.enemy.counter=0;drawCheck.combat.player.qi=9999;drawCheck.combat.player.currentQi=9999;drawCheck.combat.enemy.qi=9999;drawCheck.combat.enemy.currentQi=9999;
-for(let n=0;n<30&&drawCheck.combat;n++)drawCheck=run(drawCheck,'combat:guard',0.99);
+// A natural thirty-round draw is reachable with ordinary stats, without mutating combat values.
+let drawSeed=3,drawRng=()=>((drawSeed=(Math.imul(drawSeed,1664525)+1013904223)>>>0)/4294967296);
+let drawCheck=G.create({origin:'herbalist'});drawCheck.stage=3;drawCheck.location='arena';drawCheck=G.step(drawCheck,'action:spar-ape',drawRng);
+for(let n=0;n<30&&drawCheck.combat;n++)drawCheck=G.step(drawCheck,'combat:guard',drawRng);
 assert.equal(drawCheck.sparRecord.last.result,'平局');
 
-let interrupted=G.create();interrupted.manuals.push(1);interrupted.manual=1;interrupted.month=12;interrupted.ageMonths+=12;interrupted.grain=30;interrupted.focus=40;interrupted.events={seen:[],nextMonth:0};
-interrupted=run(interrupted,'action:secludeYear',0);assert.ok(interrupted.pending?.startsWith('scene-'));assert.ok(interrupted.focus>40,'retreat event should surface after a recovery month');
+let recoveredRetreat=G.create();recoveredRetreat.manuals.push(1);recoveredRetreat.manual=1;recoveredRetreat.month=12;recoveredRetreat.ageMonths+=12;recoveredRetreat.grain=30;recoveredRetreat.focus=40;recoveredRetreat.events={seen:[],nextMonth:0};
+recoveredRetreat=run(recoveredRetreat,'action:secludeYear',0);assert.ok(recoveredRetreat.pending?.startsWith('scene-'));assert.ok(recoveredRetreat.focus>40,'retreat event should surface after a recovery month');
