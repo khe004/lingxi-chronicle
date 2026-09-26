@@ -528,7 +528,8 @@ function batchCultivate(initial,limit,rng){let s=initial,trained=0,rested=0,gath
   const next=step(s,`action:${action}`,rng);
   if(next.month===s.month&&!next.pending){reason='无法继续闭关';break;}
   s=next;if(action==='gather')gathered++;else if(action==='rest')rested++;else trained++;
-  if(s.pending){reason='遇到必须亲自处理的事件或筑元关口';break;}
+  if(action==='cultivate'&&s.pending?.startsWith('scene-')&&!s.ending){const pending=s.pending;s.pending=null;const recovered=step(s,'action:rest',rng);s=recovered;s.pending=pending;rested++;reason='静养恢复后，遇到必须亲自处理的随机事件';}
+  if(s.pending){reason=reason==='静养恢复后，遇到必须亲自处理的随机事件'?reason:'遇到必须亲自处理的事件或筑元关口';break;}
   if(s.ending){reason='此生已终';break;}
  }
  delete s.batchActive;
@@ -594,7 +595,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(id==='heal'){add(s,{silver:-5,wounds:-2,focus:12});note(s,'医者以药汤疏通郁结，暗伤渐消。','伤病');turn(s);}
   if(id==='marketWalk'){note(s,'你在坊市听商贩与行脚修士议论山中近况，顺手帮摊主理了货。','交易');if(!s.story.luHeard){s.story.luHeard=true;note(s,'坊间有人说商旅陆知衡正在寻护卷之人，你记住了他的名字。','人情');}turn(s);sceneEvent(s,rng);if(!s.pending&&!s.ending){add(s,{silver:2});note(s,'这一月没有新奇线索，摊主结了两两工钱。','交易','银钱 +2');}return s;}
   if(id==='buyelixir'){add(s,{silver:-10});s.flags.elixir=true;s.elixirBoost=6;note(s,`你换来一枚${ITEMS.elixir.name}。接下来六次实际吐纳，所得功行提高四分之一。`,'修行','银钱 −10 · 6 次吐纳功行 +25%');}
-  if(s.month>beforeMonth&&(!s.batchActive||id==='rest'||id==='gather'))sceneEvent(s,rng);
+  if(s.month>beforeMonth)sceneEvent(s,rng);
  }
  if(kind==='choice'){
   const opt=options(s).find(o=>o.id===id&&!o.disabled);if(!opt)return s;
