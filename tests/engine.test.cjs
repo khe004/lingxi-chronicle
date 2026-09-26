@@ -652,3 +652,12 @@ assert.deepEqual(G.FOE_ARTS.vinePounce.elements,['wood']);
 let colorful=G.create({elements:['water'],polarity:'yin'});colorful.location='arena';colorful=run(colorful,'action:spar-novice');colorful=run(colorful,'combat:withdraw');
 assert.deepEqual(colorful.sparRecord.last.playerAspect.elements,['water']);
 assert.deepEqual(colorful.sparRecord.last.enemyAspect.elements,['fire']);
+
+
+// P0 regression: standard immortal-manual acquisition attunes the core affinity needed to use the reward.
+let attuneStar=G.create({origin:'scholar'});attuneStar.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneStar.flags.scroll=true;attuneStar.npcFavor.gu=2;attuneStar.insight=8;attuneStar.root=4;attuneStar.wit=5;attuneStar.practice[1]=8;attuneStar.grain=30;attuneStar.location='cliff';attuneStar.story.guText='collaborate';attuneStar.story.guFragments=true;attuneStar.story.guTextMonth=0;attuneStar.month=3;attuneStar.focus=100;
+attuneStar=run(attuneStar,'action:guFinish');attuneStar=run(attuneStar,'choice:verify');
+assert.equal(attuneStar.manualId,'star-script');assert.ok(attuneStar.affinityPoints.fire>=4);assert.equal(attuneStar.manual,4);
+let attuneGreen=G.create({origin:'herbalist'});attuneGreen.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneGreen.location='mountain';attuneGreen.flags.herbalist=true;attuneGreen.story.yeText='tend';attuneGreen.story.yeTextMonth=0;attuneGreen.story.yeHerbWork=2;attuneGreen.month=2;attuneGreen.insight=5;attuneGreen.root=4;attuneGreen.wit=3;attuneGreen.body=4;attuneGreen.practice[1]=10;attuneGreen.herbs=4;attuneGreen.grain=20;attuneGreen.focus=100;
+attuneGreen=run(attuneGreen,'action:yeFinish');attuneGreen=run(attuneGreen,'choice:healVein');
+assert.equal(attuneGreen.manualId,'green-vein');assert.ok(attuneGreen.affinityPoints.wood>=4||attuneGreen.affinityPoints.fire>=4);assert.equal(attuneGreen.manual,5);
