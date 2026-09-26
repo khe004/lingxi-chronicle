@@ -347,8 +347,8 @@ function turn(s){s.month++;s.ageMonths++;if(s.grain>0)s.grain--;else{add(s,{woun
 }
 function chance(s,mode='steady'){
  const legacyBonus=s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0);
- const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.insight*.7+s.root*1.5+Math.floor(s.focus/20)-(s.wounds*9)+(s.talent==='meridian'?5:0)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)-(mode==='bold'?19:0);
- return clamp(clamp(Math.floor(raw),15,63)+legacyBonus*2+(s.dao-3)*3-(s.body-effectiveBody(s))*3,5,84);
+ const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.insight*.7+s.root*1.5+Math.floor(s.focus/20)-(s.wounds*9)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)-(mode==='bold'?19:0);
+ return clamp(clamp(Math.floor(raw),15,63)+legacyBonus*2+(s.dao-3)*3-(s.body-effectiveBody(s))*3+(s.talent==='meridian'?5:0),5,84);
 }
 function quality(s){return manualPower(s)*2+springPower(s)*2+s.foundation*2+s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0)+s.root+Math.floor(s.insight/3)+(s.talent==='clarity'?1:0)+(s.manual===4&&s.wit>=6?1:0)-s.wounds*2;}
 function grade(s,roll,mode){

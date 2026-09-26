@@ -573,6 +573,15 @@ for(const method of [3,4,5])for(const pool of [3,4,5]){
  const sample=G.create();sample.manual=method;sample.spring=pool;sample.root=6;sample.insight=9;sample.foundation=3;sample.foundationGrades=[2,2,2];sample.wounds=0;
  assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path`);
 }
+// Clear Meridian keeps its five-point opening advantage even when a fully prepared route reaches the base chance ceiling.
+for(const origin of ['scholar','merchant','herbalist']){
+ const prepared=G.create({origin,talent:'clarity'});
+ prepared.manual=origin==='scholar'?4:origin==='merchant'?3:5;
+ prepared.spring=origin==='scholar'?3:origin==='merchant'?4:5;
+ prepared.stage=3;prepared.foundation=3;prepared.foundationGrades=[2,2,2];prepared.insight=8;prepared.totalProgress=240;prepared.focus=100;prepared.wounds=0;
+ assert.equal(G.chance({...prepared,talent:'meridian'})-G.chance(prepared),5,origin);
+ assert.ok(G.chance({...prepared,talent:'meridian'})<=84);
+}
 const savedV6=G.create();savedV6.version=6;delete savedV6.manualId;delete savedV6.springId;delete savedV6.manualIds;delete savedV6.story.luHeard;savedV6.books=[{year:1,lines:['旧卷原文'],stage:'入门吐纳'}];
 const savedV7=G.migrate(savedV6);assert.equal(savedV7.version,7);assert.deepEqual(savedV7.books,savedV6.books);assert.equal(savedV7.manualId,'breath');assert.equal(savedV7.npcFavor.lu,0);
 const oldPending=G.create();oldPending.version=6;oldPending.pending='trueText';oldPending.flags.mentor=true;oldPending.story.trueTextReady=false;
