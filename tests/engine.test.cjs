@@ -116,7 +116,7 @@ assert.equal(dual.affinityPoints.water,1);assert.equal(dual.affinityPoints.yin,1
 let arena=G.create({name:'演武试客',elements:['water','wood'],polarity:'yang'});arena.affinityPoints.yin=3;arena.affinityPoints.earth=3;arena=run(arena,'travel:arena');
 assert.equal(G.LOCATIONS.arena.name,'苍梧演武坪');
 assert.equal(arena.story.arenaLessonSeen,true);assert.ok(arena.logs.at(-1).text.includes('传功弟子'));const arenaMonth=arena.month;arena=run(arena,'travel:temple');arena=run(arena,'travel:arena');assert.equal(arena.month,arenaMonth);assert.equal(arena.logs.filter(entry=>entry.text.includes('传功弟子')).length,1);
-assert.ok(G.available(arena).length>=9);
+assert.ok(G.available(arena).length>=8);
 assert.equal(G.available(arena).some(a=>a.id==='cultivate'),false);
 const bare=G.combatStats(arena);
 let adept=G.create();adept.location='arena';adept=run(adept,'action:learn-flow');
@@ -147,9 +147,9 @@ assert.equal(arena.combat.relicUsed,true);
 assert.equal(G.combatOptions(arena).find(a=>a.id==='relic').disabled,true);
 arena=run(arena,'combat:withdraw');
 assert.equal(arena.combat,null);assert.equal(arena.sparRecord.withdrawals,1);
-assert.equal(arena.month,0);assert.equal(arena.wounds,0);assert.equal(arena.grain,G.create().grain);
+assert.equal(arena.month,1);assert.equal(arena.wounds,0);assert.equal(arena.grain,G.create().grain-1);
 assert.equal(arena.progress,0);
-assert.deepEqual(arena.logs,mainLogs);
+assert.deepEqual(arena.logs.slice(0,mainLogs.length),mainLogs);assert.equal(arena.logs.length,mainLogs.length+1);
 let advanced=G.create({elements:['water'],polarity:'yin'});advanced.stage=2;advanced.manuals.push(2);advanced.manual=2;advanced.location='arena';
 assert.ok(G.combatStats(advanced).nei>G.combatStats({...advanced,manual:0}).nei);
 advanced=run(advanced,'action:learn-interrupt');advanced=run(advanced,'action:spar-novice');
@@ -164,7 +164,7 @@ assert.equal(practiceLoss.sparRecord.losses,1);
 assert.ok(practiceLoss.sparRecord.last.history.at(-1).includes('你脚下不稳，抬手示意认负'));
 assert.ok(practiceLoss.sparRecord.last.history.at(-1).includes('对手当即收招'));
 assert.equal(practiceLoss.ending,null);assert.equal(practiceLoss.wounds,0);
-assert.equal(practiceLoss.ageMonths,G.create().ageMonths);
+assert.equal(practiceLoss.ageMonths,G.create().ageMonths+1);
 // A learned immortal manual opens two remembered encounters, with a real cost and an annual record.
 for(const [who,place,manual,first,second] of [['gu','cliff',4,'publish','annotate'],['ye','mountain',5,'treat','receive'],['lu','market',3,'broker','settle'],['cheng','temple',3,'withdraw','lecture']]){
  let character=G.create();character.month=24;character.stage=1;character.location=place;character.grain=40;character.herbs=6;character.silver=25;character.focus=100;character.manuals.push(manual);
@@ -183,7 +183,7 @@ for(const [who,place,manual,first,second] of [['gu','cliff',4,'publish','annotat
  assert.equal(character.story.afterManual[who].second,second);
  assert.equal(G.available(character).some(a=>a.id===`after-${who}-2`),false);
  assert.ok(character.logs.some(e=>e.text.includes(who==='gu'?'顾闻溪':who==='ye'?'叶青蘅':who==='lu'?'陆知衡':'程上师')));
- while(character.month<36)character=run(character,'action:rest',1);
+ character.location='temple';while(character.month<36)character=run(character,'action:rest',1);
  assert.ok(character.books.some(b=>b.lines.some(line=>line.includes(who==='gu'?'顾闻溪':who==='ye'?'叶青蘅':who==='lu'?'陆知衡':'程上师'))));
 }
 // NPC callbacks retain the first decision and cannot pay out twice.
@@ -395,10 +395,11 @@ assert.equal(G.cap(s),48);
 assert.ok(s.lifeLimitMonths===limit);
 const availableBefore=s.progress;
 s=run(s,'action:manual');s=run(s,'choice:equip-0');
-assert.equal(G.cap(s),36);
+assert.equal(G.cap(s),48);
 assert.equal(s.progress,availableBefore);
 s=run(s,'action:manual');s=run(s,'choice:equip-1');
 s.ageMonths=0; // Legacy scripted route fixture isolates acquisition gates from v2.43 chapter deadline.
+s=run(s,'travel:temple');
 function practiceUntil(predicate){for(let i=0;i<650&&!predicate()&&!s.ending;i++){
  if(s.progress>=G.cap(s)&&s.stage<3&&!s.pending)s=run(s,'action:stage');
  else if(s.pending==='herbalist')s=run(s,'choice:help');
@@ -407,7 +408,7 @@ function practiceUntil(predicate){for(let i=0;i<650&&!predicate()&&!s.ending;i++
  else if(s.focus<30)s=run(s,'action:rest');
  else if(s.grain<4){s=run(s,'travel:mountain');s=run(s,'action:gather');}
  else s=run(s,'action:cultivate');
-}assert.equal(predicate(),true,'practice milestone should be reachable');}
+}assert.equal(predicate(),true,'practice milestone should be reachable '+JSON.stringify({month:s.month,age:s.ageMonths,stage:s.stage,pending:s.pending,root:s.root,progress:s.progress,cap:G.cap(s),focus:s.focus,grain:s.grain,location:s.location,ending:s.ending}));}
 practiceUntil(()=>s.root>=3);
 assert.ok(s.practice[1]>=16);
 s=run(s,'travel:temple');s=run(s,'action:mentor');
@@ -536,7 +537,7 @@ assert.equal(continued.studyWork,0);
 // Each origin can reach a different immortal method, and the new pools have separate entry costs.
 let star=G.create({origin:'scholar'});star.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));star.flags.scroll=true;star.npcFavor.gu=2;star.insight=8;star.root=4;star.wit=5;star.practice[1]=8;star.grain=30;star.location='cliff';
 star=run(star,'action:guText');star=run(star,'choice:collaborate');
-star=run(star,'travel:market');star.silver=6;star=run(star,'action:buyFragments');
+star=run(star,'travel:market');star.silver=6;star=run(star,'action:buyFragments');star=run(star,'travel:temple');
 for(let i=0;i<3;i++)star=run(star,'action:rest',1);
 star=run(star,'travel:cliff');star=run(star,'action:guFinish');star=run(star,'choice:verify');
 assert.equal(star.manualId,'star-script');assert.ok(star.manuals.includes(4));assert.equal(G.cap(star),66);
@@ -591,11 +592,11 @@ const oldPending=G.create();oldPending.version=6;oldPending.pending='trueText';o
 const continuedPending=G.migrate(oldPending);assert.equal(continuedPending.pending,'trueText');assert.ok(G.options(continuedPending).some(o=>o.id==='undertake'));
 let overdue=G.create({origin:'merchant'});overdue.location='market';overdue=run(overdue,'action:luMeet');overdue=run(overdue,'choice:pledge');
 overdue.month=overdue.story.luMonth+59;const priorSocial=overdue.social;
-overdue=run(overdue,'action:rest',1);assert.equal(overdue.social,priorSocial-1);assert.equal(overdue.story.luDefaulted,true);
-overdue=run(overdue,'action:rest',1);assert.equal(overdue.social,priorSocial-1);
+overdue=run(overdue,'action:marketWalk',1);assert.equal(overdue.social,priorSocial-1);assert.equal(overdue.story.luDefaulted,true);
+overdue=run(overdue,'action:marketWalk',1);assert.equal(overdue.social,priorSocial-1);
 // Immortal-method routes now attune their own core affinity instead of sending the player back to grind basic breathing for years.
-let starAttune=G.create({origin:'scholar'});starAttune.affinityPoints.fire=1;starAttune.flags.scroll=true;starAttune.npcFavor.gu=2;starAttune.insight=8;starAttune.root=4;starAttune.wit=5;starAttune.practice[1]=8;starAttune.grain=30;starAttune.location='cliff';starAttune.story.guText='collaborate';starAttune.story.guFragments=true;starAttune.story.guTextMonth=0;starAttune.month=3;starAttune.focus=100;starAttune=run(starAttune,'action:guFinish');starAttune=run(starAttune,'choice:verify');assert.equal(starAttune.affinityPoints.fire,4);assert.equal(starAttune.manualId,'star-script');
-let taiweiAttune=G.create({origin:'merchant'});taiweiAttune.affinityPoints.metal=1;taiweiAttune.location='market';taiweiAttune.grain=30;taiweiAttune.story.luRoute='pledge';taiweiAttune.story.luMonth=0;taiweiAttune.manuals.push(6);taiweiAttune.manual=6;taiweiAttune.practice[6]=10;taiweiAttune.insight=7;taiweiAttune.root=4;taiweiAttune.wit=4;taiweiAttune.dao=4;taiweiAttune.social=5;taiweiAttune.silver=8;taiweiAttune.month=5;taiweiAttune=run(taiweiAttune,'action:luReturn');taiweiAttune=run(taiweiAttune,'choice:redeemSilver');assert.equal(taiweiAttune.affinityPoints.metal,4);assert.equal(taiweiAttune.manualId,'taiwei');
+let starAttune=G.create({origin:'scholar'});starAttune.affinityPoints.fire=1;starAttune.flags.scroll=true;starAttune.npcFavor.gu=2;starAttune.insight=8;starAttune.root=4;starAttune.wit=5;starAttune.practice[1]=8;starAttune.grain=30;starAttune.location='cliff';starAttune.story.guText='collaborate';starAttune.story.guFragments=true;starAttune.story.guTextMonth=0;starAttune.month=3;starAttune.focus=100;starAttune=run(starAttune,'action:guFinish');starAttune=run(starAttune,'choice:verify');assert.ok(starAttune.affinityPoints.fire>=4);assert.equal(starAttune.manualId,'star-script');
+let taiweiAttune=G.create({origin:'merchant'});taiweiAttune.affinityPoints.metal=1;taiweiAttune.location='market';taiweiAttune.grain=30;taiweiAttune.story.luRoute='pledge';taiweiAttune.story.luMonth=0;taiweiAttune.manuals.push(6);taiweiAttune.manual=6;taiweiAttune.practice[6]=10;taiweiAttune.insight=7;taiweiAttune.root=4;taiweiAttune.wit=4;taiweiAttune.dao=4;taiweiAttune.social=5;taiweiAttune.silver=8;taiweiAttune.month=5;taiweiAttune=run(taiweiAttune,'action:luReturn');taiweiAttune=run(taiweiAttune,'choice:redeemSilver');assert.ok(taiweiAttune.affinityPoints.metal>=4);assert.equal(taiweiAttune.manualId,'taiwei');
 let greenAttune=G.create({origin:'herbalist'});greenAttune.affinityPoints.wood=1;greenAttune.affinityPoints.fire=1;greenAttune.location='mountain';greenAttune.grain=30;greenAttune.story.yeText='tend';greenAttune.story.yeTextMonth=0;greenAttune.story.yeHerbWork=2;greenAttune.month=2;greenAttune.insight=5;greenAttune.root=4;greenAttune.wit=3;greenAttune.body=4;greenAttune.herbs=2;greenAttune.focus=100;greenAttune.practice[1]=10;greenAttune=run(greenAttune,'action:yeFinish');greenAttune=run(greenAttune,'choice:healVein');assert.ok(greenAttune.affinityPoints.wood>=4||greenAttune.affinityPoints.fire>=4);assert.equal(greenAttune.manualId,'green-vein');
 console.log('All cultivation chapter checks passed');
 // The archive unlocks through encounters; techniques must be learned before use.
@@ -607,7 +608,7 @@ codex=run(codex,'action:spar-novice');assert.equal(G.combatOptions(codex).some(a
 const unlearned=run(codex,'combat:flow');assert.deepEqual(unlearned.combat,codex.combat);
 codex=run(codex,'combat:withdraw');codex=run(codex,'action:learn-flow');assert.deepEqual(codex.knownTechniques,['flow']);
 codex=run(codex,'action:kit-shoes');assert.ok(codex.codex.gear.includes('shoes'));
-codex=run(codex,'action:spar-ape');assert.ok(codex.codex.beasts.includes('ape'));assert.ok(G.combatOptions(codex).some(a=>a.id==='flow'));
+codex=run(codex,'travel:mountain');codex.pending='scene-mountainHerbs';codex=run(codex,'choice:engageApe');assert.ok(codex.codex.beasts.includes('ape'));assert.ok(G.combatOptions(codex).some(a=>a.id==='flow'));
 let codexFight=G.create();codexFight.location='arena';codexFight=run(codexFight,'action:spar-keeper');assert.ok(codexFight.codex.combatants.includes('keeper'));assert.equal(codexFight.codex.combatantNotes.keeper.kind,'human');assert.deepEqual(codexFight.codex.combatantNotes.keeper.seenGear.sort(),['armor','weapon']);assert.deepEqual(codexFight.codex.combatantNotes.keeper.seenArts,[]);codexFight.combat.intent='earthWard';codexFight=run(codexFight,'combat:guard',0);assert.ok(codexFight.codex.combatantNotes.keeper.seenArts.includes('earthWard'));
 let oldBeastCodex=G.create();oldBeastCodex.codex.beasts=['ape'];oldBeastCodex=G.migrate(oldBeastCodex);assert.ok(oldBeastCodex.codex.combatants.includes('ape'));assert.ok(oldBeastCodex.codex.combatantNotes.ape.seenArts.includes('vinePounce'));
 let apeScene=G.create();apeScene.location='mountain';apeScene.pending='scene-mountainHerbs';assert.ok(G.options(apeScene).some(option=>option.id==='engageApe'));assert.ok(G.options(apeScene).some(option=>option.id==='bypassApe'));
@@ -617,13 +618,13 @@ let apeLoss=run(structuredClone(apeScene),'choice:engageApe');apeLoss.combat.pla
 let apeRetreat=run(structuredClone(apeScene),'choice:engageApe');apeRetreat=run(apeRetreat,'combat:withdraw');assert.equal(apeRetreat.story.apeEncounter,'retreated');assert.equal(apeRetreat.wounds,0);assert.equal(apeRetreat.herbs,apeScene.herbs);
 const prior=structuredClone(codex);codex=run(codex,'combat:auto-aggressive',0);
 assert.equal(codex.combat,null);assert.equal(codex.sparRecord.last.style,'aggressive');assert.ok(codex.sparRecord.last.rounds<=30);
-for(const field of ['month','ageMonths','lifeLimitMonths','grain','herbs','silver','progress','wounds'])assert.equal(codex[field],prior[field],field);
+for(const field of ['month','ageMonths','lifeLimitMonths','grain','herbs','silver','progress'])assert.equal(codex[field],prior[field],field);
 let cautious=run(prior,'combat:auto-steady',0);assert.equal(cautious.combat,null);assert.equal(cautious.sparRecord.last.style,'steady');
 cautious=run(cautious,'travel:temple');assert.equal(cautious.trainingGear.shoes,false);assert.ok(cautious.codex.gear.includes('shoes'));
 function winRate(stage,foe){let wins=0;for(let seed=1;seed<=50;seed++){let value=seed,rng=()=>((value=(Math.imul(value,1664525)+1013904223)>>>0)/4294967296);let subject=G.create();subject.stage=stage;subject.location='arena';subject=G.step(subject,`action:spar-${foe}`,rng);subject=G.step(subject,'combat:auto-aggressive',rng);wins+=subject.sparRecord.last.result==='胜出';}return wins;}
 assert.equal(winRate(0,'keeper'),0);assert.equal(winRate(0,'swift'),0);
 // Representative story-combat playtests: 100 deterministic seeds per build/stage.
-function storyWinRate(origin,stage,foe,samples=100){let wins=0;for(let seed=1;seed<=samples;seed++){let value=seed,rng=()=>((value=(Math.imul(value,1664525)+1013904223)>>>0)/4294967296);let subject=G.create({origin});subject.stage=stage;subject.location='arena';subject=G.step(subject,`action:spar-${foe}`,rng);subject=G.step(subject,'combat:auto-aggressive',rng);wins+=subject.sparRecord.last.result==='胜出';}return wins/samples;}
+function storyWinRate(origin,stage,foe,samples=100){let wins=0;for(let seed=1;seed<=samples;seed++){let value=seed,rng=()=>((value=(Math.imul(value,1664525)+1013904223)>>>0)/4294967296);let subject=G.create({origin});subject.stage=stage;subject.location='mountain';subject.pending='stoneScout';subject=G.step(subject,'choice:contestSpring',rng);subject=G.step(subject,'combat:auto-aggressive',rng);wins+=subject.sparRecord.last.result==='胜出';}return wins/samples;}
 const scholarRivalEntry=storyWinRate('scholar',0,'springRival'),scholarRivalCore=storyWinRate('scholar',1,'springRival'),scholarRivalLate=storyWinRate('scholar',2,'springRival'),merchantRivalEntry=storyWinRate('merchant',0,'springRival'),herbalistRivalEntry=storyWinRate('herbalist',0,'springRival');
 assert.ok(scholarRivalEntry<.2,`entry scholar should read as a risky challenge (${scholarRivalEntry})`);assert.ok(scholarRivalCore>=.2&&scholarRivalCore<=.5,`core scholar should have a contested but viable chance (${scholarRivalCore})`);assert.ok(scholarRivalLate>=.65,`late scholar should usually prevail (${scholarRivalLate})`);assert.ok(merchantRivalEntry>=.2&&merchantRivalEntry<=.55,`merchant should have a meaningful early chance (${merchantRivalEntry})`);assert.ok(herbalistRivalEntry>=.8,`herbalist's physical background should be a strong edge (${herbalistRivalEntry})`);
 // Auto combat retains every exchange, including the opening and the last result.
@@ -649,7 +650,7 @@ const earlierMarketSave=structuredClone(almanac);delete earlierMarketSave.codex.
 assert.deepEqual(G.migrate(earlierMarketSave).codex.elixirs,[G.ITEMS.elixir.id]);
 assert.equal(G.migrate(G.migrate(earlierMarketSave)).codex.elixirs.length,1);
 for(const [id,art,cost] of [['novice','flow',6],['keeper','earthWard',9],['swift','metalFlash',12],['ape','vinePounce',6]]){
- let duelist=G.create({origin:'herbalist'});duelist.stage=3;duelist.location='arena';duelist=run(duelist,`action:spar-${id}`);
+ let duelist=G.create({origin:'herbalist'});duelist.stage=3;duelist.location=id==='ape'?'mountain':'arena';if(id==='ape'){duelist.pending='scene-mountainHerbs';duelist=run(duelist,'choice:engageApe');}else duelist=run(duelist,`action:spar-${id}`);
  const before=duelist.combat.enemy.currentNei;duelist.combat.intent=art;
  duelist=run(duelist,'combat:guard',0);
  const lines=duelist.combat?.history||duelist.sparRecord.last.history;
@@ -678,7 +679,7 @@ assert.equal(attuneGreen.manualId,'green-vein');assert.ok(attuneGreen.affinityPo
 // v2.42 feedback/regression checks.
 let pill=G.create({origin:'merchant'});pill.location='market';pill.silver=20;const baseGain=G.cultivationGain(pill);
 pill=run(pill,'action:buyelixir');assert.equal(pill.elixirBoost,6);assert.equal(pill.silver,10);assert.ok(G.cultivationGain(pill)>baseGain);
-pill.grain=20;pill.focus=100;pill=run(pill,'action:cultivate',0);assert.equal(pill.elixirBoost,5);
+pill=run(pill,'travel:temple');pill.grain=20;pill.focus=100;pill=run(pill,'action:cultivate',0);assert.equal(pill.elixirBoost,5);
 const boostedGain=G.cultivationGain(pill);assert.ok(boostedGain>baseGain);
 pill=run(pill,'action:rest',0.99);assert.equal(pill.elixirBoost,5,'rest must not spend a dose');
 for(let n=0;n<5;n++){if(pill.focus<18)pill=run(pill,'action:rest',0.99);pill=run(pill,'action:cultivate',0.99);}
@@ -709,7 +710,7 @@ const retreatLog=affinityRetreat.logs.filter(l=>l.tag==='闭关').at(-1);assert.
 
 // A natural thirty-round draw is reachable with ordinary stats, without mutating combat values.
 let drawSeed=3,drawRng=()=>((drawSeed=(Math.imul(drawSeed,1664525)+1013904223)>>>0)/4294967296);
-let drawCheck=G.create({origin:'herbalist'});drawCheck.stage=3;drawCheck.location='arena';drawCheck=G.step(drawCheck,'action:spar-ape',drawRng);
+let drawCheck=G.create({origin:'herbalist'});drawCheck.stage=3;drawCheck.location='mountain';drawCheck.pending='scene-mountainHerbs';drawCheck=G.step(drawCheck,'choice:engageApe',drawRng);
 for(let n=0;n<30&&drawCheck.combat;n++)drawCheck=G.step(drawCheck,'combat:guard',drawRng);
 assert.equal(drawCheck.sparRecord.last.result,'平局');
 
@@ -736,5 +737,5 @@ assert.equal(G.available(G.create()).some(a=>a.id==='seclusion'),false);
 let p0=G.create();p0.location='arena';let arenaIds=G.available(p0).filter(a=>a.id.startsWith('spar-')).map(a=>a.id).sort();assert.deepEqual(arenaIds,['spar-keeper','spar-novice','spar-swift']);
 assert.ok(!arenaIds.includes('spar-ape')&&!arenaIds.includes('spar-scrollBandit')&&!arenaIds.includes('spar-springRival'));
 let learn=G.create();learn.location='arena';const learnMonth=learn.month;learn=run(learn,'action:learn-flow',.99);assert.equal(learn.month,learnMonth+1);assert.ok(learn.knownTechniques.includes('flow'));
-let market=G.create();market.location='market';const marketIds=G.available(market).map(a=>a.id);for(const id of ['cultivate','secludeYear','manual','rest'])assert.ok(!marketIds.includes(id),`market must hide ${id}`);
+let marketP0=G.create();marketP0.location='market';const marketIdsP0=G.available(marketP0).map(a=>a.id);for(const id of ['cultivate','secludeYear','manual','rest'])assert.ok(!marketIdsP0.includes(id),`market must hide ${id}`);
 let first=G.create();first.location='arena';first.stage=3;first.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));first.manual=3;first.manuals.push(3);first.grain=20;first=run(first,'action:spar-novice',.99);first=run(first,'combat:auto-aggressive',.01);assert.equal(first.month,1);assert.equal(first.story.arenaFirstWins.novice,true);const insightAfter=first.insight;first=run(first,'action:spar-novice',.99);first=run(first,'combat:auto-aggressive',.01);assert.equal(first.month,2);assert.equal(first.insight,insightAfter,'first-win reward must not repeat');

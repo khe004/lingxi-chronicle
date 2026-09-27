@@ -121,7 +121,9 @@ function command(s,route,policy,buyPill){
 function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
  let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
- while(!s.ending&&steps<1500&&s.month<750){const c=command(s,route,policy,buyPill);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,state:s};
+ while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,state:s};
+  // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
+  if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
   const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage]);last=c;
   if(c==='choice:steady'||c==='choice:bold'){attemptMonth=s.month;attemptChance=G.chance(s,c==='choice:bold'?'bold':'steady');}
   if(c==='action:buyelixir')pillsBought++;
