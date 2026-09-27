@@ -731,3 +731,10 @@ let chron=G.create();chron.story.afterManual={gu:{first:'publish',second:'annota
 const chronText=G.lifeSummary(chron).join('\n');
 for(const token of ['publish','annotate','treat','visit','honor','credit','teach','guide'])assert.equal(chronText.includes(token),false,`chronicle leaked ${token}`);
 assert.equal(G.available(G.create()).some(a=>a.id==='seclusion'),false);
+
+// P0 arena/location/menu regressions.
+let p0=G.create();p0.location='arena';let arenaIds=G.available(p0).filter(a=>a.id.startsWith('spar-')).map(a=>a.id).sort();assert.deepEqual(arenaIds,['spar-keeper','spar-novice','spar-swift']);
+assert.ok(!arenaIds.includes('spar-ape')&&!arenaIds.includes('spar-scrollBandit')&&!arenaIds.includes('spar-springRival'));
+let learn=G.create();learn.location='arena';const learnMonth=learn.month;learn=run(learn,'action:learn-flow',.99);assert.equal(learn.month,learnMonth+1);assert.ok(learn.knownTechniques.includes('flow'));
+let market=G.create();market.location='market';const marketIds=G.available(market).map(a=>a.id);for(const id of ['cultivate','secludeYear','manual','rest'])assert.ok(!marketIds.includes(id),`market must hide ${id}`);
+let first=G.create();first.location='arena';first.stage=3;first.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));first.manual=3;first.manuals.push(3);first.grain=20;first=run(first,'action:spar-novice',.99);first=run(first,'combat:auto-aggressive',.01);assert.equal(first.month,1);assert.equal(first.story.arenaFirstWins.novice,true);const insightAfter=first.insight;first=run(first,'action:spar-novice',.99);first=run(first,'combat:auto-aggressive',.01);assert.equal(first.month,2);assert.equal(first.insight,insightAfter,'first-win reward must not repeat');
