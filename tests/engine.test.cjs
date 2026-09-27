@@ -541,7 +541,7 @@ star=run(star,'travel:market');star.silver=6;star=run(star,'action:buyFragments'
 for(let i=0;i<3;i++)star=run(star,'action:rest',1);
 star=run(star,'travel:cliff');star=run(star,'action:guFinish');star=run(star,'choice:verify');
 assert.equal(star.manualId,'star-script');assert.ok(star.manuals.includes(4));assert.equal(G.cap(star),66);
-let green=G.create({origin:'herbalist'});green.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));green.location='mountain';green.flags.herbalist=true;green.insight=5;green.wit=3;green.grain=30;green.manuals.push(1);green.manual=1;
+let green=G.create({origin:'herbalist'});green.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));green.location='mountain';green.flags.herbalist=true;green.story.yeRoute='help';green.insight=5;green.wit=3;green.grain=30;green.manuals.push(1);green.manual=1;
 for(let i=0;i<10;i++){if(green.focus<18)green=run(green,'action:rest',1);green=run(green,'action:cultivate',1);}
 green=run(green,'action:yeText');green=run(green,'choice:tend');
 green=run(green,'action:gather',1);green=run(green,'action:gather',1);
@@ -742,6 +742,6 @@ let first=G.create();first.location='arena';first.stage=3;first.affinityPoints=O
 
 
 // P0 onboarding/deadline/route-copy regressions.
-for(const origin of Object.keys(G.ORIGINS))for(const talent of Object.keys(G.TALENTS)){const intro=G.openingStory(origin,talent);assert.ok(intro.includes(G.ORIGINS[origin].name));assert.ok(intro.includes(G.TALENTS[talent].name));assert.ok(intro.includes('十六岁'));assert.ok(intro.includes('三十岁'));}
+for(const origin of Object.keys(G.ORIGINS))for(const talent of Object.keys(G.TALENTS)){const intro=G.openingStory(origin,talent);const originPhrase={scholar:'寒门书生之家',merchant:'行商之家',herbalist:'采药人家'}[origin];assert.ok(intro.includes(originPhrase));assert.ok(intro.includes(G.TALENTS[talent].name));assert.ok(intro.includes('十六岁'));assert.ok(intro.includes('三十岁'));assert.ok(!/\b(?:scholar|merchant|herbalist|clarity|meridian|vitality)\b/.test(intro));}
 let unknownYe=G.create({origin:'herbalist'});unknownYe.location='mountain';assert.equal(G.available(unknownYe).some(x=>x.id==='yeText'),false,'herbalist origin must not know Ye before meeting her');unknownYe.story.yeRoute='help';assert.equal(G.available(unknownYe).some(x=>x.id==='yeText'),true,'Ye route should unlock asking about Qinghua');
 let yeCopy=G.create();yeCopy.pending='yeFinish';yeCopy.practice[1]=4;yeCopy.practice[2]=2;yeCopy.practice[6]=7;const yeDetail=G.options(yeCopy).find(x=>x.id==='healVein').detail;assert.ok(yeDetail.includes('《青篆引脉帖》实修 4 / 10 次'));assert.ok(yeDetail.includes('《澄元导脉经》实修 2 / 6 次'));assert.ok(!yeDetail.includes('6／10'));

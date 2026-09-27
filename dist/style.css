@@ -65,3 +65,10 @@
 @media(max-width:1120px){.status,.narrative{min-height:0}}
 @media(max-width:720px){.story-content,.books-content{max-height:none;min-height:0;overflow:visible}.decision-resources{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:7px 0 11px}.decision-resources span{padding:6px 5px;text-align:center}.status-secondary{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:430px){.decision-resources{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Make the chapter deadline readable and visibly urgent in the final two years. */
+.chapter-deadline-row{padding:6px 8px;border:1px solid #776b4f;border-radius:4px;background:#1d302a}
+.chapter-deadline-row>span{color:#c7ae75}
+.chapter-deadline-row>b{color:#e7d39c}
+.chapter-deadline-row.urgent-deadline{border-color:#bb765e;background:#422c27}
+.chapter-deadline-row.urgent-deadline>span,.chapter-deadline-row.urgent-deadline>b{color:#ffd2b7}
