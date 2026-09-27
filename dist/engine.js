@@ -85,6 +85,19 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const copy=(s)=>JSON.parse(JSON.stringify(s));
 const year=(month)=>Math.max(1,Math.ceil(month/12));
 const time=(month)=>month===0?'求道第1年 · 初入山门':`求道第${year(month)}年 · ${(month-1)%12+1}月`;
+function openingStory(origin,talent){
+ const origins={
+  scholar:'你出身寒门书生之家，自幼与旧纸残卷为伴，虽家资清薄，却总觉得那些仙家异闻未必只是书生妄谈。',
+  merchant:'你出身行商之家，自幼随商旅往来山川，见过奇人异士，也早知道凡俗之外另有一重天地。',
+  herbalist:'你出身采药人家，自幼随长辈出入山野，识草木、辨山径，也曾在云深处见过凡理难解的泉气与踪迹。'
+ };
+ const talents={
+  clarity:'你又生有慧心，读到晦涩处常能比旁人多悟一层。',
+  meridian:'你又天生清脉，经络稳固，吐纳行气少有滞涩。',
+  vitality:'你又天生长息，筋骨耐久，跋山涉水也比常人更能支撑。'
+ };
+ return `${origins[origin]||origins.scholar}${talents[talent]||talents.clarity}少时曾远远见过修士御风越岭，自此心中便存下一个念头：世间既有长生之道，为何不能是我？听闻东华洲苍梧山中有修行人传法，十六岁这年，你终于辞别故里，独自入山寻仙。凡人年华有限；若三十岁前仍不能开脉入道，你便只能收起这场仙梦，下山归家。善渊观只传了你最粗浅的《养息吐纳诀》。仙门就在眼前，而你尚在门外。`;
+}
 function create({name,origin='scholar',talent='clarity',gender='female',elements=[],polarity='harmony'}={}){
  const o=ORIGINS[origin]||ORIGINS.scholar,t=TALENTS[talent]?talent:'clarity';
  const clean=String(name||'').trim().slice(0,12)||'无名求道者';
@@ -92,7 +105,7 @@ function create({name,origin='scholar',talent='clarity',gender='female',elements
  if(!compatibleElements(elements))throw new RangeError('五行相克或属性无效，不能同时选取');
  const birth=elements.includes('plain')?[]:elements;
 const s={version:9,name:clean,gender:gender==='male'?'male':'female',elements:birth,polarity:Object.hasOwn(POLARITIES,polarity)?polarity:'harmony',affinityPoints:innatePoints(birth,polarity),knownTechniques:[],techniquePractice:{},codex:{people:[],beasts:[],combatants:[],combatantNotes:{},gear:[],elixirs:[]},origin:ORIGINS[origin]?origin:'scholar',talent:t,month:0,ageMonths:16*12,lifeLimitMonths:(o.life+(body-3)+(t==='vitality'?6:0))*12,location:'temple',stage:0,progress:0,totalProgress:0,practice:[0,0,0,0,0,0,0],affinityTraining:[0,0,0,0,0,0,0],studyWork:0,manuals:[0],foundationGrades:[],foundationStrain:0,focus:100,wounds:0,silver:o.silver,grain:o.grain,herbs:o.herbs,root:o.root+(t==='meridian'?1:0),wit:o.wit,body,dao:3,social:o.social,insight:o.insight+(t==='clarity'?2:0),foundation:0,manual:0,spring:0,npcFavor:{gu:0,ye:0,cheng:0,lu:0,wen:0},flags:{scroll:false,herbalist:false,mentor:false,elixir:false},elixirBoost:0,story:{arenaLessonSeen:false,yeRoute:null,yeMonth:null,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0,guRoute:null,guMonth:null,chengRoute:null,chengMonth:null,guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false},events:{seen:[],nextMonth:0},trainingGear:{staff:false,vest:false,shoes:false,talisman:false},sparRecord:{wins:0,losses:0,withdrawals:0,draws:0,last:null},combat:null,pending:null,ending:null,logs:[],books:[]};
- note(s,`你来到东华洲苍梧山，领得${ITEMS.manual[0].name}。只凭这门吐纳诀，求道之路漫长难行。`,'开篇');return syncIds(s);
+ note(s,openingStory(s.origin,s.talent),'开篇');return syncIds(s);
 }
 function note(s,text,tag='日常',effect=''){s.logs.push({month:s.month,text,tag,effect,...(s.batchActive&&['修行','日常','采集'].includes(tag)?{batch:true}:{})});if(s.logs.length>220)s.logs.shift();
  if(s.month>0&&s.month%12===0&&['开篇','人情','抉择','法门','华池','突破','开脉','结局','伤病','延寿','悟道','见闻'].includes(tag)){
@@ -411,7 +424,7 @@ function sceneEvent(s,rng){
 function attuneManualAffinity(s,n){const item=ITEMS.manual[n],need=affinityRequirement(item);if(!item||!['灵品','仙品'].includes(item.rarity)||!need)return [];if(!s.affinityPoints)s.affinityPoints=innatePoints(s.elements,s.polarity);const raised=[];if(item.elements?.length){const key=item.elements.slice().sort((a,b)=>(s.affinityPoints[b]||0)-(s.affinityPoints[a]||0))[0];if((s.affinityPoints[key]||0)<need){s.affinityPoints[key]=need;raised.push(`${ELEMENTS[key]}亲和 → ${need}`);}}if(item.polarity&&item.polarity!=='harmony'&&(s.affinityPoints[item.polarity]||0)<need){s.affinityPoints[item.polarity]=need;raised.push(`${POLARITIES[item.polarity]}亲和 → ${need}`);}return raised;}
 function earnManual(s,n,source){if(!s.manuals.includes(n))s.manuals.push(n);const attuned=attuneManualAffinity(s,n),ready=!affinityMissing(s,ITEMS.manual[n]).length;if(ready)s.manual=n;note(s,`${source}，你取得${ITEMS.manual[n].name}。${attuned.length?'求法历练使自身气机与真章相契（'+attuned.join('、')+'）。':''}${ready?'已转修此法。':'属性未足，暂存法卷；需另寻契合机缘后再转修。'}`,'法门',attuned.join(' · '));}
 function canReadStar(s){return (s.practice[1]||0)>=8||(s.practice[2]||0)>=6||(s.practice[6]||0)>=8;}
-function canNurtureVein(s){return (s.practice[1]||0)>=10||(s.practice[2]||0)>=6||(s.practice[6]||0)>=10;}
+function canNurtureVein(s){return (s.practice[1]||0)>=10||(s.practice[2]||0)>=6||(s.practice[6]||0)>=10;}\nfunction practiceRequirementText(s,requirements){return Object.entries(requirements).map(([manual,need])=>`${ITEMS.manual[manual].name}实修 ${Math.min(s.practice[manual]||0,need)} / ${need} 次`).join('；');}
 function canRedeem(s){const contractAptitude=s.root>=4||s.root>=3&&s.social>=5&&(s.practice[6]||0)>=18;const socialReady=s.story.luRoute==='escort'?s.social>=2:s.social>=4;return (s.practice[6]||0)>=10&&s.insight>=7&&contractAptitude&&s.wit>=4&&s.dao>=3&&socialReady;}
 const AFTER_MANUAL={gu:{place:'cliff',manual:4},ye:{place:'mountain',manual:5},lu:{place:'market',manual:3},cheng:{place:'temple',manual:3}};
 function afterManualReady(s,who,part){
@@ -424,7 +437,7 @@ function options(s){
  if(s.pending==='guText')return [{id:'collaborate',label:'与顾闻溪合校残篇',detail:'一月、口粮 1、心神 −16；需顾好感 1、心得 5、悟性 4；日后仍要搜集缺页',disabled:s.npcFavor.gu<1||s.insight<5||s.wit<4||s.focus<16},{id:'independent',label:'自购残篇，独自考据',detail:'一月、口粮 1、银钱 −6、心神 −20；需心得 7、悟性 5；顾好感 −1',disabled:s.silver<6||s.insight<7||s.wit<5||s.focus<20},{id:'back',label:'暂不立题'}];
  if(s.pending==='guFinish')return [{id:'verify',label:'试行校成的星篆法',rarity:'仙品',detail:`一月、口粮 1、心神 −25${s.story.guText==='independent'?'、灵草 −1':''}；需缺页、心得 8、根骨 3、悟性 5，并实修凡品 8 次或灵品 6／8 次；所得真章适合考据修行`,disabled:!s.story.guFragments||s.insight<8||s.root<3||s.wit<5||!canReadStar(s)||s.focus<25||(s.story.guText==='independent'&&s.herbs<1)||s.manuals.includes(4)},{id:'back',label:'继续推敲'}];
  if(s.pending==='yeText')return [{id:'tend',label:'替叶青蘅养护泉脉',detail:'一月、口粮 1、灵草 −1、心神 −16；叶好感 +1；后续须亲自采药验证',disabled:s.herbs<1||s.focus<16},{id:'sample',label:'独取药径泉样',detail:'一月、口粮 1、灵草 −1、心神 −12、暗伤 +1；叶好感 −1，换取独立验证',disabled:s.herbs<1||s.focus<12||s.wounds>=5},{id:'back',label:'暂不问法'}];
- if(s.pending==='yeFinish')return [{id:'healVein',label:'以灵草试行青华篇',rarity:'仙品',detail:'一月、口粮 1、灵草 −2、心神 −22；需采药验证 2 次、心得 5、根骨 4、悟性 3、体魄 4，并实修凡品 10 次或灵品 6／10 次',disabled:s.story.yeHerbWork<2||s.insight<5||s.root<4||s.wit<3||s.body<4||!canNurtureVein(s)||s.herbs<2||s.focus<22||s.manuals.includes(5)},{id:'back',label:'留待来日'}];
+ if(s.pending==='yeFinish')return [{id:'healVein',label:'以灵草试行青华篇',rarity:'仙品',detail:'一月、口粮 1、灵草 −2、心神 −22；需采药验证 2 次、心得 5、根骨 4、悟性 3、体魄 4，前置修行：${practiceRequirementText(s,{1:10,2:6,6:10})}',disabled:s.story.yeHerbWork<2||s.insight<5||s.root<4||s.wit<3||s.body<4||!canNurtureVein(s)||s.herbs<2||s.focus<22||s.manuals.includes(5)},{id:'back',label:'留待来日'}];
  if(s.pending==='luMeet')return [{id:'pledge',label:'押资护卷，立下契书',detail:'一月、口粮 1、银钱 −6；需处世 4、根骨 3、悟性 3；得灵品《行云寄脉书》，以后还要履约换回真章',rarity:'灵品',disabled:s.silver<6||s.social<4||missingAttributes(s,6).length>0},{id:'escort',label:'替商队护送散卷',detail:'一月、口粮 1、心神 −30、暗伤 +1；需体魄 3、根骨 3、悟性 3；得灵品过渡法',rarity:'灵品',disabled:s.focus<30||s.body<3||s.wounds>=5||missingAttributes(s,6).length>0},{id:'fight',label:'出手护卷，截住拦路修士',detail:'一月、口粮 1；胜利推进护卷契约，失手或撤退会使卷册受损、契约延期',rarity:'灵品'},{id:'back',label:'暂不介入',detail:'不耗月份；日后仍可回来商谈'}];
  if(s.pending==='luReturn'&&s.story.luRoute==='fightDelayed')return [{id:'repairScrollSilver',label:'赔付银钱，修复散卷',detail:'一月、口粮 1、银钱 −4；补全卷册，继续护卷契约',disabled:s.silver<4},{id:'repairScrollHerbs',label:'以灵草抵补散卷',detail:'一月、口粮 1、灵草 −2；补全卷册，继续护卷契约',disabled:s.herbs<2},{id:'sellPapers',label:'卖出残卷，放下这条路',detail:'银钱 +6；结束护卷契约，仍可通过其他路线求仙品法'},{id:'back',label:'暂缓补偿'}];
  if(s.pending==='luReturn'&&s.manuals.includes(3))return [{id:'back',label:'真章已得',detail:'你已从别处承受太微真章，此契不再以求法为终点；可自行离开'}];
@@ -497,7 +510,7 @@ function available(s){if(s.ending||s.pending||s.combat)return [];
   base.push({id:'gather',label:'采药',detail:'一月、口粮 1、心神 −15 · 灵草至少 +1、口粮 +2',disabled:s.focus<12});
   base.push({id:'gatherSeason',label:'连采至多半年',detail:batchRisk?'寿元剩余不足一年或暗伤过重，请逐月采药':'逐月采药，心神不足先静养；遇人物事件或危险立即停下',disabled:batchRisk||(s.focus<12&&s.grain===0)});
   if(s.story?.yeRoute&&!s.story.yeFollowup&&s.month>=s.story.yeMonth+2)base.push({id:'yeFollowup',label:'药径旧事',detail:`叶青蘅记得你${{help:'分药相助',trade:'索酬指路',leave:'绕道而去'}[s.story.yeRoute]}；再作一次选择`});
-  if((s.flags.herbalist||s.origin==='herbalist')&&!s.story.yeText&&!s.manuals.includes(5))base.push({id:'yeText',label:'问叶青蘅青华养脉法',detail:'需灵草，择同行养脉或独自取样；打开不耗时'});
+  if((s.story.yeRoute||s.codex?.people?.includes('ye'))&&!s.story.yeText&&!s.manuals.includes(5))base.push({id:'yeText',label:'问叶青蘅青华养脉法',detail:'需灵草，择同行养脉或独自取样；打开不耗时'});
   if(s.story.yeText&&s.story.yeText!=='complete'&&s.month>=s.story.yeTextMonth+2)base.push({id:'yeFinish',label:'试行青华养脉篇',detail:`已采药验证 ${s.story.yeHerbWork||0}/2 次；还需心得、根骨、体魄及灵草`});
   if(s.story.yeText&&s.body<4)base.push({id:'bodyTonic',label:'以灵草温养体魄',detail:'一月、口粮 1、灵草 −2、心神 −16；体魄 +1、寿限 +1 年；仅养脉求法时可用',disabled:s.herbs<2||s.focus<16});
   if(s.story.guText&&!s.story.guFragments)base.push({id:'findFragments',label:'沿山脉寻星篆缺页',detail:'一月、口粮 1、心神 −24；体魄不足 4 时暗伤 +1；亦可在坊市购得',disabled:s.focus<24||s.wounds>=5&&effectiveBody(s)<4});
@@ -795,5 +808,5 @@ function step(input,command,rng=Math.random){const s=stepInternal(input,command,
  if(pending==='luMeet'||pending.startsWith('lu')||pending.startsWith('after-lu'))discover(s,'people','lu');
  if(action[0]==='action'&&action[1]==='mentor')discover(s,'people','cheng');
  return syncIds(s); }
-return {KEY,STAGES,NEED,ELEMENTS,ELEMENT_BEATS,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
+return {KEY,STAGES,NEED,openingStory,ELEMENTS,ELEMENT_BEATS,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
 });
