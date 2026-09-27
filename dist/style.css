@@ -72,3 +72,5 @@
 .chapter-deadline-row>b{color:#e7d39c}
 .chapter-deadline-row.urgent-deadline{border-color:#bb765e;background:#422c27}
 .chapter-deadline-row.urgent-deadline>span,.chapter-deadline-row.urgent-deadline>b{color:#ffd2b7}
+
+.requirement-list{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:7px;font-size:11px;line-height:1.4;text-align:left}.requirement-list span{padding:2px 5px;border:1px solid #51675b;color:#aebdb4}.requirement-list .met{color:#9fbca9}.requirement-list .missing,.requirement-list.missing span{color:#d6a28d;border-color:#79594d}.action:disabled .requirement-list{opacity:1}.history-more{display:block;margin:10px auto 2px}.history-dialog{width:min(760px,92vw);max-width:760px;max-height:84vh}.history-dialog form{display:flex;flex-direction:column;max-height:78vh}.history-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:20px}.full-log{overflow:auto;padding-right:8px}.story-content{max-height:none;overflow:visible}.log{min-height:0}
