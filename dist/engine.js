@@ -443,7 +443,57 @@ function afterManualReady(s,who,part){
  const acquired=who==='lu'?s.story.luCredential:who==='cheng'?s.story.trueTextReady&&s.manuals.includes(3):s.manuals.includes(route.manual);
  return acquired&&(part===1?s.stage>=1&&!record?.first:s.stage>=2&&!!record?.first&&!record?.second&&s.month>=record.month+6);
 }
-function options(s){
+
+function legacyRequirementDiagnostics(s,o){
+ if(!o?.disabled||o.requirements?.length||o.disabledReasons?.length)return o;
+ const req=[];
+ const add=(r)=>{if(r&&!req.some(x=>x.text===r.text))req.push(r);};
+ const labels={silver:'银钱',grain:'口粮',herbs:'灵草',focus:'心神',insight:'心得',root:'根骨',wit:'悟性',body:'体魄',dao:'道心',social:'处世'};
+ const keyByLabel=Object.fromEntries(Object.entries(labels).map(([k,v])=>[v,k]));
+ const text=`${o.label||''}；${o.detail||''}`;
+ // Resource costs written in the option copy.
+ for(const [label,key] of Object.entries(keyByLabel)){
+  const m=text.match(new RegExp(label+'\\s*[−-]\\s*(\\d+)'));
+  if(m)add(resourceRequirement(s,key,Number(m[1])));
+ }
+ // Explicit numeric gates written as “根骨 4 / 悟性 5 / …”.
+ for(const [label,key] of Object.entries(keyByLabel)){
+  if(['银钱','口粮','灵草','心神'].includes(label))continue;
+  const m=text.match(new RegExp(label+'\\s*(?:≥|>=|需)?\\s*(\\d+)'));
+  if(m)add(resourceRequirement(s,key,Number(m[1])));
+ }
+ const favorMap={顾:'gu',叶:'ye',陆:'lu',程:'cheng'};
+ for(const [name,key] of Object.entries(favorMap)){
+  const m=text.match(new RegExp(name+'(?:闻溪|青蘅|知衡|上师)?好感\\s*(\\d+)'));
+  if(m)add(requirement(name+'好感',s.npcFavor?.[key]||0,Number(m[1])));
+ }
+ // State gates that are not simple resources.
+ if(o.id==='askMethod'&&eventProgressGain(s,8)<=0)add({label:'本层功行空间',current:'已满',required:'尚可增长',met:false,text:'本层功行已满或当前功法已到本层上限；需先筑元或切换可继续推进的功法'});
+ if(o.id==='secludeYear'&&s.progress>=cap(s))add({label:'本层功行',current:s.progress,required:'低于当前上限',met:false,text:`本层功行 ${s.progress} / ${cap(s)}，已到当前上限`});
+ if(o.id==='cultivate'&&s.progress>=cap(s))add({label:'本层功行',current:s.progress,required:'低于当前上限',met:false,text:`本层功行 ${s.progress} / ${cap(s)}，已到当前上限`});
+ if(o.id==='secludeYear'&&(s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4))add({label:'闭关风险',current:s.lifeLimitMonths-s.ageMonths<=12?'寿限不足一年':`暗伤 ${s.wounds}`,required:'可安全长期闭关',met:false,text:s.lifeLimitMonths-s.ageMonths<=12?'距本章寿限不足一年，请逐月行动':`暗伤 ${s.wounds} / 4，暗伤过重，请逐月行动`});
+ if(o.id==='common'&&s.spring>=1||o.id==='deep'&&s.spring>=2||['hidden','stone','sealed'].includes(o.id)&&s.spring>=3)add({label:'华池',current:'已取得',required:'尚未取得同级或更高华池',met:false,text:'你已有同级或更高华池，无需重复取用'});
+ if(o.id==='heal'&&s.wounds===0)add({label:'暗伤',current:0,required:'至少 1',met:false,text:'当前没有暗伤需要医治'});
+ if(o.id==='buyelixir'&&s.elixirBoost>0)add({label:'聚气丹',current:`余 ${s.elixirBoost} 次`,required:'当前无药效',met:false,text:`聚气丹药效尚余 ${s.elixirBoost} 次，不能叠加`});
+ if(o.id==='sellall'||o.id==='sellherb')add(resourceRequirement(s,'herbs',1));
+ if(o.id==='buymax'||o.id==='buygrain')add(resourceRequirement(s,'silver',3));
+ if(o.id==='buyFragments')add(resourceRequirement(s,'silver',5));
+ if(o.id==='findFragments'&&s.wounds>=5&&effectiveBody(s)<4)add({label:'暗伤风险',current:s.wounds,required:'暗伤低于 5 或体魄至少 4',met:false,text:`暗伤 ${s.wounds}，且体魄不足 4，无法安全寻页`});
+ if(o.id==='contestSpring'&&s.story.stoneMissed)add({label:'争泉机会',current:'已错过',required:'仍在本次机会内',met:false,text:'本次争泉机会已经错过'});
+ if(o.id==='restore'&&!(s.foundationStrain>0))add({label:'元基裂隙',current:s.foundationStrain||0,required:'至少 1',met:false,text:'当前没有元基裂隙需要修补'});
+ if((o.id==='patient'||o.id==='hasty')&&s.progress<cap(s))add(requirement('本层功行',s.progress,cap(s)));
+ if(o.id?.startsWith('equip-')){
+  const m=Number(o.id.slice(6));
+  if(m===s.manual)add({label:'当前功法',current:'正在修习',required:'另一门功法',met:false,text:`${ITEMS.manual[m].name}已是当前功法`});
+  for(const miss of affinityMissing(s,ITEMS.manual[m]))add({label:'功法契合',current:'不足',required:miss,met:false,text:miss});
+ }
+ if(!req.length)add({label:'条件',current:'未满足',required:'满足选项所列条件',met:false,text:'当前条件不足；请查看此选项说明中的门槛'});
+ o.requirements=req;
+ o.disabledReasons=req.filter(r=>!r.met).map(r=>r.text);
+ return o;
+}
+
+function rawOptions(s){
  if(s.ending)return [];
  if(s.pending==='guText')return [withRequirements({id:'collaborate',label:'与顾闻溪合校残篇',detail:'一月、口粮 1、心神 −16；日后仍要搜集缺页'},[requirement('顾闻溪好感',s.npcFavor.gu,1),resourceRequirement(s,'insight',5),resourceRequirement(s,'wit',4),resourceRequirement(s,'focus',16)]),withRequirements({id:'independent',label:'自购残篇，独自考据',detail:'一月、口粮 1、银钱 −6、心神 −20；顾好感 −1'},[resourceRequirement(s,'silver',6),resourceRequirement(s,'insight',7),resourceRequirement(s,'wit',5),resourceRequirement(s,'focus',20)]),{id:'back',label:'暂不立题',detail:'不耗月份与资源；日后仍可继续追索'}];
  if(s.pending==='guFinish'){const req=[{label:'星篆缺页',current:s.story.guFragments?'已齐':'未齐',required:'已齐',met:!!s.story.guFragments,text:`星篆缺页 ${s.story.guFragments?'已齐':'未齐'} / 已齐`},resourceRequirement(s,'insight',8),resourceRequirement(s,'root',3),resourceRequirement(s,'wit',5),practiceAnyRequirement(s,{1:8,2:6,6:8}),resourceRequirement(s,'focus',25),...(s.story.guText==='independent'?[resourceRequirement(s,'herbs',1)]:[]),{label:'真章',current:s.manuals.includes(4)?'已习得':'未习得',required:'未习得',met:!s.manuals.includes(4),text:s.manuals.includes(4)?'《星篆玄息录》已习得':'《星篆玄息录》尚未习得'}];return [withRequirements({id:'verify',label:'试行校成的星篆法',rarity:'仙品',detail:`一月、口粮 1、心神 −25${s.story.guText==='independent'?'、灵草 −1':''}；所得真章适合考据修行`},req),{id:'back',label:'继续推敲'}];}
@@ -548,6 +598,7 @@ function available(s){if(s.ending||s.pending||s.combat)return [];
  if(s.location==='market')return base.filter(a=>!['secludeYear','cultivate','manual','rest'].includes(a.id));
  return base;
 }
+function options(s){return rawOptions(s).map(o=>legacyRequirementDiagnostics(s,o));}
 function batchCultivate(initial,limit,rng){let s=initial,trained=0,rested=0,gathered=0,reason='约定的闭关期限已满';
  const start={month:s.month,progress:s.progress,root:s.root,wit:s.wit,body:s.body,dao:s.dao,grain:s.grain,herbs:s.herbs,affinity:{...points(s)}};
  s.batchActive=true;
