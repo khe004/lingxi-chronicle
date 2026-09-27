@@ -7,7 +7,7 @@ function rng(seed){let x=seed>>>0;return ()=>((x=(Math.imul(x,1664525)+101390422
 function travel(s,where){return s.location===where?null:`travel:${where}`;}
 function ready(s,id){return G.available(s).some(x=>x.id===id&&!x.disabled);}
 function choice(s,id){return G.options(s).some(x=>x.id===id&&!x.disabled)?`choice:${id}`:null;}
-function command(s,route,policy,buyPill){
+function command(s,route,policy,buyPill,opening='transition'){
  if(s.combat)return 'combat:withdraw';
  if(s.pending){
   const p=s.pending;
@@ -41,11 +41,15 @@ function command(s,route,policy,buyPill){
  if(s.focus<(policy==='conservative'?40:policy==='risky'?18:25))return 'action:rest';
  if(s.wounds>=(policy==='conservative'?1:policy==='risky'?4:2))return 'action:rest';
  if(s.stage<3&&s.progress>=G.cap(s))return 'action:stage';
- if(!s.manuals.includes(1)){
+ if(opening==='basic'&&!s.manuals.includes(1)&&s.practice[0]<24)return 'action:secludeYear';
+ if(!s.manuals.includes(1)&&(opening!=='basic'||s.practice[0]>=24)){
   if(s.silver<12){if(s.herbs>=3){if(s.location!=='market')return travel(s,'market');return 'action:sellall';}if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
   if(s.location!=='market')return travel(s,'market');return 'action:buymanual';
  }
- if(s.manual===0){if(!G.affinityMissing(s,G.ITEMS.manual[1]).length)return 'action:manual';return 'action:secludeYear';}
+ if(s.manual===0&&opening==='basic')return 'action:manual';
+ if(s.manual===0&&opening!=='basic'){if(!G.affinityMissing(s,G.ITEMS.manual[1]).length)return 'action:manual';return 'action:secludeYear';}
+ if(opening==='specialist'&&s.manual===1&&s.practice[1]<12)return 'action:secludeYear';
+ const openingPractice=1;
  if(!s.manuals.includes(target)){
   if(s.focus<35)return 'action:rest';
   const needInsight=route==='star'?8:route==='green'?5:8;
@@ -54,20 +58,22 @@ function command(s,route,policy,buyPill){
   if(route==='star'){
    if(!s.flags.scroll){if(s.location!=='cliff')return travel(s,'cliff');return 'action:study';}
    if(!s.story.guText){if(s.location!=='cliff')return travel(s,'cliff');return 'action:guText';}
+   if(s.month<s.story.guTextMonth+3)return 'action:rest';
    if(!s.story.guFragments){if(s.location!=='mountain')return travel(s,'mountain');return 'action:findFragments';}
-   if(s.root<3||s.practice[1]<8){return 'action:secludeYear';}
+    if(s.root<3||s.practice[openingPractice]<8){return 'action:secludeYear';}
    if(s.location!=='cliff')return travel(s,'cliff');return 'action:guFinish';
   }
   if(route==='green'){
    if(!s.story.yeText){if(s.herbs<2){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}if(s.location!=='mountain')return travel(s,'mountain');return 'action:yeText';}
+   if(s.month<s.story.yeTextMonth+2)return 'action:rest';
    if(s.body<4){if(s.herbs<2)return 'action:gather';return 'action:bodyTonic';}
    if(s.story.yeHerbWork<2||s.herbs<3){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
-   if(s.root<4||s.practice[1]<10)return 'action:secludeYear';
+   if(s.root<4||s.practice[openingPractice]<10)return 'action:secludeYear';
    if(s.location!=='mountain')return travel(s,'mountain');return 'action:yeFinish';
   }
   if(route==='taiwei'){
    if(s.origin==='scholar'){
-    if(s.root<3||s.practice[1]<16)return 'action:secludeYear';
+    if(s.root<3||s.practice[openingPractice]<16)return 'action:secludeYear';
     if(!s.flags.mentor||!s.manuals.includes(2)){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
     if(s.manual!==2)return 'action:manual';
     if(s.practice[2]<14||s.root<4||s.dao<4)return 'action:secludeYear';
@@ -118,10 +124,10 @@ function command(s,route,policy,buyPill){
  if(s.grain<9&&s.silver>=3){if(s.location!=='market')return travel(s,'market');return 'action:buymax';}
  return s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4?'action:cultivate':'action:secludeYear';
 }
-function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false}){
+function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false,opening='transition'}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
  let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
- while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,state:s};
+ while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
   // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
   if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
   const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage]);last=c;
@@ -133,28 +139,28 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
   if(!firstSpirit&&(s.manuals.includes(2)||s.manuals.includes(6)))firstSpirit=s.month;
   if(!firstManual&&s.manuals.includes(route==='star'?4:route==='green'?5:3))firstManual=s.month;
   if(!firstSpring&&s.spring>=3)firstSpring=s.month;
-  if(JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,command:c,state:s};
+  if(JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,opening,command:c,state:s};
  }
- return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
+ return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
 }
 if(require.main===module){
- const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual');
+ const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual'),compareOpenings=process.argv.includes('--compare-openings'),openings=compareOpenings?['basic','transition','specialist']:['transition'];
  const outIndex=process.argv.indexOf('--best-out');
  if(outIndex>=0&&!process.argv[outIndex+1])throw Error('--best-out requires a file path');
  const count=Number(process.argv.find(x=>/^\d+$/.test(x))||1);
- for(const origin of origins)for(const talent of talents)for(const route of routes)for(const policy of policies)for(let seed=1;seed<=count;seed++){
-  const x=simulate({origin,talent,route,policy,seed,buyPill});rows.push(x);
+ for(const opening of openings)for(const origin of origins)for(const talent of talents)for(const route of routes)for(const policy of policies)for(let seed=1;seed<=count;seed++){
+  const x=simulate({origin,talent,route,policy,seed,buyPill,opening});rows.push(x);
   if(x.successMonth==null)continue;
   if(groupByManual){
    const manual=String(x.manual);
    if(!bestByManual[manual]||x.successMonth<bestByManual[manual].successMonth){
-    bestByManual[manual]={manual:x.manual,manualName:G.ITEMS.manual[x.manual]?.name||manual,origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
+    bestByManual[manual]={manual:x.manual,manualName:G.ITEMS.manual[x.manual]?.name||manual,origin,talent,route,policy,seed,buyPill,opening,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
     manualImprovements.push({manual,...bestByManual[manual]});
    }
   }
-  const key=[origin,talent,route].join('/');
+  const key=[opening,origin,talent,route].join('/');
   if(!bestByBuild[key]||x.successMonth<bestByBuild[key].successMonth){
-   bestByBuild[key]={origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
+   bestByBuild[key]={opening,origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
    improvements.push({build:key,...bestByBuild[key]});
   }
  }
@@ -169,7 +175,7 @@ if(require.main===module){
  }
  const bestResult={objective:'earliest successful meridian opening (month)',seedCount:count,buyPill,best,improvements,bestByBuild,bestActions:replay?.actions||[],...(groupByManual?{manualImprovements,bestByManual:manualResults}:{})};
  if(outIndex>=0)fs.writeFileSync(process.argv[outIndex+1],JSON.stringify(bestResult,null,2)+'\n');
- const by={};for(const x of rows){const key=[x.origin,x.route,x.reason].join('/');by[key]=(by[key]||0)+1;}
+ const by={};for(const x of rows){const key=[x.opening,x.origin,x.route,x.reason].join('/');by[key]=(by[key]||0)+1;}
  console.log(JSON.stringify({count:rows.length,by,attempted:rows.filter(x=>x.attemptMonth!=null).length,records:rows.map(({state,...x})=>x),failures:rows.filter(x=>x.attemptMonth==null).map(x=>({origin:x.origin,talent:x.talent,route:x.route,policy:x.policy,seed:x.seed,reason:x.reason,month:x.month||x.state?.month,command:x.command||x.last,stage:x.state?.stage,manual:x.state?.manual,focus:x.state?.focus,grain:x.state?.grain,pending:x.state?.pending,story:x.state?.story})).slice(0,30),bestResult},null,2));
 }
 module.exports={simulate};

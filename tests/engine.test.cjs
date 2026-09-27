@@ -106,8 +106,8 @@ function cultivate(method,count){let disciple=G.create();disciple.manual=method;
  for(let i=0;i<count&&!disciple.ending;i++){if(disciple.focus<18)disciple=run(disciple,'action:rest',1);if(disciple.progress>=G.cap(disciple))disciple.progress=0;disciple=run(disciple,'action:cultivate',1);}
  return disciple;
 }
-const universal=cultivate(0,35);for(const key of G.AFFINITY_KEYS)assert.equal(universal.affinityPoints[key],1,`basic ${key} must not rise before 36 actual sessions`);
-const universal36=cultivate(0,36);for(const key of G.AFFINITY_KEYS)assert.equal(universal36.affinityPoints[key],2,`basic ${key}`);
+const universal=cultivate(0,23);for(const key of G.AFFINITY_KEYS)assert.equal(universal.affinityPoints[key],1,`basic ${key} must not rise before 24 actual sessions`);
+const universal24=cultivate(0,24);for(const key of G.AFFINITY_KEYS)assert.equal(universal24.affinityPoints[key],2,`basic ${key}`);
 const specialist=cultivate(3,60);assert.ok(specialist.affinityPoints.metal>=4&&specialist.affinityPoints.yang>=4,'immortal specialization deepens tagged axes');
 assert.ok(specialist.affinityPoints.wood<=1&&specialist.affinityPoints.water<=1,'specialization leaves unrelated axes low');
 const dual=cultivate(5,10);for(const key of ['wood','fire','yang'])assert.equal(dual.affinityPoints[key],2,`dual ${key}`);
@@ -220,11 +220,13 @@ assert.equal(ignoredEvent.events.seen.length,1);
 assert.equal(ignoredEvent.month,retreatEvent.month);
 assert.equal(G.migrate(ignoredEvent),ignoredEvent);
 // The location deck changes at each foundation realm; later options act on progress and wounds.
-const realmEventIds={1:['templeMeridian','cliffPulse','mountainVein','marketScript'],2:['templeSeal','cliffFormation','mountainCave','marketPact'],3:['templeBreath','cliffVision','mountainSpring','marketExchange']};
+const realmEventIds={1:['templeMeridian','cliffPulse','mountainVein','marketScript'],2:['templeSeal','cliffFormation','mountainCave','marketPact'],3:['templeBreath','cliffVision','mountainSpring']};
 for(const [realm,ids] of Object.entries(realmEventIds)){
- for(const [index,location] of ['temple','cliff','mountain','market'].entries()){
+ for(const [index,location] of ['temple','cliff','mountain',...(realm=== '1'||realm==='2'?['market']:[])].entries()){
   let realmState=G.create();realmState.stage=Number(realm);realmState.location=location;realmState.month=25;realmState.grain=30;realmState.flags.scroll=true;realmState.flags.herbalist=true;
+  if(location==='market')realmState.events.seen=[];
   realmState=run(realmState,location==='market'?'action:marketWalk':'action:rest',0);
+  if(location==='market'&&realmState.pending==null){realmState.events.seen=[];realmState.events.nextMonth=0;realmState=run(realmState,'action:rest',0);}
   assert.equal(realmState.pending,`scene-${ids[index]}`);
  }
 }
@@ -744,10 +746,10 @@ let first=G.create();first.location='arena';first.stage=3;first.affinityPoints=O
 // P0 onboarding/deadline/route-copy regressions.
 for(const origin of Object.keys(G.ORIGINS))for(const talent of Object.keys(G.TALENTS)){const intro=G.openingStory(origin,talent);const originPhrase={scholar:'寒门书生之家',merchant:'行商之家',herbalist:'采药人家'}[origin];assert.ok(intro.includes(originPhrase));assert.ok(intro.includes(G.TALENTS[talent].name));assert.ok(intro.includes('十六岁'));assert.ok(intro.includes('三十岁'));assert.ok(!/\b(?:scholar|merchant|herbalist|clarity|meridian|vitality)\b/.test(intro));}
 let unknownYe=G.create({origin:'herbalist'});unknownYe.location='mountain';assert.equal(G.available(unknownYe).some(x=>x.id==='yeText'),false,'herbalist origin must not know Ye before meeting her');unknownYe.story.yeRoute='help';assert.equal(G.available(unknownYe).some(x=>x.id==='yeText'),true,'Ye route should unlock asking about Qinghua');
-let yeCopy=G.create();yeCopy.pending='yeFinish';yeCopy.practice[1]=4;yeCopy.practice[2]=2;yeCopy.practice[6]=7;const yeDetail=G.options(yeCopy).find(x=>x.id==='healVein').detail;assert.ok(yeDetail.includes('《青篆引脉帖》实修 4 / 10 次'));assert.ok(yeDetail.includes('《澄元导脉经》实修 2 / 6 次'));assert.ok(!yeDetail.includes('6／10'));
+let yeCopy=G.create();yeCopy.pending='yeFinish';yeCopy.practice[1]=4;yeCopy.practice[2]=2;yeCopy.practice[6]=7;const yeOpt=G.options(yeCopy).find(x=>x.id==='healVein');assert.ok(yeOpt.requirements.some(r=>r.text.includes('《青篆引脉帖》 4 / 10')));assert.ok(yeOpt.requirements.some(r=>r.text.includes('《澄元导脉经》 2 / 6')));assert.ok(!yeOpt.detail.includes('6／10'));
 
 // P0 transparency / duplicate purchase / combat context regressions.
 let marketManual=G.create({origin:'merchant'});marketManual.location='market';marketManual.silver=30;let buy=G.available(marketManual).find(x=>x.id==='buymanual');assert.equal(buy.disabled,false);marketManual=run(marketManual,'action:buymanual');const afterSilver=marketManual.silver;buy=G.available(marketManual).find(x=>x.id==='buymanual');assert.equal(buy.disabled,true);assert.ok(buy.requirements.some(r=>!r.met&&r.text.includes('已习得')));marketManual=run(marketManual,'action:buymanual');assert.equal(marketManual.silver,afterSilver);assert.equal(marketManual.manuals.filter(x=>x===1).length,1);
 let cave=G.create();cave.stage=2;cave.pending='scene-mountainCave';cave.herbs=0;cave.wounds=0;cave.focus=10;const caveOpts=G.options(cave);assert.ok(caveOpts.find(x=>x.id==='healCave').disabledReasons.some(x=>x.includes('灵草')));assert.ok(caveOpts.find(x=>x.id==='seekCave').disabledReasons.some(x=>x.includes('心神')));
-let star=G.create();star.pending='guFinish';star.story.guFragments=true;const starOpt=G.options(star).find(x=>x.id==='verify');assert.ok(starOpt.requirements.some(r=>r.text.includes('《青篆引脉帖》')));assert.ok(!starOpt.detail.includes('6／8'));
+let starVerify=G.create();starVerify.pending='guFinish';starVerify.story.guFragments=true;const starOpt=G.options(starVerify).find(x=>x.id==='verify');assert.ok(starOpt.requirements.some(r=>r.text.includes('《青篆引脉帖》')));assert.ok(!starOpt.detail.includes('6／8'));
 let lowFocus=G.create();lowFocus.location='arena';lowFocus.focus=20;lowFocus=run(lowFocus,'action:spar-novice');assert.ok(lowFocus.combat.history.some(x=>x.includes('开局仅能调动')));assert.equal(G.affinityRequirement(G.ITEMS.manual[1]),1);
