@@ -74,3 +74,47 @@
 .chapter-deadline-row.urgent-deadline>span,.chapter-deadline-row.urgent-deadline>b{color:#ffd2b7}
 
 .requirement-list{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:7px;font-size:11px;line-height:1.4;text-align:left}.requirement-list span{padding:2px 5px;border:1px solid #51675b;color:#aebdb4}.requirement-list .met{color:#9fbca9}.requirement-list .missing,.requirement-list.missing span{color:#d6a28d;border-color:#79594d}.action:disabled .requirement-list{opacity:1}.history-more{display:block;margin:10px auto 2px}.history-dialog{width:min(760px,92vw);max-width:760px;max-height:84vh}.history-dialog form{display:flex;flex-direction:column;max-height:78vh}.history-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:20px}.full-log{overflow:auto;padding-right:8px}.story-content{max-height:none;overflow:visible}.log{min-height:0}
+
+/* 2026 responsive UI redesign */
+.ui-redesign{grid-template-columns:minmax(250px,300px) minmax(0,1fr);max-width:1280px;margin:0 auto;gap:18px}
+.ui-redesign .narrative{min-width:0}
+.ui-redesign .decisions{grid-column:2;grid-row:1}
+.ui-redesign .status{grid-column:1;grid-row:1 / span 2}
+.ui-redesign .narrative{grid-column:2;grid-row:1}
+.ui-redesign .decisions{margin-top:0;align-self:start}
+.primary-tabs{position:sticky;top:0;z-index:5;background:var(--panel,#132324)}
+.collection-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0}
+.mobile-status-strip,.mobile-location,.mobile-actions{display:none}
+.latest-result{margin:12px 0 16px;padding:12px 14px;border-left:3px solid #a98a4d;background:rgba(169,138,77,.08)}
+.latest-result span,.latest-result strong{display:block}.latest-result span{font-size:.82rem;opacity:.75}.latest-result strong{margin-top:4px}
+.recent-heading{display:flex;align-items:center;justify-content:space-between;margin-top:18px}.recent-heading h2{font-size:1rem;margin:0}
+#log .entry{padding:10px 0}
+@media (min-width:768px){
+ .ui-redesign .decisions{display:none}
+ .ui-redesign .mobile-actions{display:block}
+ .ui-redesign .mobile-location{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 14px}
+ .ui-redesign .mobile-location>div{display:flex;flex-direction:column}
+ .ui-redesign .mobile-travel-list{position:absolute;z-index:10;right:20px;max-width:420px;padding:10px;background:#132324;border:1px solid rgba(190,160,95,.35);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+}
+@media (max-width:767px){
+ body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+ .top{padding-inline:14px}.top-links{display:none}
+ .ui-redesign{display:block;margin:0;padding:0 10px}
+ .ui-redesign .status,.ui-redesign .decisions{display:none}
+ .ui-redesign .narrative{border:0;padding:12px 4px;background:transparent}
+ .narrative-head{display:none}
+ .primary-tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#101b1c;border-top:1px solid rgba(190,160,95,.28)}
+ .primary-tabs button{min-height:48px;font-size:15px}
+ .collection-tabs{position:sticky;top:0;z-index:12;background:#101b1c;padding:8px}
+ .mobile-status-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:sticky;top:0;z-index:11;margin:-12px -4px 10px;padding:9px 8px;background:#101b1c;border-bottom:1px solid rgba(190,160,95,.22);font-size:13px}
+ .mobile-status-strip span{display:flex;flex-direction:column;min-width:0}.mobile-status-strip b{font-size:15px}
+ .mobile-location{display:flex;position:relative;align-items:center;justify-content:space-between;margin:10px 0 14px}
+ .mobile-location>div{display:flex;flex-direction:column}.mobile-location strong{font-size:20px}
+ .mobile-travel-list{position:absolute;top:48px;left:0;right:0;z-index:20;display:grid;gap:7px;padding:10px;background:#132324;border:1px solid rgba(190,160,95,.35)}
+ .mobile-actions{display:block;margin:12px 0}.mobile-actions>h2{font-size:1.08rem;margin:0 0 8px}
+ .action-group{margin-bottom:8px}.action-group-items{display:grid;grid-template-columns:1fr}
+ .action,.prompt-options button{min-height:52px}
+ #event-prompt{margin:10px 0 12px}
+ #log{min-height:0}.story-content{overflow:visible}
+ .history-more{min-height:44px}
+}
