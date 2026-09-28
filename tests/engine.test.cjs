@@ -1,4 +1,5 @@
 const assert=require('node:assert/strict');
+const {test}=require('node:test');
 const G=require('../dist/engine.js');
 const run=(s,command,roll=0)=>G.step(s,command,()=>roll);
 let s=G.create({name:'闻山',origin:'scholar',talent:'clarity'});s.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));
@@ -102,7 +103,7 @@ woodSpar.combat.player.currentQi-=10;const hurtQi=woodSpar.combat.player.current
 woodSpar=run(woodSpar,'combat:guard',.99);
 assert.ok(woodSpar.combat.player.currentQi>hurtQi);assert.ok(woodSpar.combat.history.at(-1).includes('回生'));
 // Affinity growth rewards specialization: broad low-level growth is possible, but high affinity takes sustained practice.
-function cultivate(method,count){let disciple=G.create();disciple.manual=method;if(!disciple.manuals.includes(method))disciple.manuals.push(method);disciple.grain=300;disciple.events.nextMonth=999;disciple.stage=3;
+function cultivate(method,count){let disciple=G.create();disciple.manual=method;if(!disciple.manuals.includes(method))disciple.manuals.push(method);disciple.grain=300;disciple.events.nextMonth=999;disciple.stage=3;disciple.story.ordeal={triggered:true,resolved:true,route:'test',triggerMonth:0};
  for(let i=0;i<count&&!disciple.ending;i++){if(disciple.focus<18)disciple=run(disciple,'action:rest',1);if(disciple.progress>=G.cap(disciple))disciple.progress=0;disciple=run(disciple,'action:cultivate',1);}
  return disciple;
 }
@@ -410,6 +411,7 @@ function practiceUntil(predicate){for(let i=0;i<650&&!predicate()&&!s.ending;i++
  else if(s.focus<30)s=run(s,'action:rest');
  else if(s.grain<4){s=run(s,'travel:mountain');s=run(s,'action:gather');}
  else s=run(s,'action:cultivate');
+ if(s.story.ordeal?.triggered&&!s.story.ordeal.resolved)s.story.ordeal.resolved=true;
 }assert.equal(predicate(),true,'practice milestone should be reachable '+JSON.stringify({month:s.month,age:s.ageMonths,stage:s.stage,pending:s.pending,root:s.root,progress:s.progress,cap:G.cap(s),focus:s.focus,grain:s.grain,location:s.location,ending:s.ending}));}
 practiceUntil(()=>s.root>=3);
 assert.ok(s.practice[1]>=16);
@@ -767,14 +769,26 @@ test('气机逆乱在元成入真四分之一处触发并阻断功行',()=>{
  let n=G.step(s,'action:cultivate',()=>0);assert.equal(n.story.ordeal?.triggered,true);const p=n.progress;
  n=G.step(n,'action:cultivate',()=>0);assert.equal(n.progress,p);assert.match(n.logs.at(-1).effect,/功行 \+0/);
 });
+test('迁移旧存档时补触发已越过阈值的气机逆乱',()=>{
+ const s=G.create({});s.stage=3;s.progress=30;s.story.ordeal=null;
+ const n=G.migrate(s);assert.equal(n.story.ordeal?.triggered,true);assert.equal(n.story.ordeal?.triggerMonth,n.month);
+});
 test('气机逆乱闭关只消耗一个月且不增长功行',()=>{
  const s=G.create({});s.stage=3;s.manual=3;s.manuals=[0,3];s.progress=30;s.focus=100;s.grain=20;s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:9};
  const n=G.step(s,'action:secludeYear',()=>0);assert.equal(n.month,s.month+1);assert.equal(n.progress,s.progress);assert.match(n.logs.at(-1).text,/并非单凭苦修/);
 });
+test('闭关途中越过碍难阈值即在首月中断',()=>{
+ const s=G.create({});s.stage=3;s.manual=3;s.manuals=[0,3];s.progress=21;s.focus=100;s.grain=30;s.events.nextMonth=999;
+ const n=G.step(s,'action:secludeYear',()=>.99);assert.equal(n.story.ordeal?.triggered,true);assert.equal(n.month,s.month+1);assert.ok(n.progress>=22);
+});
+test('事件功行跨过阈值时立即触发气机逆乱',()=>{
+ const s=G.create({});s.stage=3;s.location='cliff';s.pending='scene-cliffPulse';s.progress=21;s.totalProgress=100;s.focus=100;s.grain=20;s.insight=5;
+ const n=G.step(s,'choice:readPulse',()=>0);assert.equal(n.story.ordeal?.triggered,true);assert.ok(n.progress>=22);
+});
 test('气机逆乱人物调查不锁路线，正式受助后解除',()=>{
  const s=G.create({});s.stage=3;s.progress=30;s.focus=100;s.grain=20;s.dao=5;s.npcFavor.cheng=3;s.flags.mentor=true;s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:9};
- let n=G.step(s,'action:ordealHelp',()=>0);assert.equal(n.pending,'ordealHelp');n=G.step(n,'event:back',()=>0);assert.equal(n.story.ordeal.resolved,false);
- n=G.step(n,'action:ordealHelp',()=>0);n=G.step(n,'event:ordealCheng',()=>0);assert.equal(n.story.ordeal.resolved,true);assert.equal(n.story.ordeal.route,'cheng');
+ let n=G.step(s,'action:ordealHelp',()=>0);assert.equal(n.pending,'ordealHelp');assert.ok(G.options(n).some(o=>o.id==='ordealCheng'));n=G.step(n,'choice:back',()=>0);assert.equal(n.story.ordeal.resolved,false);
+ n=G.step(n,'action:ordealHelp',()=>0);n=G.step(n,'choice:ordealCheng',()=>0);assert.equal(n.story.ordeal.resolved,true);assert.equal(n.story.ordeal.route,'cheng');
 });
 test('限时破碍修士只在期限内出现',()=>{
  const s=G.create({});s.stage=3;s.progress=30;s.location='arena';s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:8};s.month=8;
