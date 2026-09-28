@@ -129,7 +129,7 @@ const SPAR_OPPONENTS={
  scrollBandit:{name:'截卷修士 · 赵七',rank:'入门',text:'袖中藏着半截卷轴，持短刀拦路。',qi:52,nei:14,attack:16,defense:8,vitality:0,counter:0,evasion:14,elements:['metal'],polarity:'yang',gear:{weapon:'断锋短刀'},artRanks:{paperCut:0},pattern:['charge','paperCut','strike','guard','burst']},
  springRival:{name:'寻泉客 · 闻秋',rank:'凝元',text:'熟悉苍梧地势，已在泉眼旁插下探脉竹签。',qi:68,nei:18,attack:19,defense:12,vitality:0,counter:0,evasion:15,elements:['wood'],polarity:'yin',gear:{weapon:'青竹杖'},artRanks:{flow:1},pattern:['flow','strike','charge','burst','guard']},
  swift:{name:'游坪客 · 柳惊鸿',rank:'淬元',text:'持霜纹短剑、踏轻云靴，以锋锐剑招取胜。',qi:108,nei:44,attack:31,defense:21,vitality:0,counter:9,evasion:23,elements:['metal'],polarity:'yang',gear:{weapon:'霜纹短剑',shoes:'轻云靴'},artRanks:{metalFlash:2},pattern:['strike','metalFlash','guard','charge','burst']},
- ape:{name:'青背灵猿',rank:'山中异兽',kind:'beast',text:'青背灵猿不持器物，天生会催木气化作藤影扑击。',qi:58,nei:12,attack:17,defense:9,vitality:2,counter:0,evasion:18,elements:['wood'],polarity:'harmony',innate:'藤影扑击',artRanks:{vinePounce:1},pattern:['strike','guard','vinePounce','charge','burst']}
+ ape:{name:'青背灵猿',rank:'山中异兽',kind:'beast',text:'青背灵猿不持器物，天生会催木气化作藤影扑击。',qi:58,nei:12,attack:17,defense:9,vitality:2,counter:0,evasion:18,elements:['wood'],polarity:'harmony',innate:'藤影扑击',artRanks:{vinePounce:1},pattern:['strike','guard','vinePounce','charge','burst']},\n ordealVisitor:{name:'过山修士 · 沈砺',rank:'元成入真圆满',text:'为寻仙品华池暂住苍梧，佩玄铁长剑与护脉软甲，出手老练。',qi:142,nei:52,attack:35,defense:27,vitality:2,counter:7,evasion:22,elements:['water'],polarity:'yin',gear:{weapon:'玄铁长剑',armor:'护脉软甲'},artRanks:{flow:2},pattern:['flow','guard','charge','burst','strike']}
 };
 const FOE_ARTS={flow:{name:'引气贯锋',cost:6,mult:1.25,hit:0,growth:{cost:[0,-1,-2],mult:[0,.07,.14]}},earthWard:{name:'磐岩镇脉',cost:9,mult:1.3,hit:0,guard:5,elements:['earth'],polarity:'yin',growth:{mult:[0,.06,.12]}},metalFlash:{name:'霜锋掠影',cost:12,mult:1.55,hit:6,elements:['metal'],polarity:'yang',growth:{mult:[0,.06,.12],hit:[0,2,4]}},vinePounce:{name:'藤影扑击',cost:6,mult:1.4,hit:8,innate:true,elements:['wood'],polarity:'harmony',growth:{mult:[0,.06,.12]}},paperCut:{name:'裂页断章',cost:5,mult:1.3,hit:3,elements:['metal'],polarity:'yang',growth:{mult:[0,.05,.1]}}};
 Object.values(SPAR_OPPONENTS).forEach(foe=>{foe.points=points({affinityPoints:innatePoints(foe.elements,foe.polarity)});foe.qi+=3*foe.points.yang;foe.nei+=2*foe.points.yin;foe.attack+=foe.gear?.weapon?3:0;foe.defense+=foe.gear?.armor?4:0;foe.evasion+=foe.gear?.shoes?5:0;});
@@ -161,7 +161,7 @@ function battleOpening(s,player,line){const current=Math.max(0,Math.floor(player
 function startSpar(s,id){const foe=SPAR_OPPONENTS[id];if(!foe||s.combat||s.pending||s.ending||s.location!=='arena')return;
  const player=combatStats(s),opening=battleOpening(s,player,`守坪弟子敲响起手的木板。你与${foe.name}互相行礼。`);s.combat={id,round:1,player:{...player,currentQi:player.qi,currentNei:opening.current},enemy:{...foe,currentQi:foe.qi,currentNei:foe.nei},intent:sparIntent(foe,1),relicUsed:false,history:opening.lines};discoverCombatant(s,id);
 }
-function startSceneCombat(s,id,scenario='mountainApe'){const foe=SPAR_OPPONENTS[id];if(!foe||s.combat)return;const player=combatStats(s),line=scenario==='luEscort'?'坊市后巷，截卷修士拦在商队前。陆知衡护住卷箱，留给你一条出手的空隙。':scenario==='springContest'?'泉眼旁，寻泉客闻秋先一步布下探脉竹签，见你到来便横杖拦住去路。':'药径深处，青背灵猿挡在灵草丛前。你与它隔着藤枝对峙。',opening=battleOpening(s,player,line);s.combat={id,storyEncounter:scenario,round:1,player:{...player,currentQi:player.qi,currentNei:opening.current},enemy:{...foe,currentQi:foe.qi,currentNei:foe.nei},intent:sparIntent(foe,1),relicUsed:false,history:opening.lines};discoverCombatant(s,id);}
+function startSceneCombat(s,id,scenario='mountainApe'){const foe=SPAR_OPPONENTS[id];if(!foe||s.combat)return;const player=combatStats(s),line=scenario==='ordealDuel'?'演武坪上，沈砺听完你的气机症候，只道：“既然静坐理不顺，就在招里把它逼回正途。”他拔剑等你出手。':scenario==='luEscort'?'坊市后巷，截卷修士拦在商队前。陆知衡护住卷箱，留给你一条出手的空隙。':scenario==='springContest'?'泉眼旁，寻泉客闻秋先一步布下探脉竹签，见你到来便横杖拦住去路。':'药径深处，青背灵猿挡在灵草丛前。你与它隔着藤枝对峙。',opening=battleOpening(s,player,line);s.combat={id,storyEncounter:scenario,round:1,player:{...player,currentQi:player.qi,currentNei:opening.current},enemy:{...foe,currentQi:foe.qi,currentNei:foe.nei},intent:sparIntent(foe,1),relicUsed:false,history:opening.lines};discoverCombatant(s,id);}
 function combatOptions(s){if(!s.combat)return [];const c=s.combat;
  return [{id:'strike',label:'寻常出手',detail:'不耗内息；以攻势直接进招'},{id:'guard',label:'敛息守势',detail:'本回合护体 +8、内息 +2；不出手'},...Object.entries(TECHNIQUES).filter(([id,t])=>s.knownTechniques?.includes(id)&&s.stage>=t.stage).map(([id,t])=>{const rank=techniqueRank(s,id),effect=techniqueEffect(id,rank);return {id,label:`${t.name} · ${proficiencyName(rank)}`,detail:`内息 −${effect.cost}；${id==='interrupt'?`截断机会 ${Math.round(effect.interruptChance*100)}%`: `伤害倍率 ${effect.mult.toFixed(2)}`}${id==='surge'?`、命中 ${effect.hit}`:''}${techniqueMissing(s,id).length?'；不可施展：'+techniqueMissing(s,id).join('、'):''}`,disabled:c.player.currentNei<effect.cost||techniqueMissing(s,id).length>0};}),...(s.trainingGear?.talisman?[{id:'relic',label:'催动试法铜符',detail:'内息 −4，本回合护体 +14；每场一次',disabled:c.relicUsed||c.player.currentNei<4}]:[]),{id:'withdraw',label:s.location==='arena'?'收手认输':'寻机逃离',detail:'切磋可随时退出；不受伤、不耗月'}];
 }
@@ -188,7 +188,12 @@ function recoverQi(person){if(person.currentQi<=0)return 0;const amount=Math.min
  person.currentQi+=amount;return amount;
 }
 function finishSpar(s,result){const c=s.combat,storyEncounter=c.storyEncounter,record=s.sparRecord||(s.sparRecord={wins:0,losses:0,withdrawals:0,draws:0,last:null});
- if(storyEncounter==='springContest'){
+ if(storyEncounter==='ordealDuel'){
+  if(result==='胜出'){c.history[c.history.length-1]+='高压换招间，你那股岔乱真息被逼得重新贯入周天。沈砺收剑点头：“记住这口气，不是记住我。”';resolveOrdeal(s,'combat','你在与沈砺的高压交锋中借战破碍，逆乱真息终于重新归入周天。','气机逆乱已解 · 演武破碍');}
+  else if(result==='失手'){c.history[c.history.length-1]+='沈砺及时收剑。你仍未理顺那股逆气，但这一战让你看清了它最容易失控的节点。';note(s,'你挑战沈砺失手，气机逆乱仍在；他离山前仍可再战，也可转求人物帮助。','演武','气机逆乱未解');}
+  else {c.history[c.history.length-1]+='你主动收手。沈砺没有追击，只提醒你别把一时逞强当成破关。';note(s,'你从破碍切磋中收手，气机逆乱仍在；其他解法仍然开放。','演武','气机逆乱未解');}
+  turn(s);
+ }else if(storyEncounter==='springContest'){
   if(result==='胜出'){c.history[c.history.length-1]+='闻秋收杖退开，承认你赢得这次优先探查权；石髓池仍须另备灵草与心神。';s.story.stoneClue=true;s.story.stonePriority=true;s.story.stoneMissed=false;s.story.springRivalFavor=(s.story.springRivalFavor||0)+1;favor(s,'wen',1);discover(s,'people','wen');recordCombatantObservation(s,'springRival','争泉时以守势和探脉步法应战。');}
   else if(result==='失手'){c.history[c.history.length-1]+='你被闻秋逼退，错过这次优先探查机会，泉眼仍可另寻。';s.story.stoneMissed=true;s.story.springRivalFavor=(s.story.springRivalFavor||0)-1;favor(s,'wen',-1);discover(s,'people','wen');add(s,{wounds:1});recordCombatantObservation(s,'springRival','争泉时不肯让步，擅长以竹杖封住近路。');}
   else {c.history[c.history.length-1]+='你主动收手，闻秋先行探泉；这次优先机会已过，山中仍有别的泉径。';s.story.stoneMissed=true;recordCombatantObservation(s,'springRival','争泉后先行探泉，没有追击。');}
@@ -260,6 +265,29 @@ function sparRound(s,id,rng){const c=s.combat;if(!c||!combatOptions(s).some(o=>o
  c.round++;if(!interrupted)c.intent=sparIntent(e,c.round);
 }
 function cap(s,manual=s.manual){return NEED[s.stage]+(ITEMS.manual[manual]?.capBonus||0);}
+const ORDEAL_RATIO=.25,ORDEAL_VISITOR_MONTHS=8;
+function ordealThreshold(s){return Math.ceil(NEED[3]*ORDEAL_RATIO);}
+function ordealActive(s){return s.stage===3&&s.story?.ordeal?.triggered&&!s.story.ordeal.resolved;}
+function ensureOrdeal(s){
+ if(s.stage!==3||s.story?.ordeal?.triggered||s.progress<ordealThreshold(s))return false;
+ s.story.ordeal={triggered:true,resolved:false,route:null,triggerMonth:s.month,visitorUntil:s.month+ORDEAL_VISITOR_MONTHS,seclusionWarned:false};
+ note(s,'行功渐深时，一缕真息忽在胸腹间自行岔开。你数次收束周天，它却总在同一处逆冲回来。并非伤势，也不像功法出了错；这层功行暂时再难寸进。','碍难','气机逆乱 · 功行暂时停滞');
+ return true;
+}
+function resolveOrdeal(s,route,text,effect=''){
+ if(!ordealActive(s))return false;s.story.ordeal.resolved=true;s.story.ordeal.route=route;s.story.ordeal.resolvedMonth=s.month;
+ note(s,text,'破碍',effect||'气机逆乱已解 · 可继续修行');return true;
+}
+function ordealVisitorAvailable(s){return ordealActive(s)&&s.month<=(s.story.ordeal.visitorUntil??-1);}
+function ordealNpcOptions(s){
+ if(!ordealActive(s))return [];
+ const o=s.story.ordeal;
+ const opts=[];
+ if(s.npcFavor.cheng>=2||s.flags.mentor)opts.push(withRequirements({id:'ordealCheng',label:'请程上师借清心玉佩理气',detail:'两月、口粮 2、心神 −18；正式受助后以道心梳理逆乱，路线互斥'},[requirement('程上师好感',s.npcFavor.cheng,2),resourceRequirement(s,'dao',4),resourceRequirement(s,'focus',18)]));
+ if(s.npcFavor.gu>=1||s.flags.scroll)opts.push(withRequirements({id:'ordealGu',label:'请顾闻溪查旧卷寻症结',detail:'两月、口粮 2、心神 −16；以旧注参照逆乱行气，路线互斥'},[requirement('顾闻溪好感',s.npcFavor.gu,1),resourceRequirement(s,'insight',6),resourceRequirement(s,'wit',5),resourceRequirement(s,'focus',16)]));
+ if(s.npcFavor.ye>=1||s.flags.herbalist)opts.push(withRequirements({id:'ordealYe',label:'请叶青蘅配药调理气机',detail:'两月、口粮 2、灵草 −2、心神 −14；辨药调息后破碍，路线互斥'},[requirement('叶青蘅好感',s.npcFavor.ye,1),resourceRequirement(s,'herbs',2),resourceRequirement(s,'focus',14)]));
+ return opts;
+}
 function cultivationGain(s){const boost=(s.elixirBoost||0)>0?1.25:1;return Math.round((ITEMS.manual[s.manual]?.speed||SPEED[0])*(1+(s.wit-3)*.06)*boost*100)/100;}
 function eventProgressGain(s,amount){
  const remainingPractice=s.manual===1&&s.root<3?Math.max(0,16-s.practice[1]):s.manual===2&&!s.manuals.some(m=>ITEMS.manual[m]?.rarity==='仙品')?Math.max(0,14-s.practice[2]):0;
@@ -311,7 +339,7 @@ function upgradeStory(s){
 function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(input.books)||!Number.isFinite(input.ageMonths))return null;
  if(input.version===9||input.version===8||input.version===7){input.version=9;input.techniquePractice=input.techniquePractice||{};input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
   if(!input.affinityPoints||'plain' in input.affinityPoints||'harmony' in input.affinityPoints){input=upgradeAffinity(copy(input));}
-  input.codex=input.codex||{};input.codex.combatants=input.codex.combatants||[];input.codex.combatantNotes=input.codex.combatantNotes||{};input.codex.elixirs=(input.codex.elixirs||[]).filter(id=>id!=='yangyuan');
+  input.story=input.story||{};input.story.ordeal=input.story.ordeal||null;input.codex=input.codex||{};input.codex.combatants=input.codex.combatants||[];input.codex.combatantNotes=input.codex.combatantNotes||{};input.codex.elixirs=(input.codex.elixirs||[]).filter(id=>id!=='yangyuan');
   for(const id of input.codex.beasts||[]){if(!input.codex.combatants.includes(id)){input.codex.combatants.push(id);const foe=SPAR_OPPONENTS[id],seenArts=foe?.innate?Object.keys(FOE_ARTS).filter(art=>FOE_ARTS[art].name===foe.innate):[];input.codex.combatantNotes[id]={kind:'beast',seenArts,seenGear:[]};}}
   const visitedMarket=input.location==='market'||input.flags?.elixir||input.logs.some(e=>e.text==='你来到山下集市。');
   if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);return input;
@@ -569,9 +597,9 @@ function rawOptions(s){
  return [];
 }
 function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
- if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':' · 首胜另有奖励'}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
+ if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...(ordealVisitorAvailable(s)?[{id:'ordealDuel',label:`破碍切磋 · ${SPAR_OPPONENTS.ordealVisitor.name}`,detail:`${SPAR_OPPONENTS.ordealVisitor.rank} · 约在第 ${s.story.ordeal.visitorUntil} 月离山；胜出可借战破除气机逆乱，失败只耗正常演武时间`}]:[]),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':' · 首胜另有奖励'}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
  const batchRisk=s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4;
- const base=[{id:'secludeYear',label:'闭关修炼',detail:batchRisk?'已接近本章期限或暗伤过重，请逐月决定行动':'自动逐月结算，至多一年；满额、事件、缺粮或危险即停；后山可采药补给',disabled:s.progress>=cap(s)||batchRisk},{id:'cultivate',label:'吐纳修炼',detail:`一月、口粮 1、心神 −22 · 功行约 +${cultivationGain(s)}，本层上限 ${cap(s)}`,disabled:s.focus<18||s.progress>=cap(s)},{id:'manual',label:'切换功法',detail:`不耗月份 · 已得 ${s.manuals.length} 门，本层上限随之变化`},{id:'rest',label:'静养调息',detail:`一月、口粮 1 · 心神约 +${48+(effectiveBody(s)-3)*4+(s.talent==='vitality'?12:0)}、暗伤 −${effectiveBody(s)>=5?2:1}`}];
+ const base=[{id:'secludeYear',label:'闭关修炼',detail:blocked?'气机逆乱中：闭关只会尝试一个月并立即中断':batchRisk?'已接近本章期限或暗伤过重，请逐月决定行动':'自动逐月结算，至多一年；满额、事件、缺粮或危险即停；后山可采药补给',disabled:s.progress>=cap(s)||batchRisk},{id:'cultivate',label:'吐纳修炼',detail:blocked?`一月、口粮 1、心神 −22 · 气机逆乱未解，功行 +0`:`一月、口粮 1、心神 −22 · 功行约 +${cultivationGain(s)}，本层上限 ${cap(s)}`,disabled:s.focus<18||s.progress>=cap(s)},{id:'manual',label:'切换功法',detail:`不耗月份 · 已得 ${s.manuals.length} 门，本层上限随之变化`},{id:'rest',label:'静养调息',detail:`一月、口粮 1 · 心神约 +${48+(effectiveBody(s)-3)*4+(s.talent==='vitality'?12:0)}、暗伤 −${effectiveBody(s)>=5?2:1}`}];
  if(s.location==='cliff'){
   for(const part of [1,2])if(afterManualReady(s,'gu',part))base.push({id:`after-gu-${part}`,label:part===1?'顾闻溪 · 星篆误字':'顾闻溪 · 校本来信',detail:'得法后的旧事有了下文；打开不耗月份'});
   base.push({id:'study',label:'研读蚀文',detail:`一月、口粮 1、心神 −16 · ${s.insight>=10?'心得已满':`心得 +${Math.min(10-s.insight,s.talent==='clarity'?2:1)}`} · ${s.wit>=8?'悟性已至上限':`悟性修习 ${s.studyWork}/${studyNeed(s.wit)}`}`,disabled:s.focus<12});
@@ -599,6 +627,7 @@ function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
   if(s.story.luHeard&&!s.story.luRoute&&!s.manuals.includes(3))base.push({id:'luMeet',label:'拜访商旅陆知衡',detail:'商路护卷与契书；打开不耗时'});
   if(s.story.luRoute&&s.story.luRoute!=='complete'&&!s.manuals.includes(3)&&s.month>=s.story.luMonth+5)base.push({id:'luReturn',label:s.story.luRoute==='fightDelayed'?'陆知衡 · 处理受损散卷':'陆知衡归还散卷',detail:s.story.luRoute==='fightDelayed'?'散卷受损已拖延五个月；可赔付修复后继续履约，也可卖出残卷离开；打开不耗时':'行云法需修满 10 月，再以银钱或灵草结契；打开不耗时'});
  }
+ if(ordealActive(s)&&ordealNpcOptions(s).length)base.push({id:'ordealHelp',label:'寻人问气机逆乱',detail:'查看可用的人物解法；调查不耗时、不锁路线'});
  if(s.location==='temple'){
   for(const part of [1,2])if(afterManualReady(s,'cheng',part))base.push({id:`after-cheng-${part}`,label:part===1?'程上师 · 传法之后':'程上师 · 旧注回访',detail:'得法后的旧事有了下文；打开不耗月份'});
   base.push({id:'mentor',label:'拜访程上师',detail:'请益、结交或求法；打开菜单不耗时'});
@@ -670,13 +699,18 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
  if(kind==='action'){
   if(s.pending||!available(s).some(a=>a.id===id&&!a.disabled))return s;
   const beforeMonth=s.month;
+  if(id==='ordealDuel'){startSceneCombat(s,'ordealVisitor','ordealDuel');return s;}
   if(id.startsWith('spar-')){startSpar(s,id.slice(5));return s;}
   if(id.startsWith('learn-')){const tech=id.slice(6);if(TECHNIQUES[tech]&&s.stage>=TECHNIQUES[tech].stage&&!techniqueMissing(s,tech).length){s.knownTechniques=s.knownTechniques||[];if(!s.knownTechniques.includes(tech))s.knownTechniques.push(tech);s.techniquePractice=s.techniquePractice||{};s.techniquePractice[tech]=s.techniquePractice[tech]||0;note(s,`你在演武坪受诀后反复揣摩${TECHNIQUES[tech].name}，拆招、调息、印证一月，终于能在交手中施展。`,'演武','习得招式 · 耗时 1 月');turn(s);}return s;}
   if(id.startsWith('kit-')){const slot=id.slice(4);if(!['staff','vest','shoes','talisman'].includes(slot))return s;s.trainingGear=s.trainingGear||{staff:false,vest:false,talisman:false};s.trainingGear[slot]=!s.trainingGear[slot];discover(s,'gear',slot);return s;}
-  if(id==='secludeYear')return batchCultivate(s,12,rng);
+  if(id==='secludeYear'){
+   if(ordealActive(s)){add(s,{focus:-22});note(s,s.story.ordeal.seclusionWarned?'你又强行闭关一月，逆乱气机仍在原处打转，只得停下。':'你强行闭关一月，逆乱气机反复冲回原处，功行毫无寸进。你终于明白，此关并非单凭苦修可以磨过。','碍难','功行 +0 · 闭关中断');s.story.ordeal.seclusionWarned=true;turn(s);return s;}
+   return batchCultivate(s,12,rng);
+  }
   if(id==='gatherSeason')return batchGather(s,rng);
+  if(id==='ordealHelp'){s.pending='ordealHelp';return s;}
   if(id.startsWith('after-')){s.pending=id;return s;}
-  if(id==='cultivate'){const gained=Math.min(cultivationGain(s),Math.max(0,cap(s)-s.progress));s.progress=Math.round((s.progress+gained)*100)/100;s.totalProgress=Math.round((s.totalProgress+gained)*100)/100;add(s,{focus:-22});trainAttribute(s);if((s.elixirBoost||0)>0)s.elixirBoost--;note(s,`你依${ITEMS.manual[s.manual].name}吐纳行气，积累这一层的功行。`,'修行',`功行 +${gained.toFixed(2)}${s.elixirBoost>0?` · 聚气余效 ${s.elixirBoost} 次`:''}`);turn(s);if(!s.ending&&s.stage<3&&s.progress>=cap(s))s.pending='stage';}
+  if(id==='cultivate'){const gained=ordealActive(s)?0:Math.min(cultivationGain(s),Math.max(0,cap(s)-s.progress));s.progress=Math.round((s.progress+gained)*100)/100;s.totalProgress=Math.round((s.totalProgress+gained)*100)/100;add(s,{focus:-22});if(!ordealActive(s))trainAttribute(s);if((s.elixirBoost||0)>0)s.elixirBoost--;note(s,ordealActive(s)?'你依旧法强行吐纳一月，逆乱气机却总在同一处折返，未能积下新的功行。':`你依${ITEMS.manual[s.manual].name}吐纳行气，积累这一层的功行。`,'修行',`功行 +${gained.toFixed(2)}${s.elixirBoost>0?` · 聚气余效 ${s.elixirBoost} 次`:''}`);turn(s);if(!s.ending){ensureOrdeal(s);if(s.stage<3&&s.progress>=cap(s))s.pending='stage';}}
   if(id==='rest'){const body=effectiveBody(s);add(s,{focus:48+(body-3)*4+(s.talent==='vitality'?12:0),wounds:body>=5?-2:-1});note(s,'你暂歇一月，收束杂念，调养经脉。','日常');turn(s);}
   if(id==='study'){add(s,{focus:-16,insight:s.talent==='clarity'?2:1,silver:s.insight>=5?2:0});note(s,'你推演蚀文，一字多解，终于窥见道书中隐藏的行气之理。','研经');study(s);turn(s);if(!s.ending&&!s.flags.scroll){s.flags.scroll=true;s.pending='scroll';}}
   if(id==='gather'){add(s,{focus:-15,herbs:rand(rng)<.28?2:1,grain:5});if(s.story.yeText&&s.story.yeText!=='complete')s.story.yeHerbWork=Math.min(2,(s.story.yeHerbWork||0)+1);note(s,'你沿山径采下灵草，也带回一些野菜与谷物，足够支撑一阵子。','采集');turn(s);if(!s.ending&&!s.flags.herbalist){s.flags.herbalist=true;s.pending='herbalist';}}
@@ -722,6 +756,13 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
    if(part==='1'){record.first=id;record.month=s.month;}else record.second=id;
    note(s,line,part==='1'?'抉择':'人情',Object.entries(delta).map(([key,val])=>`${{focus:'心神',insight:'心得',herbs:'灵草',wounds:'暗伤',silver:'银钱',dao:'道心',grain:'口粮'}[key]} ${val>0?'+':''}${val}`).concat(favorChange?`${{gu:'顾闻溪',ye:'叶青蘅',lu:'陆知衡',cheng:'程上师'}[person]} ${favorChange>0?'+':''}${favorChange}`:[]).join(' · '));
    if(new Set(['publish','reserve','treat','keep','honor','broker','teach','annotate','correct','visit','remedy','defend','guide','lecture']).has(id))turn(s);
+   return s;
+  }
+  if(event==='ordealHelp'){
+   if(id==='back')return s;
+   if(id==='ordealCheng'){add(s,{focus:-18});resolveOrdeal(s,'cheng','程上师借你一枚清心玉佩，陪你逐段重走周天。两月后，你终于找回那条不再岔开的气路。','程上师相助 · 气机逆乱已解');turn(s);turn(s);return s;}
+   if(id==='ordealGu'){add(s,{focus:-16});resolveOrdeal(s,'gu','顾闻溪翻出数页前人批注，与你逐字对照逆乱处。两月推演之后，你照旧注改换行气次序，岔气终于归正。','顾闻溪相助 · 气机逆乱已解');turn(s);turn(s);return s;}
+   if(id==='ordealYe'){add(s,{herbs:-2,focus:-14});resolveOrdeal(s,'ye','叶青蘅带你辨了两味理气药，又守着你调息数周。两月后，药力与吐纳相合，逆乱终于平复。','灵草 −2 · 叶青蘅相助 · 气机逆乱已解');turn(s);turn(s);return s;}
    return s;
   }
   if(event==='guText'){
