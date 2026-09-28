@@ -153,6 +153,9 @@
 .ui-redesign .books-content .status-affinity .affinity-visual{max-width:280px}
 .ui-redesign .primary-tabs{position:sticky;top:0;z-index:15}
 .ui-redesign .collection-tabs{position:relative}
+.ui-redesign .collection-tabs button{min-height:44px;padding:9px 12px;background:#21382f;border:1px solid #5c725e;color:#d7e1d2;font-size:14px;line-height:1.4}
+.ui-redesign .collection-tabs button.active{background:#384c39;border-color:#c3a66b;color:#f0daa9}
+.ui-redesign .collection-tabs button:hover{background:#365342}
 .ui-redesign .narrative,.ui-redesign .story-content,.ui-redesign .books-content{overflow-wrap:anywhere}
 @media(max-width:1023px){
  .ui-redesign{display:block;margin:12px auto}
