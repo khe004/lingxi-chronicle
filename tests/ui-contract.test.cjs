@@ -15,5 +15,9 @@ assert.match(style, /\.chapter-deadline-row\.urgent-deadline\{[^}]*border-color:
   'urgent state must have a visible row treatment');
 assert.match(style, /\.chapter-deadline-row\.urgent-deadline>span,\.chapter-deadline-row\.urgent-deadline>b\{color:/,
   'urgent text must also change color for visibility');
+assert.match(app, /title\.ordealHelp='问气机逆乱'/,
+  'the new ordeal investigation should have an explicit prompt title');
+assert.match(app, /description\.ordealHelp='[^']*调查不耗月份，也不锁路线/,
+  'the new ordeal investigation should explain that inspection is free and does not lock a route');
 
 console.log('Deadline UI contract checks passed');
