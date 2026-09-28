@@ -761,3 +761,22 @@ for(const route of ['guard','copyForPay']){let exit=G.create();exit.pending='che
 for(const location of ['temple','cliff','mountain','market','arena'])for(const resourceState of [{},{focus:0,grain:0,silver:0,herbs:0,wounds:5},{focus:8,grain:1,silver:2,herbs:1,wounds:0}]){let state=G.create();state.location=location;Object.assign(state,resourceState);if(state.focus===8)state.progress=G.cap(state);for(const action of G.available(state))if(action.disabled)assert.ok(action.disabledReasons?.length,`${location}/${action.id} is disabled without an explanation`);}
 let lowFocusTrueText=G.create();lowFocusTrueText.pending='trueText';lowFocusTrueText.focus=10;const trueTextOpt=G.options(lowFocusTrueText).find(x=>x.id==='undertake');assert.equal(trueTextOpt.disabled,true);assert.ok(trueTextOpt.disabledReasons.some(x=>x.includes('心神')));
 let lowFocusGu=G.create();lowFocusGu.pending='guFollowup';lowFocusGu.focus=10;const guCompare=G.options(lowFocusGu).find(x=>x.id==='compare');assert.equal(guCompare.disabled,true);assert.ok(guCompare.disabledReasons.some(x=>x.includes('心神')));
+
+test('气机逆乱在元成入真四分之一处触发并阻断功行',()=>{
+ const s=G.create({origin:'scholar',talent:'clarity'});s.stage=3;s.manual=3;s.manuals=[0,3];s.progress=G.NEED[3]*.25-1;s.focus=100;s.grain=20;
+ let n=G.step(s,'action:cultivate',()=>0);assert.equal(n.story.ordeal?.triggered,true);const p=n.progress;
+ n=G.step(n,'action:cultivate',()=>0);assert.equal(n.progress,p);assert.match(n.logs.at(-1).effect,/功行 \+0/);
+});
+test('气机逆乱闭关只消耗一个月且不增长功行',()=>{
+ const s=G.create({});s.stage=3;s.manual=3;s.manuals=[0,3];s.progress=30;s.focus=100;s.grain=20;s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:9};
+ const n=G.step(s,'action:secludeYear',()=>0);assert.equal(n.month,s.month+1);assert.equal(n.progress,s.progress);assert.match(n.logs.at(-1).text,/并非单凭苦修/);
+});
+test('气机逆乱人物调查不锁路线，正式受助后解除',()=>{
+ const s=G.create({});s.stage=3;s.progress=30;s.focus=100;s.grain=20;s.dao=5;s.npcFavor.cheng=3;s.flags.mentor=true;s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:9};
+ let n=G.step(s,'action:ordealHelp',()=>0);assert.equal(n.pending,'ordealHelp');n=G.step(n,'event:back',()=>0);assert.equal(n.story.ordeal.resolved,false);
+ n=G.step(n,'action:ordealHelp',()=>0);n=G.step(n,'event:ordealCheng',()=>0);assert.equal(n.story.ordeal.resolved,true);assert.equal(n.story.ordeal.route,'cheng');
+});
+test('限时破碍修士只在期限内出现',()=>{
+ const s=G.create({});s.stage=3;s.progress=30;s.location='arena';s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:8};s.month=8;
+ assert.ok(G.available(s).some(x=>x.id==='ordealDuel'));s.month=9;assert.ok(!G.available(s).some(x=>x.id==='ordealDuel'));
+});
