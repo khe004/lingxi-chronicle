@@ -55,4 +55,8 @@ test('the single action surface preserves event locks and settles each click onc
   assert.equal(resolved.month, after.month + (choice.id === 'back' ? 0 : 1));
   const repeat = click('action:gather');
   assert.equal(repeat.month, resolved.month + 1, 'a repeat click settles exactly one month');
+  const opened = click('action:manual');
+  assert.equal(opened.month, repeat.month, 'opening a menu is free');
+  assert.equal(opened.pending, 'manual');
+  assert.equal(element('latest-result').hidden, true, 'a free menu does not claim a new result');
 });
