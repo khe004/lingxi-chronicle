@@ -8,11 +8,15 @@ function travel(s,where){return s.location===where?null:`travel:${where}`;}
 function ready(s,id){return G.available(s).some(x=>x.id===id&&!x.disabled);}
 function choice(s,id){return G.options(s).some(x=>x.id===id&&!x.disabled)?`choice:${id}`:null;}
 function command(s,route,policy,buyPill,opening='transition'){
- if(s.combat)return 'combat:withdraw';
+ if(s.combat)return s.combat.storyEncounter==='ordealDuel'?'combat:auto-aggressive':'combat:withdraw';
  if(s.pending){
   const p=s.pending;
   if(p==='stage')return choice(s,'restore')&&s.foundationStrain&&s.wounds===0&&policy==='conservative'?'choice:restore':choice(s,policy==='risky'?'hasty':'patient')||'choice:defer';
   if(p==='attempt')return policy==='risky'?'choice:bold':'choice:steady';
+  if(p==='ordealHelp'){
+   const preference=route==='star'?['ordealGu','ordealYe','ordealCheng']:route==='green'?['ordealYe','ordealGu','ordealCheng']:['ordealCheng','ordealGu','ordealYe'];
+   return preference.map(id=>choice(s,id)).find(Boolean)||'choice:back';
+  }
   if(p==='manual')return (route==='taiwei'&&s.origin!=='scholar'&&s.root<4&&choice(s,'equip-1'))||choice(s,`equip-${route==='star'?4:route==='green'?5:3}`)||choice(s,'equip-1')||choice(s,'equip-2')||choice(s,'equip-6')||'choice:back';
   if(p==='spring')return (route==='star'?choice(s,'hidden'):route==='green'?choice(s,'stone'):choice(s,'sealed'))||'choice:back';
   if(p==='scroll')return 'choice:share';
@@ -35,6 +39,23 @@ function command(s,route,policy,buyPill,opening='transition'){
   if(p.startsWith('scene-'))return 'choice:ignore';
   if(p.startsWith('after-'))return 'choice:back';
   return choice(s,'back')||choice(s,'depart')||choice(s,'ignore');
+ }
+ if(s.story?.ordeal?.triggered&&!s.story.ordeal.resolved){
+  const options=G.options({...s,pending:'ordealHelp'});
+  const preference=route==='star'?['ordealGu','ordealYe','ordealCheng']:route==='green'?['ordealYe','ordealGu','ordealCheng']:['ordealCheng','ordealGu','ordealYe'];
+  const availableHelpers=preference.map(id=>options.find(o=>o.id===id)).filter(Boolean);
+  const helper=availableHelpers.find(o=>!o.disabled);
+  if(helper){const place=helper.id==='ordealCheng'?'temple':helper.id==='ordealGu'?'cliff':'mountain';if(s.location!==place)return travel(s,place);return 'action:ordealHelp';}
+  const stalled=availableHelpers[0];
+  if(stalled){const miss=stalled.requirements?.filter(r=>!r.met).map(r=>r.label)||[];
+   if(miss.includes('心神'))return 'action:rest';
+   if(miss.includes('灵草')){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
+   if(miss.includes('心得')||miss.includes('悟性')){if(s.location!=='cliff')return travel(s,'cliff');return 'action:study';}
+   if(miss.includes('口粮')){if(s.location==='market'&&s.silver>=3)return 'action:buygrain';if(s.location!=='mountain')return travel(s,'mountain');return s.focus<12?'action:rest':'action:gather';}
+   if(miss.includes('程上师好感')&&!s.flags.mentor){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
+  }
+  const visitor=G.available({...s,location:'arena'}).some(o=>o.id==='ordealDuel');
+  if(visitor){if(s.location!=='arena')return travel(s,'arena');return 'action:ordealDuel';}
  }
  const target=route==='star'?4:route==='green'?5:3;
  if(s.grain<(policy==='conservative'?8:4)){if(s.location!=='mountain')return travel(s,'mountain');return s.focus<12?'action:rest':'action:gather';}
@@ -130,7 +151,8 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
  while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
   // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
   if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
-  const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage]);last=c;
+  if(s.location==='arena'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
+  const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage,s.combat?.id,s.combat?.round]);last=c;
   if(c==='choice:steady'||c==='choice:bold'){attemptMonth=s.month;attemptChance=G.chance(s,c==='choice:bold'?'bold':'steady');}
   if(c==='action:buyelixir')pillsBought++;
   const at=s.month;s=G.step(s,c,random);steps++;minGrain=Math.min(minGrain,s.grain);
