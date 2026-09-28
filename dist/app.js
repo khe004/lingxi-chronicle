@@ -30,6 +30,7 @@ const afterStories={
  lu:['陆知衡送来的不是催债帖，而是一册账。你求得真章后，护卷的旧契已经结清；商队却又找出一页散在外面的余卷。他把卷目与两笔价钱摆在桌上，手指压住最末一行。\n\n“契结了，人情没结。我不替你决定这页纸该走哪条路。”','陆知衡的回信写在旧契背面，没有一句寒暄。他记清了上次的银钱、余卷和收卷人，也留下一笔账等你来定。见面时他才说：“先把事讲明，再谈交情。”'],
  cheng:['程上师在书案前翻你校过的旧卷，未立即谈真章。他指了指廊下几个初来善渊观的弟子：有人连第一口气也行不稳。\n\n“我传你法，不等于你欠我一生差事，”他说，“只是他们现在也在门外。你愿意教一程，还是取了酬劳去过自己的关？”','过了些时日，程上师又取出你当年的行气注。廊下弟子已有的各自入了门，有的仍在原处打转。他把一张旧注推给你，没有问你是否后悔，只问你这次怎么看。']
 };
+title.ordealHelp='问气机逆乱';description.ordealHelp='入真之后的修行碍难尚未解除。可以先查看程上师、顾闻溪或叶青蘅的帮助门槛；调查不耗月份，也不锁路线。正式受助耗时两个月并选定该路，也可暂不求助，另寻演武破碍。';
 function promptTitle(s){if(s.pending==='luReturn'&&s.story.luRoute==='fightDelayed')return '陆知衡 · 修复受损散卷';if(s.pending?.startsWith('after-')){const [,who,part]=s.pending.split('-');return ({gu:'顾闻溪 · 星篆误字',ye:'叶青蘅 · 山中药笺',lu:'陆知衡 · 契外余卷',cheng:'程上师 · 传法之后'})[who]+(part==='2'?' · 回音':'');}return s.pending?.startsWith('scene-')?sceneTitle[s.pending.slice(6)]:title[s.pending];}
 function promptDescription(s){if(s.pending==='luReturn'&&s.story.luRoute==='fightDelayed')return '护卷交手失利后，陆知衡带卷脱身，但散卷缺页。赔付银钱或灵草可以修复卷册，契约延期后仍能继续；也可卖出残卷，离开这条路。';if(s.pending?.startsWith('after-')){const [,who,part]=s.pending.split('-');return afterStories[who][Number(part)-1];}return s.pending?.startsWith('scene-')?`${sceneDescription[s.pending.slice(6)]||'山中有事发生。'}刚才的行动已经耗时一月；选择不会再耗月。`:description[s.pending];}
 const intentText={strike:'试探出手 · 下一招为普通攻击',charge:'沉肩蓄势 · 本合不攻击，下合重击',burst:'蓄力重击 · 伤害更高',guard:'守住中门 · 本合护体提高',flow:'引气贯锋 · 将耗内息进招',earthWard:'磐岩镇脉 · 将护身并反击',metalFlash:'霜锋掠影 · 剑招迅疾',vinePounce:'藤影扑击 · 天赋神通将发',paperCut:'裂页断章 · 短刃直取卷册'};
