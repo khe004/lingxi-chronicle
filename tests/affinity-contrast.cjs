@@ -3,7 +3,7 @@
 const assert=require('node:assert/strict');
 const G=require('../dist/engine.js');
 function run(mode){
- let s=G.create({elements:['wood'],polarity:'yang'});s.stage=3;s.manuals.push(3,4,5);
+ let s=G.create({elements:['wood'],polarity:'yang'});s.stage=3;s.story.ordeal={triggered:true,resolved:true,route:'test',triggerMonth:0};s.manuals.push(3,4,5);
  Object.assign(s.affinityPoints,{metal:4,fire:4,wood:4,yin:4,yang:4});
  s.grain=500;s.events.nextMonth=999;
  let actions=0;const at={};
