@@ -469,6 +469,20 @@ function legacyRequirementDiagnostics(s,o){
  }
  // State gates that are not simple resources.
  if(o.id==='askMethod'&&eventProgressGain(s,8)<=0)add({label:'本层功行空间',current:'已满',required:'尚可增长',met:false,text:'本层功行已满或当前功法已到本层上限；需先筑元或切换可继续推进的功法'});
+ // The action list uses a few legacy boolean gates. Explain the actual gate
+ // separately from the action's resource cost so the disabled reason is exact.
+ const focusGates={cultivate:18,study:12,gather:12,gatherSeason:12,bodyTonic:16,findFragments:24};
+ if(focusGates[o.id]&&s.focus<focusGates[o.id])add(resourceRequirement(s,'focus',focusGates[o.id]));
+ if(o.id==='gatherSeason'&&s.grain===0&&s.focus<12)add({label:'口粮与心神',current:`口粮 ${s.grain}、心神 ${s.focus}`,required:'至少一项可支撑采药',met:false,text:'口粮已尽且心神不足 12，先静养或补充口粮再连采'});
+ if(o.id==='bodyTonic'&&s.herbs<2)add(resourceRequirement(s,'herbs',2));
+ if(o.id==='findFragments'&&s.focus<24)add(resourceRequirement(s,'focus',24));
+ if(['learn-novice','learn-keeper','learn-swift'].includes(o.id))for(const miss of techniqueMissing(s,o.id.slice(6)))add({label:'研习条件',current:'未满足',required:'满足功法与兵器契合',met:false,text:miss});
+ if(o.id?.startsWith('kit-')&&o.disabled&&!s.trainingGear?.[o.id.slice(4)]){const slot={'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[o.id.slice(4)];for(const miss of affinityMissing(s,EQUIPMENT[slot]?.[1]||{}))add({label:'试器契合',current:'不足',required:'属性契合',met:false,text:miss});}
+ if(o.id==='patient'&&s.grain<3)add(resourceRequirement(s,'grain',3));
+ if(o.id==='hasty'&&s.progress<cap(s))add(progressSpaceRequirement(s));
+ if(o.id==='heal'&&s.silver<5)add(resourceRequirement(s,'silver',5));
+ if(o.id==='buyelixir'&&s.silver<10)add(resourceRequirement(s,'silver',10));
+ if(o.id==='attempt'&&s.stage===3){if(s.progress<cap(s))add(progressSpaceRequirement(s,1));if(!s.spring)add({label:'华池',current:0,required:1,met:false,text:'尚未取得开脉所需华池'});if(s.focus<50)add(resourceRequirement(s,'focus',50));if(s.grain<2)add(resourceRequirement(s,'grain',2));if(s.wounds>=4)add({label:'暗伤',current:s.wounds,required:'低于 4',met:false,text:`暗伤 ${s.wounds} / 4，需先疗伤`});}
  if(o.id==='secludeYear'&&s.progress>=cap(s))add({label:'本层功行',current:s.progress,required:'低于当前上限',met:false,text:`本层功行 ${s.progress} / ${cap(s)}，已到当前上限`});
  if(o.id==='cultivate'&&s.progress>=cap(s))add({label:'本层功行',current:s.progress,required:'低于当前上限',met:false,text:`本层功行 ${s.progress} / ${cap(s)}，已到当前上限`});
  if(o.id==='secludeYear'&&(s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4))add({label:'闭关风险',current:s.lifeLimitMonths-s.ageMonths<=12?'寿限不足一年':`暗伤 ${s.wounds}`,required:'可安全长期闭关',met:false,text:s.lifeLimitMonths-s.ageMonths<=12?'距本章寿限不足一年，请逐月行动':`暗伤 ${s.wounds} / 4，暗伤过重，请逐月行动`});
@@ -554,7 +568,7 @@ function rawOptions(s){
  if(s.pending==='attempt')return [{id:'steady',label:`守正开脉 · 成功率 ${chance(s)}%`,detail:'一月、口粮 1、心神 −35；失败即终局'},{id:'bold',label:`强求上品 · 成功率 ${chance(s,'bold')}%`,detail:'一月、口粮 1、心神 −35；提高冲出高品与大幅掉档的机会，失败即终局'},{id:'back',label:'再准备一番',detail:'不耗月份与资源'}];
  return [];
 }
-function available(s){if(s.ending||s.pending||s.combat)return [];
+function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
  if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':' · 首胜另有奖励'}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
  const batchRisk=s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4;
  const base=[{id:'secludeYear',label:'闭关修炼',detail:batchRisk?'已接近本章期限或暗伤过重，请逐月决定行动':'自动逐月结算，至多一年；满额、事件、缺粮或危险即停；后山可采药补给',disabled:s.progress>=cap(s)||batchRisk},{id:'cultivate',label:'吐纳修炼',detail:`一月、口粮 1、心神 −22 · 功行约 +${cultivationGain(s)}，本层上限 ${cap(s)}`,disabled:s.focus<18||s.progress>=cap(s)},{id:'manual',label:'切换功法',detail:`不耗月份 · 已得 ${s.manuals.length} 门，本层上限随之变化`},{id:'rest',label:'静养调息',detail:`一月、口粮 1 · 心神约 +${48+(effectiveBody(s)-3)*4+(s.talent==='vitality'?12:0)}、暗伤 −${effectiveBody(s)>=5?2:1}`}];
@@ -598,6 +612,7 @@ function available(s){if(s.ending||s.pending||s.combat)return [];
  if(s.location==='market')return base.filter(a=>!['secludeYear','cultivate','manual','rest'].includes(a.id));
  return base;
 }
+function available(s){return rawAvailable(s).map(o=>legacyRequirementDiagnostics(s,o));}
 function options(s){return rawOptions(s).map(o=>legacyRequirementDiagnostics(s,o));}
 function batchCultivate(initial,limit,rng){let s=initial,trained=0,rested=0,gathered=0,reason='约定的闭关期限已满';
  const start={month:s.month,progress:s.progress,root:s.root,wit:s.wit,body:s.body,dao:s.dao,grain:s.grain,herbs:s.herbs,affinity:{...points(s)}};
