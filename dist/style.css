@@ -118,3 +118,69 @@
  #log{min-height:0}.story-content{overflow:visible}
  .history-more{min-height:44px}
 }
+
+/* Acceptance pass: one action surface and compact status at every width. */
+.ui-redesign{grid-template-columns:270px minmax(0,1fr);gap:24px}
+.ui-redesign .status{grid-column:1;grid-row:1;min-height:0}
+.ui-redesign .narrative{grid-column:2;grid-row:1;min-height:0}
+.ui-redesign .status .base-attributes,.ui-redesign .status #wit-study,.ui-redesign .status .prep,.ui-redesign .status #relations-block,.ui-redesign .status .small-print,.ui-redesign .status .status-affinity p{display:none}
+.ui-redesign .status .status-affinity{font-size:13px;line-height:1.6}
+.ui-redesign .status .status-affinity .affinity-levels>div{display:flex;flex-wrap:wrap;gap:4px 8px}
+.ui-redesign .status .status-affinity .affinity-levels span{white-space:nowrap}
+.ui-redesign .status .status-affinity .affinity-levels h3{font-size:13px;margin:10px 0 3px}
+.sidebar-core-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:15px 0}
+.sidebar-core-resources span,.compact-extra span{background:#20372f;border:1px solid #587060;padding:7px 8px;color:#c7d6c8;font-size:14px}
+.sidebar-core-resources b,.compact-extra b{color:#ead3a5}
+.ui-redesign .mobile-actions{display:block;margin:12px 0}
+.ui-redesign .mobile-location{display:flex;position:relative;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 14px}
+.ui-redesign .mobile-location>div{display:flex;flex-direction:column;min-width:0}
+.ui-redesign .mobile-location strong{overflow-wrap:anywhere}
+.ui-redesign .mobile-travel-list{position:absolute;top:100%;right:0;z-index:20;display:grid;gap:7px;width:min(360px,100%);padding:10px;background:#132324;border:1px solid #806e4d;box-shadow:0 12px 30px #0007}
+.ui-redesign .mobile-travel-list button{min-height:44px;background:#263f34;color:#e6e6da;border:1px solid #637a68}
+.compact-extra{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 12px}
+.compact-extra span{min-width:105px}
+.ui-redesign .action-group-items{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ui-redesign .action,.ui-redesign .prompt-options button{min-height:52px;font-size:15px;line-height:1.55}
+.ui-redesign .action:disabled,.ui-redesign .prompt-options button:disabled{opacity:1;color:#d4dcd1;background:#25352e;border-color:#617565;cursor:not-allowed}
+.ui-redesign .action:disabled small,.ui-redesign .prompt-options button:disabled small{color:#bfcdbf}
+.ui-redesign .requirement-list{font-size:13px}
+.ui-redesign .latest-result{min-height:72px}
+.ui-redesign .latest-result small{display:block;color:#cfddcd;font-size:13px;line-height:1.5;margin-top:5px}
+.ui-redesign .event-prompt,.ui-redesign .mobile-actions>h2{scroll-margin-top:88px}
+.ui-redesign .event-prompt:focus,.ui-redesign .mobile-actions>h2:focus{outline:2px solid #dec18a;outline-offset:3px}
+.ui-redesign .status-affinity .affinity-visual{max-width:240px;margin:12px auto}
+.ui-redesign .books-content .status-affinity{max-width:430px;margin:16px auto}
+.ui-redesign .books-content .status-affinity .affinity-visual{max-width:280px}
+.ui-redesign .primary-tabs{position:sticky;top:0;z-index:15}
+.ui-redesign .collection-tabs{position:relative}
+.ui-redesign .narrative,.ui-redesign .story-content,.ui-redesign .books-content{overflow-wrap:anywhere}
+@media(max-width:1023px){
+ .ui-redesign{display:block;margin:12px auto}
+ .ui-redesign .status{display:none}
+ .ui-redesign .narrative{width:100%;min-height:0}
+ .ui-redesign .mobile-status-strip{display:block;position:sticky;top:0;z-index:11;margin:-20px -27px 10px;padding:8px 14px;background:#101b1c;border-bottom:1px solid #63745d}
+ .ui-redesign .compact-head{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12px;line-height:1.4}
+ .ui-redesign .compact-head span{min-width:0;overflow-wrap:anywhere}
+ .ui-redesign .compact-head button{min-width:44px;min-height:44px;background:none;border:1px solid #827356;color:#ead2a3}
+ .ui-redesign .compact-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:3px;font-size:13px}
+ .ui-redesign .compact-values span{white-space:nowrap}
+ .ui-redesign .compact-values b{color:#ead3a5}
+}
+@media(max-width:767px){
+ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+ .ui-redesign{padding:0 10px}
+ .ui-redesign .narrative{padding:12px 4px}
+ .ui-redesign .mobile-status-strip{margin:-12px -4px 10px;padding:7px 8px}
+ .ui-redesign .compact-head{gap:4px;font-size:11px}
+ .ui-redesign .compact-values{font-size:13px}
+ .ui-redesign .mobile-travel-list{left:0;right:0;width:auto}
+ .ui-redesign .action-group-items{grid-template-columns:1fr}
+ .ui-redesign .primary-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+ .ui-redesign .primary-tabs button{min-width:0;min-height:48px;padding:8px 2px;font-size:14px}
+ .ui-redesign .collection-tabs{position:sticky;top:81px;z-index:12}
+ .ui-redesign .event-prompt,.ui-redesign .mobile-actions>h2{scroll-margin-top:94px}
+ .ui-redesign .action,.ui-redesign .prompt-options button{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){.ui-redesign .meter>span{transition:none}}
+#mobile-restart{display:none}
+@media(max-width:767px){#mobile-restart{display:block;min-height:44px;margin:18px 0 8px;color:#e7cda3}}
