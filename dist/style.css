@@ -193,9 +193,11 @@
 .ui-redesign .book>ul{margin-top:18px}
 @media(max-width:767px){
  .ui-redesign .mobile-status-strip{margin-left:-15px;margin-right:-15px;padding-left:14px;padding-right:14px}
- .ui-redesign .compact-head{display:flex;width:100%;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;text-align:center}
- .ui-redesign .compact-head span,.ui-redesign .compact-values span{text-align:center}
- .ui-redesign .compact-head span{flex:1 1 0;min-width:0}
+ .ui-redesign .compact-head{display:grid;width:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;font-size:14px}
+ .ui-redesign .compact-head span:first-child{text-align:left}
+ .ui-redesign .compact-head span:nth-child(2){text-align:center}
+ .ui-redesign .compact-head span:last-child{text-align:right}
+ .ui-redesign .compact-values span{text-align:center}
  .ui-redesign .compact-values{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;font-size:12px;text-align:center}
 }
 @media(prefers-reduced-motion:reduce){.ui-redesign .meter>span{transition:none}}
