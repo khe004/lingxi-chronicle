@@ -123,7 +123,7 @@
 .ui-redesign{grid-template-columns:270px minmax(0,1fr);gap:24px}
 .ui-redesign .status{grid-column:1;grid-row:1;min-height:0}
 .ui-redesign .narrative{grid-column:2;grid-row:1;min-height:0}
-.ui-redesign .status .base-attributes,.ui-redesign .status #wit-study,.ui-redesign .status .prep,.ui-redesign .status #relations-block,.ui-redesign .status .small-print,.ui-redesign .status .status-affinity p{display:none}
+.ui-redesign .status #wit-study,.ui-redesign .status #relations-block,.ui-redesign .status .small-print{display:none}
 .ui-redesign .status .status-affinity{font-size:13px;line-height:1.6}
 .ui-redesign .status .status-affinity .affinity-levels>div{display:flex;flex-wrap:wrap;gap:4px 8px}
 .ui-redesign .status .status-affinity .affinity-levels span{white-space:nowrap}
@@ -203,3 +203,103 @@
 @media(prefers-reduced-motion:reduce){.ui-redesign .meter>span{transition:none}}
 #mobile-restart{display:none}
 @media(max-width:767px){#mobile-restart{display:block;min-height:44px;margin:18px 0 8px;color:#e7cda3}}
+
+/* Keep the tablet status strip compact and align the desktop travel control. */
+@media(min-width:768px){
+ .ui-redesign .narrative-head{position:relative}
+ .ui-redesign .location-heading,.ui-redesign .mobile-location{width:100%}
+ .ui-redesign .location-copy{padding-right:92px}
+ .ui-redesign .location-controls{position:absolute;top:58px;right:32px;margin-right:0}
+}
+@media(min-width:768px) and (max-width:1023px){
+ .ui-redesign .compact-head{width:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;font-size:14px;line-height:1.4}
+ .ui-redesign .compact-head span:first-child{text-align:left;white-space:nowrap}
+ .ui-redesign .compact-head span:nth-child(2){text-align:center;white-space:nowrap}
+ .ui-redesign .compact-head span:last-child{text-align:right;white-space:nowrap}
+ .ui-redesign .compact-values{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:4px;font-size:13px}
+ .ui-redesign .compact-values span{flex-direction:row;justify-content:center;align-items:center;gap:3px;white-space:nowrap}
+ .ui-redesign .compact-values b{font-size:14px}
+}
+
+/* Round 2: put decision-critical status first and give outcomes a complete readout. */
+.ui-redesign .status{padding:18px 17px}
+.ui-redesign .status h2{font-size:21px;margin:6px 0 2px}
+.ui-redesign .status .status-body>.data-row{margin:8px 0 5px}
+.ui-redesign .status .realm-row{margin-top:10px}
+.ui-redesign .status .meter{margin:4px 0}
+.ui-redesign .status .chapter-deadline-row{margin:9px 0 11px;padding:5px 7px}
+.ui-redesign .sidebar-core-resources{gap:5px;margin:0 0 13px}
+.ui-redesign .sidebar-core-resources span{padding:6px 7px;font-size:13px}
+.ui-redesign .status .base-attributes{gap:4px 8px;margin:9px 0 4px}
+.ui-redesign .status .base-attributes span{border:0;padding:0;font-size:12px}
+.ui-redesign .status .status-affinity{margin:0}
+.ui-redesign .status .affinity-levels{border:0;background:transparent;padding:0;margin:0}
+.ui-redesign .status .affinity-levels h3{font-size:12px;margin:5px 0 3px}
+.ui-redesign .status .affinity-levels>div{gap:3px 9px;margin:0}
+.ui-redesign .status .affinity-levels span{border:0;padding:0;font-size:12px}
+.ui-redesign .status .affinity-explanation{margin-top:5px;font-size:11px}
+.ui-redesign .status .affinity-explanation>summary{display:inline-block;cursor:pointer;color:#9fb6a5;text-decoration:underline;text-underline-offset:2px}
+.ui-redesign .status .affinity-explanation p{display:block;margin:5px 0 0;color:#b8cdbd;font-size:12px;line-height:1.55}
+.ui-redesign .status .prep{grid-template-columns:1fr;gap:9px}
+.ui-redesign .status .prep>div{gap:2px;font-size:12px}
+.ui-redesign .status .prep b{font-size:13px}
+.ui-redesign .location-heading{flex:1;min-width:0}
+.ui-redesign .narrative-head{align-items:flex-start}
+.ui-redesign .mobile-location{display:flex;position:relative;align-items:flex-start;justify-content:space-between;gap:14px;margin:5px 0 0}
+.ui-redesign .location-copy{flex:1;min-width:0}
+.ui-redesign .location-copy h1{margin:2px 0 5px}
+.ui-redesign .location-controls{position:relative;flex:none;padding-top:5px}
+.ui-redesign .location-controls>button{min-width:72px;min-height:40px;border:1px solid #647865;background:#20372f;color:#d6e1d5}
+.ui-redesign .mobile-travel-list{position:absolute;top:calc(100% + 5px);right:0;left:auto;z-index:24;width:min(420px,calc(100vw - 32px));max-width:420px;padding:10px;background:#132324;border:1px solid rgba(190,160,95,.4);box-shadow:0 12px 30px #0008}
+.ui-redesign .latest-result{display:block;min-height:72px;margin:10px 0 15px;padding:12px 14px}
+.ui-redesign .latest-result-story{margin:6px 0 8px;color:#e7e3d4;font:15px/1.75 'Noto Serif SC',serif;white-space:pre-line}
+.ui-redesign .latest-result-highlights{display:flex;flex-wrap:wrap;gap:5px 8px;margin:7px 0;color:#f0d9a6;font-size:14px;line-height:1.6}
+.ui-redesign .latest-result-highlights span{padding:2px 6px;background:rgba(169,138,77,.12);border:1px solid rgba(169,138,77,.28)}
+.ui-redesign .latest-result-resources{margin:5px 0;color:#c5d2c3;font-size:13px;line-height:1.6}
+.ui-redesign .latest-result-meta{display:block;margin-top:6px;color:#97ad9b;font-size:12px;line-height:1.55}
+.ui-redesign .event-load-error{margin-top:14px;padding:12px;border:1px solid #8a674e;background:#362c25}
+.ui-redesign .event-load-error p{margin:0 0 10px}
+.ui-redesign .event-load-error button{min-height:44px}
+@media(max-width:767px){
+ .ui-redesign .location-controls{position:relative;top:auto;right:auto}
+ .ui-redesign .narrative-head{display:block;padding:8px 4px 12px;border:0}
+ .ui-redesign .narrative-head #date,.ui-redesign .narrative-head #restart{display:none}
+ .ui-redesign .mobile-location{margin:0;gap:8px}
+ .ui-redesign .location-copy h1{font-size:21px;margin:0 0 5px}
+ .ui-redesign .location-copy .subtle{font-size:13px;line-height:1.55}
+ .ui-redesign .location-controls{padding-top:0}
+ .ui-redesign .location-controls>button{min-width:66px;min-height:44px;padding:6px}
+ .ui-redesign .mobile-travel-list{width:min(360px,calc(100vw - 28px));}
+ .ui-redesign .status .base-attributes{gap:4px 9px}
+ .ui-redesign .status .base-attributes span{font-size:11px}
+ .ui-redesign .latest-result{margin:9px 0 13px;padding:11px 12px}
+ .ui-redesign .latest-result-story{font-size:14px;line-height:1.7}
+ .ui-redesign .latest-result-highlights{font-size:13px}
+ .ui-redesign .event-load-error button{width:100%}
+}
+
+@media(min-width:768px){
+ .ui-redesign .mobile-location{position:static}
+ .ui-redesign .location-controls{position:absolute;top:58px;right:27px}
+}
+@media(max-width:767px){
+ .ui-redesign .compact-values{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;width:100%}
+ .ui-redesign .compact-values span{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:2px;min-width:0;white-space:nowrap;font-size:11px}
+ .ui-redesign .compact-values b{font-size:12px}
+}
+@media(max-width:1023px){
+ body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+ .ui-redesign .primary-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#101b1c;border-top:1px solid rgba(190,160,95,.28)}
+ .ui-redesign .primary-tabs button{min-width:0;min-height:48px;padding:8px 2px;font-size:14px}
+ .ui-redesign .compact-values{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%}
+ .ui-redesign .compact-values span{display:flex;flex:0 0 auto;flex-direction:row;align-items:center;gap:3px;min-width:0;white-space:nowrap;font-size:11px}
+ .ui-redesign .compact-values b{font-size:12px}
+}
+.ui-redesign .collection-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:10px 0}
+.ui-redesign .collection-tabs button{width:100%;min-width:0;text-align:center;padding:9px 5px}
+@media(max-width:767px){
+ .ui-redesign .collection-tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px 0}
+ .ui-redesign .collection-tabs button{grid-column:span 2;font-size:12px;padding:8px 4px}
+ .ui-redesign .collection-tabs button:nth-child(4){grid-column:2 / span 2}
+ .ui-redesign .collection-tabs button:nth-child(5){grid-column:4 / span 2}
+}
