@@ -463,7 +463,7 @@ function canNurtureVein(s){return (s.practice[1]||0)>=10||(s.practice[2]||0)>=6|
 function practiceRequirementText(s,requirements){return Object.entries(requirements).map(([manual,need])=>`${ITEMS.manual[manual].name}实修 ${Math.min(s.practice[manual]||0,need)} / ${need} 次`).join('；');}
 const REQUIREMENT_LABELS={silver:'银钱',grain:'口粮',herbs:'灵草',focus:'心神',wounds:'暗伤',insight:'研读经历',root:'根骨',wit:'悟性',body:'体魄',dao:'道心',social:'处世',strain:'元基裂隙'};
 function requirement(label,current,required,mode='min'){const met=mode==='max'?current<=required:current>=required;return {label,current,required,mode,met,text:mode==='max'?`${label} ${current} / ≤${required}`:`${label} ${current} / ${required}`};}
-function resourceRequirement(s,key,required){const current=key==='strain'?(s.foundationStrain||0):(s[key]||0);return requirement(REQUIREMENT_LABELS[key]||key,current,required);}
+function resourceRequirement(s,key,required){const current=key==='strain'?(s.foundationStrain||0):key==='insight'?(s.story?.scriptureReads||0):(s[key]||0);return requirement(REQUIREMENT_LABELS[key]||key,current,required);}
 function practiceAnyRequirement(s,requirements,label='前置实修'){const parts=Object.entries(requirements).map(([manual,need])=>({manual:Number(manual),need,current:s.practice[manual]||0}));return {label,current:Math.max(...parts.map(p=>p.current)),required:Math.min(...parts.map(p=>p.need)),met:parts.some(p=>p.current>=p.need),text:`${label}（择一）：${parts.map(p=>`${ITEMS.manual[p.manual].name} ${Math.min(p.current,p.need)} / ${p.need}`).join('；')}`};}
 function withRequirements(option,requirements=[]){option.requirements=requirements;option.disabled=requirements.some(r=>!r.met);option.disabledReasons=requirements.filter(r=>!r.met).map(r=>r.text);return option;}
 function flagRequirement(label,met,missingText){return {label,current:met?'已满足':'未满足',required:'已满足',met,text:met?label:missingText};}
@@ -571,7 +571,7 @@ function rawOptions(s){
   };return [...choices[who],back];
  }
  if(s.pending==='seclusion')return [{id:'three',label:'闭关三个月',detail:'最多三个月；每月按当前功法修炼，心神不足先静养'},{id:'six',label:'闭关半年',detail:'最多六个月；后山缺粮时先采药补给'},{id:'twelve',label:'闭关一年',detail:'最多十二个月；遇事件、筑元关口或危险立即出关'},{id:'back',label:'暂不闭关',detail:'不耗月份与资源'}];
- if(s.pending==='scroll')return [{id:'share',label:'如实解读，并与同门分享',detail:'一月、口粮 1；银钱 +2，结交顾闻溪与程上师'},{id:'hide',label:'留下关键一页，独自参详',detail:'一月、口粮 1；研读经历 +2，顾闻溪好感 −1'},{id:'selltext',label:'卖给抄书人，换取资粮',detail:'一月、口粮 1；银钱 +7，顾闻溪好感 −1'}];
+ if(s.pending==='scroll')return [{id:'share',label:'如实解读，并与同门分享',detail:'一月、口粮 1；银钱 +2，结交顾闻溪与程上师'},{id:'hide',label:'留下关键一页，独自参详',detail:'一月、口粮 1；蚀文研读 +1，顾闻溪好感 −1'},{id:'selltext',label:'卖给抄书人，换取资粮',detail:'一月、口粮 1；银钱 +7，顾闻溪好感 −1'}];
  if(s.pending==='herbalist')return [{id:'help',label:'分出一株灵草救人',detail:'一月、口粮 1、灵草 −1；叶青蘅好感 +2、程上师好感 +1',disabled:s.herbs<1},{id:'trade',label:'索取八两报酬再指路',detail:'一月、口粮 1；银钱 +8、叶青蘅好感 −1'},{id:'leave',label:'绕道独行',detail:'不另耗月份、口粮与灵草；保留独自探路的可能'}];
  if(s.pending==='yeFollowup'){
   const route=s.story.yeRoute;
@@ -581,7 +581,7 @@ function rawOptions(s){
  }
  if(s.pending==='trueText')return [withRequirements({id:'undertake',label:'应下校卷之约',detail:'一月、口粮 1、心神 −20；完成后方能向上师求取秘传真章'},[resourceRequirement(s,'focus',20)]),{id:'defer',label:'暂且告退',detail:'不耗月份；半年后可再来商谈'}];
  if(s.pending==='guFollowup')return [withRequirements({id:'compare',label:'与顾闻溪对读残卷',detail:'一月、口粮 1、心神 −16；顾好感 +1'},[resourceRequirement(s,'focus',16)]),{id:'commission',label:'替她向书商交稿',detail:'一月、口粮 1；银钱 +8；顾好感不变'},{id:'decline',label:'留心自己的修行',detail:'不耗时间，顾闻溪会记住你这次的决定'}];
- if(s.pending==='guReturn')return s.story.guRoute==='compare'?[{id:'joint',label:'合力校定泉脉注解',detail:'一月、口粮 1、心神 −18；顾好感 +1，寻泉费用少 1',disabled:s.focus<18},{id:'private',label:'只借旧注自参',detail:'不耗月份；研读经历 +1，顾好感 −1，不取得寻泉线索'}]:[{id:'copy',label:'誊录书商带来的药方',detail:'一月、口粮 1；灵草 +2，顾好感 +1'},{id:'wage',label:'帮书商跑一趟山路',detail:'一月、口粮 1；银钱 +6，不取得药方'}];
+ if(s.pending==='guReturn')return s.story.guRoute==='compare'?[{id:'joint',label:'合力校定泉脉注解',detail:'一月、口粮 1、心神 −18；顾好感 +1，寻泉费用少 1',disabled:s.focus<18},{id:'private',label:'只借旧注自参',detail:'不耗月份；蚀文研读 +1，顾好感 −1，不取得寻泉线索'}]:[{id:'copy',label:'誊录书商带来的药方',detail:'一月、口粮 1；灵草 +2，顾好感 +1'},{id:'wage',label:'帮书商跑一趟山路',detail:'一月、口粮 1；银钱 +6，不取得药方'}];
  if(s.pending==='chengFollowup')return [withRequirements({id:'guard',label:'替上师守一夜藏书阁',detail:'一月、口粮 1、心神 −20；程好感 +1、道心 +1'},[resourceRequirement(s,'focus',20)]),{id:'copyForPay',label:'替上师抄卷换资粮',detail:'一月、口粮 1；银钱 +8，不增加好感'},{id:'pass',label:'婉拒这份差事',detail:'不耗月份；此后仍可正常求法'}];
  if(s.pending==='chengReturn'){const leave={id:'back',label:'暂且告退',detail:'不耗月份、不改变关系；这桩旧事以后仍可再谈'};if(s.story.chengRoute==='guard'){const gain=eventProgressGain(s,8);return [withRequirements({id:'askMethod',label:'再请教行气疑难',detail:`一月、口粮 1、心神 −18；本层功行 +${gain}，程好感 +1`},[resourceRequirement(s,'focus',18),progressSpaceRequirement(s,8)]),{id:'askSupply',label:'领一份闭关资粮',detail:'不耗月份；口粮 +5、程好感 −1'},leave];}return [{id:'settle',label:'结清抄卷酬劳',detail:'不耗月份；银钱 +5，程好感 −1'},{id:'gift',label:'留下抄卷作人情',detail:'不耗月份；程好感 +1，放弃酬劳'},leave];}
  if(s.pending?.startsWith('scene-')){
@@ -760,7 +760,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
    };
    const [delta,person,favorChange,line]=outcomes[id];add(s,delta);if(favorChange)favor(s,person,favorChange);
    if(part==='1'){record.first=id;record.month=s.month;}else record.second=id;
-   note(s,line,part==='1'?'抉择':'人情',Object.entries(delta).map(([key,val])=>`${{focus:'心神',insight:'研读经历',herbs:'灵草',wounds:'暗伤',silver:'银钱',dao:'道心',grain:'口粮'}[key]} ${val>0?'+':''}${val}`).concat(favorChange?`${{gu:'顾闻溪',ye:'叶青蘅',lu:'陆知衡',cheng:'程上师'}[person]} ${favorChange>0?'+':''}${favorChange}`:[]).join(' · '));
+   note(s,line,part==='1'?'抉择':'人情',Object.entries(delta).filter(([key])=>key!=='insight').map(([key,val])=>`${{focus:'心神',herbs:'灵草',wounds:'暗伤',silver:'银钱',dao:'道心',grain:'口粮'}[key]} ${val>0?'+':''}${val}`).concat(favorChange?`${{gu:'顾闻溪',ye:'叶青蘅',lu:'陆知衡',cheng:'程上师'}[person]} ${favorChange>0?'+':''}${favorChange}`:[]).join(' · '));
    if(new Set(['publish','reserve','treat','keep','honor','broker','teach','annotate','correct','visit','remedy','defend','guide','lecture']).has(id))turn(s);
    return s;
   }
@@ -838,14 +838,14 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   }
   if(event==='guFollowup'){
    s.story.guRoute=id;s.story.guMonth=s.month;
-   if(id==='compare'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{focus:-16});favor(s,'gu',1);note(s,`${s.story.guFirst==='hide'?'顾闻溪记得你曾私藏关键一页，校卷时仍留了三分谨慎。':s.story.guFirst==='selltext'?'顾闻溪知道你曾卖过释文，这次请你把每一行来历说清。':'顾闻溪记得你分享残卷时的坦诚。'}你们对读旧页，校出一段新的行气注解。`,'人情','研读经历 +2 · 顾闻溪 +1');turn(s);}
+   if(id==='compare'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{focus:-16});favor(s,'gu',1);note(s,`${s.story.guFirst==='hide'?'顾闻溪记得你曾私藏关键一页，校卷时仍留了三分谨慎。':s.story.guFirst==='selltext'?'顾闻溪知道你曾卖过释文，这次请你把每一行来历说清。':'顾闻溪记得你分享残卷时的坦诚。'}你们对读旧页，校出一段新的行气注解。`,'人情','蚀文研读 +1 · 顾闻溪 +1');turn(s);}
    if(id==='commission'){add(s,{silver:8});note(s,`${s.story.guFirst==='selltext'?'顾闻溪记得你熟悉书商，这回索性托你去交稿。':'顾闻溪请你把修订稿交给山下书商。'}你换得一笔酬劳，也把两家的生意搭上了线。`,'抉择','银钱 +8');turn(s);}
    if(id==='decline')note(s,'你谢绝顾闻溪的邀约，保留时间打磨自己的功行。她记下了你的选择。','抉择');
   }
   if(event==='guReturn'){
    s.story.guReturn=id;
-   if(id==='joint'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{focus:-18});favor(s,'gu',1);s.story.guSpringDiscount=true;note(s,'顾闻溪带来新校的泉脉旧注。你们合力辨清一处错标，寻访深谷泉时可少花一两。','人情','研读经历 +1 · 顾闻溪 +1 · 寻泉少花 1 银');turn(s);}
-   if(id==='private'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;favor(s,'gu',-1);note(s,'你借顾闻溪的旧注自行参悟，没有把所得再告知她。','抉择','研读经历 +1 · 顾闻溪 −1');}
+   if(id==='joint'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{focus:-18});favor(s,'gu',1);s.story.guSpringDiscount=true;note(s,'顾闻溪带来新校的泉脉旧注。你们合力辨清一处错标，寻访深谷泉时可少花一两。','人情','蚀文研读 +1 · 顾闻溪 +1 · 寻泉少花 1 银');turn(s);}
+   if(id==='private'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;favor(s,'gu',-1);note(s,'你借顾闻溪的旧注自行参悟，没有把所得再告知她。','抉择','蚀文研读 +1 · 顾闻溪 −1');}
    if(id==='copy'){add(s,{herbs:2});favor(s,'gu',1);note(s,'山下书商寄来一纸药方，顾闻溪请你誊录，你顺带辨出两株草药。','人情','灵草 +2 · 顾闻溪 +1');turn(s);}
    if(id==='wage'){add(s,{silver:6});note(s,'你替书商送回誊好的旧卷，带着酬金回山，药方留给了顾闻溪。','抉择','银钱 +6');turn(s);}
   }
