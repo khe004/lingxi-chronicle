@@ -72,7 +72,8 @@ assert.equal(springVisitor.affinityPoints.water,1);assert.equal(springVisitor.lo
 let fullWater=G.create({elements:['water']});fullWater.affinityPoints.water=6;fullWater=run(fullWater,'travel:mountain');
 assert.equal(fullWater.affinityPoints.water,6);assert.equal(fullWater.logs.at(-1).effect,'水亲和已满');
 let blocked=G.create({elements:['fire'],polarity:'yin'});blocked.manuals.push(2);blocked.pending='manual';
-assert.equal(G.options(blocked).find(o=>o.id==='equip-2').disabled,true);
+assert.ok(G.options(blocked).some(o=>o.id==='decode-2'));
+assert.ok(!G.options(blocked).some(o=>o.id==='equip-2'));
 blocked=run(blocked,'choice:equip-2');assert.equal(blocked.manual,0);
 let compat=G.create({elements:['water'],polarity:'yin'});compat.stage=2;compat.location='arena';
 assert.deepEqual(G.techniqueMissing(compat,'interrupt'),[]);
@@ -274,7 +275,7 @@ market=run(market,'action:buymax');
 assert.equal(market.grain,G.ORIGINS.merchant.grain+40);assert.equal(market.silver,1);assert.equal(market.month,0);
 const noFunds=run(market,'action:buymax');assert.equal(noFunds.silver,market.silver);
 let purchase=G.create({origin:'merchant',elements:['wood']});purchase.location='market';purchase=run(purchase,'action:buymanual');
-assert.equal(purchase.manual,1);assert.equal(purchase.month,0);
+assert.ok(purchase.manuals.includes(1));assert.equal(purchase.manual,0);assert.equal(purchase.month,0);
 let tonic=G.create();tonic.location='market';tonic.silver=16;const beforeTonic=tonic.lifeLimitMonths;
 tonic=run(tonic,'action:buyelixir');assert.equal(tonic.lifeLimitMonths,beforeTonic);assert.equal(tonic.elixirBoost,6);assert.equal(tonic.month,0);
 let harvest=G.create({origin:'herbalist'});harvest.location='mountain';harvest.flags.herbalist=true;harvest.grain=2;
@@ -317,7 +318,8 @@ const readTimes=n=>{for(let i=0;i<n;i++){
 const beforeStudy=G.cultivationGain(scholarOfScriptures);
 readTimes(2);assert.equal(scholarOfScriptures.wit,3);
 assert.equal(scholarOfScriptures.studyWork,0);
-assert.ok(G.cultivationGain(scholarOfScriptures)>beforeStudy);
+assert.equal(G.cultivationGain(scholarOfScriptures),beforeStudy);
+assert.ok(G.decodeNeed(scholarOfScriptures,4)<G.decodeNeed({...scholarOfScriptures,wit:2},4));
 readTimes(3);assert.equal(scholarOfScriptures.wit,4);
 readTimes(5);assert.equal(scholarOfScriptures.wit,4);
 assert.equal(scholarOfScriptures.studyWork,5);
@@ -393,12 +395,17 @@ s=run(s,'travel:mountain');s=run(s,'action:gather');
 s=run(s,'travel:market');s=run(s,'action:sellherb');
 assert.ok(s.silver>=12);
 s=run(s,'action:buymanual');
+assert.ok(s.manuals.includes(1));assert.equal(s.manual,0);
+s=run(s,'travel:temple');s=run(s,'action:manual');
+while(!G.manualDecoded(s,1)){if(s.focus<12){s=run(s,'choice:back');s=run(s,'action:rest');s=run(s,'action:manual');}s=run(s,'choice:decode-1');}
+s=run(s,'action:manual');
+s=run(s,'choice:equip-1');
 assert.equal(s.manual,1);
 assert.equal(G.cap(s),48);
 assert.ok(s.lifeLimitMonths===limit);
 const availableBefore=s.progress;
 s=run(s,'action:manual');s=run(s,'choice:equip-0');
-assert.equal(G.cap(s),48);
+assert.equal(G.cap(s),36);
 assert.equal(s.progress,availableBefore);
 s=run(s,'action:manual');s=run(s,'choice:equip-1');
 s.ageMonths=0; // Legacy scripted route fixture isolates acquisition gates from v2.43 chapter deadline.
@@ -416,17 +423,28 @@ function practiceUntil(predicate){for(let i=0;i<650&&!predicate()&&!s.ending;i++
 practiceUntil(()=>s.root>=3);
 assert.ok(s.practice[1]>=16);
 s=run(s,'travel:temple');s=run(s,'action:mentor');
+if(!s.flags.mentor){s=run(s,'choice:serve');s=run(s,'action:mentor');}
 assert.ok(G.options(s).find(x=>x.id==='guidance').disabled===false);
 assert.equal(G.options(s).some(x=>x.id==='raretext'),false);
 s=run(s,'choice:guidance');
-assert.equal(s.manual,2);
+assert.ok(s.manuals.includes(2));assert.equal(s.manual,1);
+s=run(s,'action:manual');for(let i=0;!G.manualDecoded(s,2)&&i<30;i++){
+ if(s.pending?.startsWith('scene-'))s=run(s,'choice:ignore');
+ if(s.pending==='manual'&&(s.focus<20||s.grain<3))s=run(s,'choice:back');
+ if(!s.pending&&s.grain<3){s=run(s,'travel:mountain');s=run(s,'action:gather');s=run(s,'travel:temple');}
+ if(!s.pending&&s.focus<20)s=run(s,'action:rest');
+ if(!s.pending)s=run(s,'action:manual');
+ if(s.pending==='manual')s=run(s,'choice:decode-2');
+}
+assert.ok(G.manualDecoded(s,2),JSON.stringify({month:s.month,pending:s.pending,location:s.location,focus:s.focus,grain:s.grain,ending:s.ending,decode:s.decodeWork,options:G.options(s)}));
+s=run(s,'action:manual');s=run(s,'choice:equip-2');assert.equal(s.manual,2);
 assert.equal(G.cap(s),72);
 practiceUntil(()=>s.root>=4&&s.dao>=4);
 assert.ok(s.practice[2]>=14);
 s=run(s,'travel:temple');s=run(s,'action:mentor');s=run(s,'choice:serve');
 assert.equal(s.npcFavor.cheng,3);
 practiceUntil(()=>s.herbs>=2);
-if(s.focus<20)s=run(s,'action:rest');
+if(s.focus<20)s=run(s,'action:rest');s.focus=100;
 if(s.pending?.startsWith('scene-'))s=run(s,'choice:ignore');
 s=run(s,'travel:temple');s=run(s,'action:mentor');
 assert.equal(s.pending,'trueText');
@@ -436,7 +454,8 @@ assert.equal(s.story.trueTextReady,true);
 s=run(s,'action:mentor');
 assert.equal(G.options(s).find(x=>x.id==='raretext').disabled,false);
 s=run(s,'choice:raretext');
-assert.equal(s.manual,3);
+assert.ok(s.manuals.includes(3));assert.equal(s.manual,2);
+s.decodedManuals.push(3);s=run(s,'action:manual');s=run(s,'choice:equip-3');assert.equal(s.manual,3);
 assert.equal(G.cap(s),96);
 assert.ok(s.month<180,'high manual should be obtainable before the first breakthrough');
 // The manual active at each breakthrough is recorded and changes foundation grade.
@@ -539,29 +558,29 @@ assert.equal(continued.wit,6);
 assert.equal(continued.progress,12.5);
 assert.equal(continued.studyWork,0);
 // Each origin can reach a different immortal method, and the new pools have separate entry costs.
-let star=G.create({origin:'scholar'});star.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));star.flags.scroll=true;star.npcFavor.gu=2;star.insight=8;star.root=4;star.wit=5;star.practice[1]=8;star.grain=30;star.location='cliff';
+let star=G.create({origin:'scholar'});star.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));star.flags.scroll=true;star.npcFavor.gu=2;star.story.scriptureReads=8;star.root=4;star.wit=5;star.practice[1]=8;star.grain=30;star.location='cliff';
 star=run(star,'action:guText');star=run(star,'choice:collaborate');
 star=run(star,'travel:market');star.silver=6;star=run(star,'action:buyFragments');star=run(star,'travel:temple');
 for(let i=0;i<3;i++)star=run(star,'action:rest',1);
 star=run(star,'travel:cliff');star=run(star,'action:guFinish');star=run(star,'choice:verify');
-assert.equal(star.manualId,'star-script');assert.ok(star.manuals.includes(4));assert.equal(G.cap(star),66);
-let green=G.create({origin:'herbalist'});green.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));green.location='mountain';green.flags.herbalist=true;green.story.yeRoute='help';green.insight=5;green.wit=3;green.grain=30;green.manuals.push(1);green.manual=1;
+assert.ok(star.manuals.includes(4));assert.equal(star.manualId,'breath');assert.equal(G.cap(star),36);
+let green=G.create({origin:'herbalist'});green.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));green.location='mountain';green.flags.herbalist=true;green.story.yeRoute='help';green.story.scriptureReads=5;green.wit=3;green.grain=30;green.manuals.push(1);green.manual=1;
 for(let i=0;i<10;i++){if(green.focus<18)green=run(green,'action:rest',1);green=run(green,'action:cultivate',1);}
 green=run(green,'action:yeText');green=run(green,'choice:tend');
 green=run(green,'action:gather',1);green=run(green,'action:gather',1);
 green=run(green,'action:rest',1);
 green=run(green,'action:yeFinish');green=run(green,'choice:healVein');
-assert.equal(green.manualId,'green-vein');assert.equal(green.story.yeHerbWork,2);
+assert.ok(green.manuals.includes(5));assert.equal(green.manualId,'qingzhuan');assert.equal(green.story.yeHerbWork,2);
 let trader=G.create({origin:'merchant'});trader.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));trader.location='market';trader.grain=40;
-trader=run(trader,'action:luMeet');trader=run(trader,'choice:pledge');assert.equal(trader.manualId,'caravan-script');
-trader.practice[6]=10;trader.insight=7;trader.root=4;trader.wit=4;trader.dao=4;trader.month+=5;trader.silver=9;
+trader=run(trader,'action:luMeet');trader=run(trader,'choice:pledge');assert.ok(trader.manuals.includes(6));assert.equal(trader.manualId,'breath');
+trader.practice[6]=10;trader.story.scriptureReads=7;trader.root=4;trader.wit=4;trader.dao=4;trader.month+=5;trader.silver=9;
 trader=run(trader,'action:luReturn');trader=run(trader,'choice:redeemSilver');
-assert.equal(trader.manualId,'taiwei');assert.equal(trader.story.luCredential,true);
+assert.ok(trader.manuals.includes(3));assert.equal(trader.story.luCredential,true);
 let contracted=G.create({origin:'merchant'});contracted.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));contracted.location='market';contracted.grain=30;
 contracted=run(contracted,'action:luMeet');contracted=run(contracted,'choice:pledge');
 contracted.month=contracted.story.luMonth+18;contracted.practice[6]=18;contracted.insight=7;contracted.wit=4;contracted.silver=8;
 contracted=run(contracted,'action:luReturn');assert.equal(G.options(contracted).find(o=>o.id==='redeemSilver').disabled,false);
-contracted=run(contracted,'choice:redeemSilver');assert.equal(contracted.manualId,'taiwei');assert.equal(contracted.root,3);
+contracted=run(contracted,'choice:redeemSilver');assert.ok(contracted.manuals.includes(3));assert.equal(contracted.manualId,'breath');assert.equal(contracted.root,3);
 let luFight=G.create({origin:'merchant'});luFight.location='market';luFight.grain=30;luFight.story.luHeard=true;luFight=run(luFight,'action:luMeet');assert.ok(G.options(luFight).some(o=>o.id==='fight'));const luMonth=luFight.month;luFight=run(luFight,'choice:fight');assert.equal(luFight.month,luMonth+1);assert.equal(luFight.combat.storyEncounter,'luEscort');luFight.combat.enemy.currentQi=1;luFight=run(luFight,'combat:strike',0);assert.equal(luFight.story.luBattle,'won');assert.equal(luFight.story.luRoute,'fight');assert.ok(luFight.npcFavor.lu>0);assert.ok(luFight.manuals.includes(6));assert.equal(luFight.sparRecord.wins,0);
 let luFightObserved=G.create({origin:'merchant'});luFightObserved.location='market';luFightObserved.grain=30;luFightObserved.story.luHeard=true;luFightObserved=run(luFightObserved,'action:luMeet');luFightObserved=run(luFightObserved,'choice:fight');luFightObserved=run(luFightObserved,'combat:guard',0);assert.equal(luFightObserved.combat.intent,'paperCut');luFightObserved=run(luFightObserved,'combat:guard',0);assert.ok(luFightObserved.codex.combatantNotes.scrollBandit.seenArts.includes('paperCut'));
 let luFightLoss=G.create({origin:'merchant'});luFightLoss.location='market';luFightLoss.grain=30;luFightLoss.story.luHeard=true;luFightLoss=run(luFightLoss,'action:luMeet');luFightLoss=run(luFightLoss,'choice:fight');luFightLoss.combat.player.currentQi=1;luFightLoss.combat.enemy.attack=300;luFightLoss.combat.intent='strike';luFightLoss=run(luFightLoss,'combat:guard',0);assert.equal(luFightLoss.story.luBattle,'lost');assert.equal(luFightLoss.story.luRoute,'fightDelayed');assert.ok(luFightLoss.npcFavor.lu<0);assert.equal(luFightLoss.manuals.includes(6),false);luFightLoss.month+=5;luFightLoss.silver=4;luFightLoss=run(luFightLoss,'action:luReturn');assert.ok(G.options(luFightLoss).some(o=>o.id==='repairScrollSilver'));luFightLoss=run(luFightLoss,'choice:repairScrollSilver');assert.equal(luFightLoss.story.luRoute,'fight');assert.ok(luFightLoss.manuals.includes(6));assert.equal(luFightLoss.story.luPapersDamaged,false);
@@ -599,9 +618,9 @@ overdue.month=overdue.story.luMonth+59;const priorSocial=overdue.social;
 overdue=run(overdue,'action:marketWalk',1);assert.equal(overdue.social,priorSocial-1);assert.equal(overdue.story.luDefaulted,true);
 overdue=run(overdue,'action:marketWalk',1);assert.equal(overdue.social,priorSocial-1);
 // Immortal-method routes now attune their own core affinity instead of sending the player back to grind basic breathing for years.
-let starAttune=G.create({origin:'scholar'});starAttune.affinityPoints.fire=1;starAttune.flags.scroll=true;starAttune.npcFavor.gu=2;starAttune.insight=8;starAttune.root=4;starAttune.wit=5;starAttune.practice[1]=8;starAttune.grain=30;starAttune.location='cliff';starAttune.story.guText='collaborate';starAttune.story.guFragments=true;starAttune.story.guTextMonth=0;starAttune.month=3;starAttune.focus=100;starAttune=run(starAttune,'action:guFinish');starAttune=run(starAttune,'choice:verify');assert.ok(starAttune.affinityPoints.fire>=4);assert.equal(starAttune.manualId,'star-script');
-let taiweiAttune=G.create({origin:'merchant'});taiweiAttune.affinityPoints.metal=1;taiweiAttune.location='market';taiweiAttune.grain=30;taiweiAttune.story.luRoute='pledge';taiweiAttune.story.luMonth=0;taiweiAttune.manuals.push(6);taiweiAttune.manual=6;taiweiAttune.practice[6]=10;taiweiAttune.insight=7;taiweiAttune.root=4;taiweiAttune.wit=4;taiweiAttune.dao=4;taiweiAttune.social=5;taiweiAttune.silver=8;taiweiAttune.month=5;taiweiAttune=run(taiweiAttune,'action:luReturn');taiweiAttune=run(taiweiAttune,'choice:redeemSilver');assert.ok(taiweiAttune.affinityPoints.metal>=4);assert.equal(taiweiAttune.manualId,'taiwei');
-let greenAttune=G.create({origin:'herbalist'});greenAttune.affinityPoints.wood=1;greenAttune.affinityPoints.fire=1;greenAttune.location='mountain';greenAttune.grain=30;greenAttune.story.yeText='tend';greenAttune.story.yeTextMonth=0;greenAttune.story.yeHerbWork=2;greenAttune.month=2;greenAttune.insight=5;greenAttune.root=4;greenAttune.wit=3;greenAttune.body=4;greenAttune.herbs=2;greenAttune.focus=100;greenAttune.practice[1]=10;greenAttune=run(greenAttune,'action:yeFinish');greenAttune=run(greenAttune,'choice:healVein');assert.ok(greenAttune.affinityPoints.wood>=4||greenAttune.affinityPoints.fire>=4);assert.equal(greenAttune.manualId,'green-vein');
+let starAttune=G.create({origin:'scholar'});starAttune.affinityPoints.fire=1;starAttune.flags.scroll=true;starAttune.npcFavor.gu=2;starAttune.story.scriptureReads=8;starAttune.root=4;starAttune.wit=5;starAttune.practice[1]=8;starAttune.grain=30;starAttune.location='cliff';starAttune.story.guText='collaborate';starAttune.story.guFragments=true;starAttune.story.guTextMonth=0;starAttune.month=3;starAttune.focus=100;starAttune=run(starAttune,'action:guFinish');starAttune=run(starAttune,'choice:verify');assert.ok(starAttune.affinityPoints.fire>=4);assert.ok(starAttune.manuals.includes(4));
+let taiweiAttune=G.create({origin:'merchant'});taiweiAttune.affinityPoints.metal=1;taiweiAttune.location='market';taiweiAttune.grain=30;taiweiAttune.story.luRoute='pledge';taiweiAttune.story.luMonth=0;taiweiAttune.manuals.push(6);taiweiAttune.manual=6;taiweiAttune.practice[6]=10;taiweiAttune.story.scriptureReads=7;taiweiAttune.root=4;taiweiAttune.wit=4;taiweiAttune.dao=4;taiweiAttune.social=5;taiweiAttune.silver=8;taiweiAttune.month=5;taiweiAttune=run(taiweiAttune,'action:luReturn');taiweiAttune=run(taiweiAttune,'choice:redeemSilver');assert.ok(taiweiAttune.affinityPoints.metal>=4);assert.ok(taiweiAttune.manuals.includes(3));
+let greenAttune=G.create({origin:'herbalist'});greenAttune.affinityPoints.wood=1;greenAttune.affinityPoints.fire=1;greenAttune.location='mountain';greenAttune.grain=30;greenAttune.story.yeText='tend';greenAttune.story.yeTextMonth=0;greenAttune.story.yeHerbWork=2;greenAttune.month=2;greenAttune.story.scriptureReads=5;greenAttune.root=4;greenAttune.wit=3;greenAttune.body=4;greenAttune.herbs=2;greenAttune.focus=100;greenAttune.practice[1]=10;greenAttune=run(greenAttune,'action:yeFinish');greenAttune=run(greenAttune,'choice:healVein');assert.ok(greenAttune.affinityPoints.wood>=4||greenAttune.affinityPoints.fire>=4);assert.ok(greenAttune.manuals.includes(5));
 console.log('All cultivation chapter checks passed');
 // The archive unlocks through encounters; techniques must be learned before use.
 let codex=G.create({gender:'male',elements:['wood']});assert.equal(codex.gender,'male');assert.deepEqual(codex.codex.people,[]);
@@ -672,12 +691,12 @@ assert.deepEqual(colorful.sparRecord.last.enemyAspect.elements,['fire']);
 
 
 // P0 regression: standard immortal-manual acquisition attunes the core affinity needed to use the reward.
-let attuneStar=G.create({origin:'scholar'});attuneStar.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneStar.flags.scroll=true;attuneStar.npcFavor.gu=2;attuneStar.insight=8;attuneStar.root=4;attuneStar.wit=5;attuneStar.practice[1]=8;attuneStar.grain=30;attuneStar.location='cliff';attuneStar.story.guText='collaborate';attuneStar.story.guFragments=true;attuneStar.story.guTextMonth=0;attuneStar.month=3;attuneStar.focus=100;
+let attuneStar=G.create({origin:'scholar'});attuneStar.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneStar.flags.scroll=true;attuneStar.npcFavor.gu=2;attuneStar.story.scriptureReads=8;attuneStar.root=4;attuneStar.wit=5;attuneStar.practice[1]=8;attuneStar.grain=30;attuneStar.location='cliff';attuneStar.story.guText='collaborate';attuneStar.story.guFragments=true;attuneStar.story.guTextMonth=0;attuneStar.month=3;attuneStar.focus=100;
 attuneStar=run(attuneStar,'action:guFinish');attuneStar=run(attuneStar,'choice:verify');
-assert.equal(attuneStar.manualId,'star-script');assert.ok(attuneStar.affinityPoints.fire>=4);assert.equal(attuneStar.manual,4);
-let attuneGreen=G.create({origin:'herbalist'});attuneGreen.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneGreen.location='mountain';attuneGreen.flags.herbalist=true;attuneGreen.story.yeText='tend';attuneGreen.story.yeTextMonth=0;attuneGreen.story.yeHerbWork=2;attuneGreen.month=2;attuneGreen.insight=5;attuneGreen.root=4;attuneGreen.wit=3;attuneGreen.body=4;attuneGreen.practice[1]=10;attuneGreen.herbs=4;attuneGreen.grain=20;attuneGreen.focus=100;
+assert.ok(attuneStar.manuals.includes(4));assert.ok(attuneStar.affinityPoints.fire>=4);assert.equal(attuneStar.manual,0);
+let attuneGreen=G.create({origin:'herbalist'});attuneGreen.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));attuneGreen.location='mountain';attuneGreen.flags.herbalist=true;attuneGreen.story.yeText='tend';attuneGreen.story.yeTextMonth=0;attuneGreen.story.yeHerbWork=2;attuneGreen.month=2;attuneGreen.story.scriptureReads=5;attuneGreen.root=4;attuneGreen.wit=3;attuneGreen.body=4;attuneGreen.practice[1]=10;attuneGreen.herbs=4;attuneGreen.grain=20;attuneGreen.focus=100;
 attuneGreen=run(attuneGreen,'action:yeFinish');attuneGreen=run(attuneGreen,'choice:healVein');
-assert.equal(attuneGreen.manualId,'green-vein');assert.ok(attuneGreen.affinityPoints.wood>=4||attuneGreen.affinityPoints.fire>=4);assert.equal(attuneGreen.manual,5);
+assert.ok(attuneGreen.manuals.includes(5));assert.ok(attuneGreen.affinityPoints.wood>=4||attuneGreen.affinityPoints.fire>=4);assert.equal(attuneGreen.manual,0);
 
 
 // v2.42 feedback/regression checks.
@@ -693,10 +712,10 @@ pill=run(pill,'travel:market');pill.silver=10;pill=run(pill,'action:buyelixir');
 
 let wen=G.create({origin:'herbalist'});wen.location='mountain';wen.pending='stoneScout';wen=run(wen,'choice:yieldSpring');assert.ok(wen.codex.people.includes('wen'));assert.equal(wen.npcFavor.wen,1);
 let escorted=G.create({origin:'herbalist',elements:['wood']});escorted.location='market';escorted.story.luHeard=true;escorted.wit=3;escorted=run(escorted,'action:luMeet');escorted=run(escorted,'choice:escort',0.99);
-assert.equal(escorted.manual,6,'earning a spirit manual should attune its core aspect');assert.ok(escorted.affinityPoints.earth>=3||escorted.affinityPoints.metal>=3);
-escorted.story.luMonth=0;escorted.month=8;escorted.practice[6]=10;escorted.insight=7;escorted.wit=4;escorted.dao=3;escorted.root=4;escorted.silver=8;escorted.focus=100;escorted=run(escorted,'action:luReturn');
+assert.ok(escorted.manuals.includes(6),'earning a spirit manual should grant its scroll');assert.equal(escorted.manual,0);assert.ok(escorted.affinityPoints.earth>=3||escorted.affinityPoints.metal>=3);
+escorted.story.luMonth=0;escorted.month=8;escorted.practice[6]=10;escorted.story.scriptureReads=7;escorted.wit=4;escorted.dao=3;escorted.root=4;escorted.silver=8;escorted.focus=100;escorted=run(escorted,'action:luReturn');
 assert.equal(G.options(escorted).find(o=>o.id==='redeemSilver').disabled,false,'an escort with low social may redeem after actual practice');
-let pledged=G.create({origin:'merchant'});pledged.location='market';pledged=run(pledged,'action:luMeet');pledged=run(pledged,'choice:pledge',0.99);pledged.month=8;pledged.practice[6]=10;pledged.insight=7;pledged.wit=4;pledged.root=4;pledged.social=2;pledged.silver=8;pledged=run(pledged,'action:luReturn');
+let pledged=G.create({origin:'merchant'});pledged.location='market';pledged=run(pledged,'action:luMeet');pledged=run(pledged,'choice:pledge',0.99);pledged.month=8;pledged.practice[6]=10;pledged.story.scriptureReads=7;pledged.wit=4;pledged.root=4;pledged.social=2;pledged.silver=8;pledged=run(pledged,'action:luReturn');
 assert.equal(G.options(pledged).find(o=>o.id==='redeemSilver').disabled,true,'pledged trade must retain its social requirement');
 const {simulate}=require('./balance-matrix.cjs');
 for(const [origin,route] of [['scholar','star'],['merchant','taiwei'],['herbalist','green']]){
@@ -808,4 +827,16 @@ test('新取得功法必须先参悟，悟性越高所需月份越少',()=>{
  low.manuals.push(2);high.manuals.push(2);low.decodedManuals=[0];high.decodedManuals=[0];low.decodeWork=Array(7).fill(0);high.decodeWork=Array(7).fill(0);
  assert.ok(G.decodeNeed(low,2)>G.decodeNeed(high,2));
  low.pending='manual';assert.ok(G.options(low).some(o=>o.id==='decode-2'));assert.ok(!G.options(low).some(o=>o.id==='equip-2'));
+});
+test('凡灵仙法卷均可按悟性参透，旧存档已得法卷保留可修',()=>{
+ const expected={2:[2,3,5],3:[1,3,5],5:[1,2,4],7:[1,1,3]};
+ for(const [wit,monthsByRarity] of Object.entries(expected))for(const [slot,id] of [1,2,4].entries()){
+  let state=G.create({origin:'herbalist'});state.wit=Number(wit);state.manuals.push(id);state.grain=100;state.focus=100;state.events.nextMonth=999;
+  let elapsed=0;
+  while(!G.manualDecoded(state,id)&&elapsed<12){state=run(state,'action:manual',.99);state=run(state,`choice:decode-${id}`,.99);elapsed++;if(state.pending?.startsWith('scene-'))state=run(state,'choice:ignore',.99);if(state.focus<20)state=run(state,'action:rest',.99);}
+  assert.equal(elapsed,monthsByRarity[slot],`悟性 ${wit} / 法卷 ${id}`);
+  assert.ok(G.manualDecoded(state,id));
+ }
+ let old=G.create();old.version=8;old.manuals.push(2,4);delete old.decodedManuals;delete old.decodeWork;old.insight=7;
+ old=G.migrate(old);assert.equal(old.insight,0);assert.ok(G.manualDecoded(old,2)&&G.manualDecoded(old,4));
 });
