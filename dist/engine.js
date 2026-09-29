@@ -620,7 +620,6 @@ function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
   if(s.story?.yeRoute&&!s.story.yeFollowup&&s.month>=s.story.yeMonth+2)base.push({id:'yeFollowup',label:'药径旧事',detail:`叶青蘅记得你${{help:'分药相助',trade:'索酬指路',leave:'绕道而去'}[s.story.yeRoute]}；再作一次选择`});
   if((s.story.yeRoute||s.codex?.people?.includes('ye'))&&!s.story.yeText&&!s.manuals.includes(5))base.push({id:'yeText',label:'向叶青蘅请教药径养脉',detail:'她有一套以泉药调理经络的经验；需灵草，可同行养护或独自取样，打开不耗时'});
   if(s.story.yeText&&s.story.yeText!=='complete'&&s.month>=s.story.yeTextMonth+2)base.push({id:'yeFinish',label:'验证药径养脉法',detail:`已采药验证 ${s.story.yeHerbWork||0}/2 次；还需采药验证、根骨、悟性、体魄及灵草`});
-  if(s.story.yeText&&s.body<4)base.push({id:'bodyTonic',label:'以灵草温养体魄',detail:'一月、口粮 1、灵草 −2、心神 −16；体魄 +1、寿限 +1 年；仅养脉求法时可用',disabled:s.herbs<2||s.focus<16});
   if(s.story.guText&&!s.story.guFragments)base.push({id:'findFragments',label:'沿山脉寻星篆缺页',detail:'一月、口粮 1、心神 −24；体魄不足 4 时暗伤 +1；亦可在坊市购得',disabled:s.focus<24||s.wounds>=5&&effectiveBody(s)<4});
   if(!s.story.stoneClue&&(s.story.yeClue||s.origin==='herbalist'||s.root>=5&&effectiveBody(s)>=4) )base.push({id:'stoneScout',label:'探访苍梧石髓池',detail:'与寻泉客闻秋相遇，可让泉、议价、独探或争夺本次优先权；打开不耗时'});
   base.push({id:'spring',label:'寻访华池',detail:'择一处开脉泉眼；打开菜单不耗时'});
@@ -932,5 +931,5 @@ function step(input,command,rng=Math.random){const s=stepInternal(input,command,
  if(pending==='luMeet'||pending.startsWith('lu')||pending.startsWith('after-lu'))discover(s,'people','lu');
  if(action[0]==='action'&&action[1]==='mentor')discover(s,'people','cheng');
  return syncIds(s); }
-return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
+return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,aptitudeNeed,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
 });
