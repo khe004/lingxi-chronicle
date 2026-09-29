@@ -502,10 +502,9 @@ function legacyRequirementDiagnostics(s,o){
  if(o.id==='askMethod'&&eventProgressGain(s,8)<=0)add({label:'本层功行空间',current:'已满',required:'尚可增长',met:false,text:'本层功行已满或当前功法已到本层上限；需先筑元或切换可继续推进的功法'});
  // The action list uses a few legacy boolean gates. Explain the actual gate
  // separately from the action's resource cost so the disabled reason is exact.
- const focusGates={cultivate:18,study:12,gather:12,gatherSeason:12,bodyTonic:16,findFragments:24};
+ const focusGates={cultivate:18,study:12,gather:12,gatherSeason:12,findFragments:24};
  if(focusGates[o.id]&&s.focus<focusGates[o.id])add(resourceRequirement(s,'focus',focusGates[o.id]));
  if(o.id==='gatherSeason'&&s.grain===0&&s.focus<12)add({label:'口粮与心神',current:`口粮 ${s.grain}、心神 ${s.focus}`,required:'至少一项可支撑采药',met:false,text:'口粮已尽且心神不足 12，先静养或补充口粮再连采'});
- if(o.id==='bodyTonic'&&s.herbs<2)add(resourceRequirement(s,'herbs',2));
  if(o.id==='findFragments'&&s.focus<24)add(resourceRequirement(s,'focus',24));
  if(['learn-novice','learn-keeper','learn-swift'].includes(o.id))for(const miss of techniqueMissing(s,o.id.slice(6)))add({label:'研习条件',current:'未满足',required:'满足功法与兵器契合',met:false,text:miss});
  if(o.id?.startsWith('kit-')&&o.disabled&&!s.trainingGear?.[o.id.slice(4)]){const slot={'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[o.id.slice(4)];for(const miss of affinityMissing(s,EQUIPMENT[slot]?.[1]||{}))add({label:'试器契合',current:'不足',required:'属性契合',met:false,text:miss});}
@@ -663,7 +662,7 @@ function batchCultivate(initial,limit,rng){let s=initial,trained=0,rested=0,gath
   else action='cultivate';
   const next=step(s,`action:${action}`,rng);
   if(next.month===s.month&&!next.pending){reason='无法继续闭关';break;}
-  s=next;if(action==='gather')gathered++;else if(action==='rest')rested++;else trained++;if(ordealActive(s)){reason='气机逆乱中断闭关';break;}
+  s=next;if(typeof rng.onMonth==='function')rng.onMonth(s);if(action==='gather')gathered++;else if(action==='rest')rested++;else trained++;if(ordealActive(s)){reason='气机逆乱中断闭关';break;}
   if(action==='cultivate'&&s.pending?.startsWith('scene-')&&!s.ending){const pending=s.pending;s.pending=null;const recovered=step(s,'action:rest',rng);s=recovered;s.pending=pending;rested++;reason='静养恢复后，遇到必须亲自处理的随机事件';}
   if(s.pending){reason=reason==='静养恢复后，遇到必须亲自处理的随机事件'?reason:'遇到必须亲自处理的事件或筑元关口';break;}
   if(s.ending){reason='此生已终';break;}
@@ -732,7 +731,6 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(id==='buymanual'){add(s,{silver:-12});earnManual(s,1,'你在坊市购得法卷');}
   if(id==='buyFragments'){add(s,{silver:-5});s.story.guFragments=true;note(s,'你向书商购回缺失的一页星篆。断简已齐，还须回千丈岩核对行气。','法门','银钱 −5');}
   if(id==='findFragments'){add(s,{focus:-24,wounds:effectiveBody(s)<4?1:0});s.story.guFragments=true;note(s,'你循残卷中的山势标记，从岩缝里找到星篆缺页。此行劳损经脉，需回千丈岩试行真章。','法门');turn(s);}
-  if(id==='bodyTonic'){add(s,{herbs:-2,focus:-16,body:1});s.lifeLimitMonths+=12;note(s,'你依叶青蘅所示，将两株灵草炼为温养汤，体魄稍健，寿限也延长一年。','延寿','体魄 +1 · 寿限 +1 年');turn(s);}
   if(id==='heal'){add(s,{silver:-5,wounds:-2,focus:12});note(s,'医者以药汤疏通郁结，暗伤渐消。','伤病');turn(s);}
   if(id==='marketWalk'){gainAptitude(s,'social',2,'在坊市反复识人议价');note(s,'你在坊市听商贩与行脚修士议论山中近况，顺手帮摊主理了货。','交易');if(!s.story.luHeard){s.story.luHeard=true;note(s,'坊间有人说商旅陆知衡正在寻护卷之人，你记住了他的名字。','人情');}turn(s);sceneEvent(s,rng);if(!s.pending&&!s.ending){add(s,{silver:2});note(s,'这一月没有新奇线索，摊主结了两两工钱。','交易','银钱 +2');}return s;}
   if(id==='buyelixir'){add(s,{silver:-10});s.flags.elixir=true;s.elixirBoost=6;note(s,`你换来一枚${ITEMS.elixir.name}。接下来六次实际吐纳，所得功行提高四分之一。`,'修行','银钱 −10 · 6 次吐纳功行 +25%');}
@@ -896,7 +894,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
    if(id==='defer')return s;
    if(id==='restore'){add(s,{herbs:-1,focus:-12});turn(s);if(s.ending)return s;turn(s);if(s.ending)return s;s.foundationStrain=Math.max(0,(s.foundationStrain||0)-1);note(s,'你以灵草缓缓温养破损的元基，裂隙合拢一层。暗伤仍须另行调养。','突破',`元基裂隙 ${s.foundationStrain}`);return s;}
    const old=s.stage,odds=stageChance(s,id),expected=stageGrade(s,id),drop=downgradeChance(s,id);
-   if(id==='patient'){add(s,{focus:-10});gainAptitude(s,'dao',2,'耐心稳固元基');}
+   if(id==='patient'){add(s,{focus:-10});gainAptitude(s,'dao',4,'耐心稳固元基');}
    turn(s);if(s.ending)return s;
    if(id==='patient'){turn(s);if(s.ending)return s;}
    if(rand(rng)<odds/100){const lowered=drop>0&&rand(rng)<drop/100,grade=Math.max(1,expected-(lowered?1:0));s.stage++;s.progress=0;s.foundationGrades.push(grade);s.foundationStrain=0;

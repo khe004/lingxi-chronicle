@@ -1,6 +1,7 @@
 // Fixed-seed, action-level balance runner. Policies only use public game commands.
 const G=require('../dist/engine.js');
 const fs=require('node:fs');
+const assert=require('node:assert/strict');
 const origins=['scholar','merchant','herbalist'],talents=['clarity','meridian','vitality'];
 const routes=['taiwei','star','green'],policies=['conservative','quest','risky'];
 function rng(seed){let x=seed>>>0;return ()=>((x=(Math.imul(x,1664525)+1013904223)>>>0)/4294967296);}
@@ -11,7 +12,7 @@ function command(s,route,policy,buyPill,opening='transition'){
  if(s.combat)return s.combat.storyEncounter==='ordealDuel'?'combat:auto-aggressive':'combat:withdraw';
  if(s.pending){
   const p=s.pending;
-  if(p==='stage')return choice(s,'restore')&&s.foundationStrain&&s.wounds===0&&policy==='conservative'?'choice:restore':choice(s,policy==='risky'?'hasty':'patient')||'choice:defer';
+  if(p==='stage')return choice(s,'restore')&&s.foundationStrain&&s.wounds===0&&policy==='conservative'?'choice:restore':choice(s,policy==='risky'&&!(route==='taiwei'&&s.origin==='scholar'&&s.dao<4)?'hasty':'patient')||'choice:defer';
   if(p==='attempt')return policy==='risky'?'choice:bold':'choice:steady';
   if(p==='ordealHelp'){
    const preference=route==='star'?['ordealGu','ordealYe','ordealCheng']:route==='green'?['ordealYe','ordealGu','ordealCheng']:['ordealCheng','ordealGu','ordealYe'];
@@ -91,7 +92,7 @@ function command(s,route,policy,buyPill,opening='transition'){
   if(route==='green'){
    if(!s.story.yeText){if(s.herbs<2){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}if(s.location!=='mountain')return travel(s,'mountain');return 'action:yeText';}
    if(s.month<s.story.yeTextMonth+2)return 'action:rest';
-   if(s.body<4){if(s.herbs<2)return 'action:gather';return 'action:bodyTonic';}
+   if(s.body<4){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
    if(s.story.yeHerbWork<2||s.herbs<3){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
    if(s.root<4||s.practice[openingPractice]<10)return 'action:secludeYear';
    if(s.location!=='mountain')return travel(s,'mountain');return 'action:yeFinish';
@@ -152,16 +153,19 @@ function command(s,route,policy,buyPill,opening='transition'){
 }
 function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false,opening='transition'}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
- let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstDecoded=null,firstPractice=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
+ let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstDecoded=null,firstPractice=null,firstSpring=null,attemptMonth=null,attemptChance=null,attemptAptitude=null,minGrain=s.grain,last='',actions=[],affinityAt={},aptitudeAt={};
+ const aptitude=state=>({root:state.root,wit:state.wit,body:state.body,dao:state.dao,social:state.social});
+ random.onMonth=state=>{if([60,120,168].includes(state.month))aptitudeAt[state.month]=aptitude(state);};
  while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
   // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
   if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
   if(s.location==='arena'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
-  const before=JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage,s.combat?.id,s.combat?.round]);last=c;
-  if(c==='choice:steady'||c==='choice:bold'){attemptMonth=s.month;attemptChance=G.chance(s,c==='choice:bold'?'bold':'steady');}
+  const before=JSON.stringify([s.month,s.ageMonths,s.pending,s.location,s.progress,s.totalProgress,s.manual,s.manuals,s.decodedManuals,s.spring,s.foundation,s.foundationGrades,s.foundationStrain,s.root,s.wit,s.body,s.dao,s.social,s.aptitudeXp,s.practice,s.affinityPoints,s.affinityTraining,s.focus,s.grain,s.herbs,s.silver,s.wounds,s.lifeLimitMonths,s.npcFavor,s.flags,s.story,s.events,s.ending,s.combat?.id,s.combat?.round]);last=c;
+  if(c==='choice:steady'||c==='choice:bold'){attemptMonth=s.month;attemptChance=G.chance(s,c==='choice:bold'?'bold':'steady');attemptAptitude=aptitude(s);}
   if(c==='action:buyelixir')pillsBought++;
   const at=s.month;s=G.step(s,c,random);steps++;minGrain=Math.min(minGrain,s.grain);
   for(const milestone of [60,120,168])if(at<milestone&&s.month>=milestone)affinityAt[milestone]={...G.points(s)};
+  for(const milestone of [60,120,168])if(!aptitudeAt[milestone]&&s.month===milestone)aptitudeAt[milestone]=aptitude(s);
   if(trace)actions.push({month:at,command:c,monthAfter:s.month});
   if(!firstSpirit&&(s.manuals.includes(2)||s.manuals.includes(6)))firstSpirit=s.month;
   if(!firstManual&&s.manuals.includes(route==='star'?4:route==='green'?5:3))firstManual=s.month;
@@ -169,9 +173,9 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
   if(firstDecoded===null&&G.manualDecoded(s,target))firstDecoded=s.month;
   if(firstPractice===null&&s.practice[target]>0)firstPractice=s.month;
   if(!firstSpring&&s.spring>=3)firstSpring=s.month;
-  if(JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,opening,command:c,state:s};
+  if(JSON.stringify([s.month,s.ageMonths,s.pending,s.location,s.progress,s.totalProgress,s.manual,s.manuals,s.decodedManuals,s.spring,s.foundation,s.foundationGrades,s.foundationStrain,s.root,s.wit,s.body,s.dao,s.social,s.aptitudeXp,s.practice,s.affinityPoints,s.affinityTraining,s.focus,s.grain,s.herbs,s.silver,s.wounds,s.lifeLimitMonths,s.npcFavor,s.flags,s.story,s.events,s.ending,s.combat?.id,s.combat?.round])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,opening,command:c,state:s};
  }
- return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstDecoded,firstPractice,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
+ return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstDecoded,firstPractice,firstSpring,attemptMonth,attemptChance,attemptAptitude,aptitudeAt,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
 }
 if(require.main===module){
  const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual'),compareOpenings=process.argv.includes('--compare-openings'),openings=compareOpenings?['basic','transition','specialist']:['transition'];
@@ -197,6 +201,15 @@ if(require.main===module){
    bestByBuild[key]={opening,origin,talent,route,policy,seed,buyPill,successMonth:x.successMonth,attemptMonth:x.attemptMonth,finalGrade:x.finalGrade};
    improvements.push({build:key,...bestByBuild[key]});
   }
+ }
+ if(rows.length===8100&&openings.length===1&&openings[0]==='transition'){
+  const blocked=rows.filter(x=>['policy-stall','policy-null','timeout'].includes(x.reason));
+  assert.equal(blocked.length,0,`matrix has structural stalls: ${blocked.slice(0,3).map(x=>`${x.origin}/${x.talent}/${x.route}/${x.policy}/${x.seed}:${x.reason}`).join(', ')}`);
+  const attempted=rows.filter(x=>x.attemptMonth!=null);
+  assert.ok(attempted.every(x=>x.attemptMonth<=168),'all legal meridian attempts must occur by month 168');
+  assert.ok(attempted.length/rows.length>=.85,`overall attempt rate ${attempted.length}/${rows.length} is below 85%`);
+  const cells=new Map();for(const x of rows){const key=`${x.origin}/${x.talent}/${x.route}/${x.policy}`;const a=cells.get(key)||{total:0,attempts:0};a.total++;if(x.attemptMonth!=null)a.attempts++;cells.set(key,a);}
+  for(const [key,a] of cells)assert.ok(a.attempts/a.total>=.75,`${key} attempt rate ${a.attempts}/${a.total} is below 75%`);
  }
  const best=Object.values(bestByBuild).sort((a,b)=>a.successMonth-b.successMonth||a.seed-b.seed)[0]||null;
  const replay=best?simulate({...best,trace:true}):null;

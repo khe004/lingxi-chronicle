@@ -32,6 +32,7 @@ test('the single action surface preserves event locks and settles each click onc
     requestAnimationFrame(fn) {fn();}, console,
   };
   vm.runInNewContext(fs.readFileSync('dist/app.js', 'utf8'), context);
+  assert.equal(element('wit-study').textContent, '悟性影响解卷与参悟所需时间', 'show what wisdom affects without exposing hidden aptitude progress');
   function click(command) {
     handlers.get('document:click')({target: {id: '', closest() {return {
       disabled: false, dataset: {command}, textContent: command,

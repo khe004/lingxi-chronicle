@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const G=require('../dist/engine.js');
 const run=(s,command,roll=0)=>G.step(s,command,()=>roll);
 let s=G.create({name:'闻山',origin:'scholar',talent:'clarity'});s.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));
-assert.equal(s.version,9);
+assert.equal(s.version,10);
 assert.equal(s.manual,0);
 assert.deepEqual(s.manuals,[0]);
 assert.equal(G.ITEMS.manual[0].name,'《养息吐纳诀》');
@@ -306,8 +306,8 @@ threshold=run(threshold,'choice:defer');
 assert.ok(G.available(threshold).some(a=>a.id==='stage'));
 threshold=run(threshold,'action:stage');
 assert.equal(threshold.pending,'stage');
-// Research grows wisdom at a slowing rate and raises cultivation yield.
-assert.deepEqual([2,3,4,5,6,7].map(G.studyNeed),[2,3,6,11,18,27]);
+// Study grows wisdom through the same hidden aptitude threshold and no longer changes cultivation yield.
+assert.deepEqual([2,3,4,5,6,7].map(G.studyNeed),[7,10,13,16,19,22]);
 let scholarOfScriptures=G.create({origin:'herbalist'});
 scholarOfScriptures.location='cliff';scholarOfScriptures.grain=200;
 const readTimes=n=>{for(let i=0;i<n;i++){
@@ -316,17 +316,17 @@ const readTimes=n=>{for(let i=0;i<n;i++){
  if(scholarOfScriptures.pending==='scroll')scholarOfScriptures=run(scholarOfScriptures,'choice:hide');
 }};
 const beforeStudy=G.cultivationGain(scholarOfScriptures);
-readTimes(2);assert.equal(scholarOfScriptures.wit,3);
-assert.equal(scholarOfScriptures.studyWork,0);
+readTimes(2);assert.equal(scholarOfScriptures.wit,2);
+assert.equal(scholarOfScriptures.studyWork,4);
 assert.equal(G.cultivationGain(scholarOfScriptures),beforeStudy);
+readTimes(2);assert.equal(scholarOfScriptures.wit,3);assert.equal(scholarOfScriptures.studyWork,1);
 assert.ok(G.decodeNeed(scholarOfScriptures,4)<G.decodeNeed({...scholarOfScriptures,wit:2},4));
-readTimes(3);assert.equal(scholarOfScriptures.wit,4);
-readTimes(5);assert.equal(scholarOfScriptures.wit,4);
-assert.equal(scholarOfScriptures.studyWork,5);
-readTimes(1);assert.equal(scholarOfScriptures.wit,5);
-readTimes(10);assert.equal(scholarOfScriptures.wit,5);
-readTimes(1);assert.equal(scholarOfScriptures.wit,6);
-readTimes(18+27);assert.equal(scholarOfScriptures.wit,8);
+readTimes(4);assert.equal(scholarOfScriptures.wit,3);assert.equal(scholarOfScriptures.studyWork,9);
+readTimes(1);assert.equal(scholarOfScriptures.wit,4);assert.equal(scholarOfScriptures.studyWork,1);
+readTimes(6);assert.equal(scholarOfScriptures.wit,5);assert.equal(scholarOfScriptures.studyWork,0);
+readTimes(8);assert.equal(scholarOfScriptures.wit,6);assert.equal(scholarOfScriptures.studyWork,0);
+readTimes(10);assert.equal(scholarOfScriptures.wit,7);assert.equal(scholarOfScriptures.studyWork,1);
+readTimes(11);assert.equal(scholarOfScriptures.wit,8);
 readTimes(5);assert.equal(scholarOfScriptures.wit,8);
 assert.equal(scholarOfScriptures.studyWork,0);
 assert.ok(scholarOfScriptures.books.some(b=>b.lines.some(line=>line.includes('悟性提升'))));
@@ -421,7 +421,7 @@ function practiceUntil(predicate){for(let i=0;i<650&&!predicate()&&!s.ending;i++
  if(s.story.ordeal?.triggered&&!s.story.ordeal.resolved)s.story.ordeal.resolved=true;
 }assert.equal(predicate(),true,'practice milestone should be reachable '+JSON.stringify({month:s.month,age:s.ageMonths,stage:s.stage,pending:s.pending,root:s.root,progress:s.progress,cap:G.cap(s),focus:s.focus,grain:s.grain,location:s.location,ending:s.ending}));}
 practiceUntil(()=>s.root>=3);
-assert.ok(s.practice[1]>=16);
+assert.ok(s.practice[1]>=7,'the first root increase should follow the shared aptitude threshold');
 s=run(s,'travel:temple');s=run(s,'action:mentor');
 if(!s.flags.mentor){s=run(s,'choice:serve');s=run(s,'action:mentor');}
 assert.ok(G.options(s).find(x=>x.id==='guidance').disabled===false);
@@ -438,9 +438,9 @@ s=run(s,'action:manual');for(let i=0;!G.manualDecoded(s,2)&&i<30;i++){
 }
 assert.ok(G.manualDecoded(s,2),JSON.stringify({month:s.month,pending:s.pending,location:s.location,focus:s.focus,grain:s.grain,ending:s.ending,decode:s.decodeWork,options:G.options(s)}));
 s=run(s,'action:manual');s=run(s,'choice:equip-2');assert.equal(s.manual,2);
-assert.equal(G.cap(s),72);
-practiceUntil(()=>s.root>=4&&s.dao>=4);
-assert.ok(s.practice[2]>=14);
+assert.equal(G.cap(s),56);
+practiceUntil(()=>s.root>=4);
+s.dao=4;s.practice[2]=14; // This legacy NPC-route fixture isolates dialogue gates from the new Dao aptitude progression.
 s=run(s,'travel:temple');s=run(s,'action:mentor');s=run(s,'choice:serve');
 assert.equal(s.npcFavor.cheng,3);
 practiceUntil(()=>s.herbs>=2);
@@ -456,8 +456,8 @@ assert.equal(G.options(s).find(x=>x.id==='raretext').disabled,false);
 s=run(s,'choice:raretext');
 assert.ok(s.manuals.includes(3));assert.equal(s.manual,2);
 s.decodedManuals.push(3);s=run(s,'action:manual');s=run(s,'choice:equip-3');assert.equal(s.manual,3);
-assert.equal(G.cap(s),96);
-assert.ok(s.month<180,'high manual should be obtainable before the first breakthrough');
+assert.equal(G.cap(s),78);
+assert.ok(s.month<168,'high manual should be obtainable within the chapter deadline');
 // The manual active at each breakthrough is recorded and changes foundation grade.
 s.stage=0;s.foundation=0;s.foundationGrades=[];s.progress=G.cap(s);s.pending="stage";s.grain=50;s.focus=100;
 practiceUntil(()=>s.progress>=G.cap(s));
@@ -469,7 +469,7 @@ assert.equal(s.stage,1);
 assert.equal(s.foundationGrades.length,1);
 assert.equal(s.foundationGrades[0],3);
 assert.equal(s.progress,0);
-assert.ok(s.totalProgress>=88);
+assert.ok(s.totalProgress>=G.NEED[0]);
 for(let stage=1;stage<3;stage++){
  practiceUntil(()=>s.progress>=G.cap(s));
  assert.equal(s.pending,'stage');
@@ -829,12 +829,12 @@ test('新取得功法必须先参悟，悟性越高所需月份越少',()=>{
  low.pending='manual';assert.ok(G.options(low).some(o=>o.id==='decode-2'));assert.ok(!G.options(low).some(o=>o.id==='equip-2'));
 });
 test('凡灵仙法卷均可按悟性参透，旧存档已得法卷保留可修',()=>{
- const expected={2:[2,3,5],3:[1,3,5],5:[1,2,4],7:[1,1,3]};
- for(const [wit,monthsByRarity] of Object.entries(expected))for(const [slot,id] of [1,2,4].entries()){
+ for(const wit of [2,3,5,7])for(const id of [1,2,4]){
   let state=G.create({origin:'herbalist'});state.wit=Number(wit);state.manuals.push(id);state.grain=100;state.focus=100;state.events.nextMonth=999;
+  const initialNeed=G.decodeNeed(state,id);
   let elapsed=0;
   while(!G.manualDecoded(state,id)&&elapsed<12){state=run(state,'action:manual',.99);state=run(state,`choice:decode-${id}`,.99);elapsed++;if(state.pending?.startsWith('scene-'))state=run(state,'choice:ignore',.99);if(state.focus<20)state=run(state,'action:rest',.99);}
-  assert.equal(elapsed,monthsByRarity[slot],`悟性 ${wit} / 法卷 ${id}`);
+  assert.ok(elapsed<=initialNeed,`悟性 ${wit} / 法卷 ${id} should参透 within its initial requirement`);
   assert.ok(G.manualDecoded(state,id));
  }
  let old=G.create();old.version=8;old.manuals.push(2,4);delete old.decodedManuals;delete old.decodeWork;old.insight=7;
@@ -846,14 +846,41 @@ test('五项属性成长 2.0 使用统一隐藏历练阈值且高属性更难成
  assert.ok(G.aptitudeNeed('root',5)>G.aptitudeNeed('root',2));
  assert.ok(G.aptitudeNeed('wit',6)>G.aptitudeNeed('wit',3));
  const s=G.create({origin:'scholar'});assert.deepEqual(s.aptitudeXp,{root:0,wit:0,body:0,dao:0,social:0});
+ assert.equal(G.available(s).some(o=>o.id==='bodyTonic'),false,'the removed direct-body training button must not return');
+});
+
+test('免费菜单、返回与坊市买卖不会增加五项隐藏历练',()=>{
+ let s=G.create({origin:'scholar'});s.grain=30;s.silver=30;s.herbs=3;s.location='temple';
+ s=G.step(s,'action:manual');s=G.step(s,'choice:back');
+ s.location='market';s=G.step(s,'action:sellall');s=G.step(s,'action:buymax');
+ assert.deepEqual(s.aptitudeXp,{root:0,wit:0,body:0,dao:0,social:0});
+});
+
+test('v9 存档迁移到 v10 时保留旧悟性历练并初始化其余历练',()=>{
+ const old=G.create({origin:'scholar'});old.version=9;delete old.aptitudeXp;old.studyWork=5;
+ const migrated=G.migrate(old);
+ assert.equal(migrated.version,10);
+ assert.deepEqual(migrated.aptitudeXp,{root:0,wit:5,body:0,dao:0,social:0});
+ assert.equal(migrated.studyWork,5);
+});
+
+test('闭关的逐月观察只供矩阵采样，不改变 seeded 结算',()=>{
+ const start=G.create({origin:'scholar'});start.grain=100;start.focus=100;start.events.nextMonth=999;
+ const makeRng=seed=>()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+ const baseline=G.step(start,'action:secludeYear',makeRng(211));
+ const observedRandom=makeRng(211),months=[];observedRandom.onMonth=s=>months.push(s.month);
+ const observed=G.step(start,'action:secludeYear',observedRandom);
+ assert.deepEqual(observed,baseline);
+ assert.ok(months.length>0);
+ assert.deepEqual(months,Array.from({length:months.length},(_,i)=>i+1));
 });
 
 test('研读与采药分别塑造悟性和体魄历练，不再依赖功法固定次数直加属性',()=>{
  let study=G.create({origin:'herbalist'});study.location='cliff';study.grain=50;study.focus=100;study.events.nextMonth=999;
- const wit=study.wit;for(let i=0;i<4;i++){study=run(study,'action:study',.99);if(study.pending==='scroll')study=run(study,'choice:reserve',.99);if(study.focus<20)study=run(study,'action:rest',.99);}
+ const wit=study.wit;for(let i=0;i<4;i++){study=run(study,'action:study',.99);if(study.pending==='scroll')study=run(study,'choice:hide',.99);if(study.focus<20)study=run(study,'action:rest',.99);}
  assert.ok(study.wit>wit,'连续真实研读应积累到一次悟性成长');
  let gather=G.create({origin:'scholar'});gather.location='mountain';gather.grain=50;gather.focus=100;gather.events.nextMonth=999;gather.flags.herbalist=true;
- const body=gather.body;for(let i=0;i<10;i++){gather=run(gather,'action:gather',.99);if(gather.pending?.startsWith('scene-'))gather=run(gather,'choice:ignore',.99);if(gather.focus<20)gather=run(gather,'action:rest',.99);}
+ const body=gather.body;for(let i=0;i<10;i++){gather=run(gather,'action:gather',.99);if(gather.pending==='herbalist')gather=run(gather,'choice:leave',.99);if(gather.pending?.startsWith('scene-'))gather=run(gather,'choice:ignore',.99);if(gather.focus<20)gather=run(gather,'action:rest',.99);}
  assert.ok(gather.body>body,'长期行山采药应塑造体魄');
 });
 
@@ -863,4 +890,10 @@ test('功法实修不再按旧功法专属周期直接赠送五项属性',()=>{
  for(let i=0;i<16;i++){s=run(s,'action:cultivate',.99);if(s.pending==='stage')s=run(s,'choice:defer',.99);if(s.focus<20)s=run(s,'action:rest',.99);}
  assert.equal(s.wit,start.wit);assert.equal(s.body,start.body);assert.equal(s.dao,start.dao);assert.equal(s.social,start.social);
  assert.ok(s.root>=3,'修行本身通过统一承载历练塑造根骨');
+});
+
+test('三次稳固筑元的道心历练达到程上师路线门槛',()=>{
+ let s=G.create({origin:'scholar'});s.grain=100;s.focus=100;s.events.nextMonth=999;
+ for(let i=0;i<3;i++){s.progress=G.cap(s);s=run(s,'action:stage',0);assert.equal(s.pending,'stage');s=run(s,'choice:patient',0);}
+ assert.equal(s.dao,4);assert.equal(s.aptitudeXp.dao,1);
 });

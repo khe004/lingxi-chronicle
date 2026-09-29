@@ -31,5 +31,9 @@ assert.match(app, /新得法卷须按月参悟，参透且属性契合后才能�
   'the manuscript menu must explain the new prerequisite before switching');
 assert.doesNotMatch(app, /已得的功法可以随时切换/,
   'the old immediate-switch promise must not remain visible');
+assert.doesNotMatch(app, /s\.studyWork|G\.studyNeed/,
+  'hidden wisdom aptitude progress must not be rendered in the interface');
+assert.match(app, /悟性影响解卷与参悟所需时间/,
+  'the character panel should explain wisdom without showing hidden progress');
 
 console.log('Deadline UI contract checks passed');
