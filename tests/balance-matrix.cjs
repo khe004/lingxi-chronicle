@@ -3,7 +3,7 @@ const G=require('../dist/engine.js');
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const origins=['scholar','merchant','herbalist'],talents=['clarity','meridian','vitality'];
-const routes=['taiwei','star','green'],policies=['conservative','quest','risky'];
+const routes=['taiwei','star','green'],policies=['full-polish','patient','mixed'];
 function rng(seed){let x=seed>>>0;return ()=>((x=(Math.imul(x,1664525)+1013904223)>>>0)/4294967296);}
 function travel(s,where){return s.location===where?null:`travel:${where}`;}
 function ready(s,id){return G.available(s).some(x=>x.id===id&&!x.disabled);}
@@ -12,7 +12,11 @@ function command(s,route,policy,buyPill,opening='transition'){
  if(s.combat)return s.combat.storyEncounter==='ordealDuel'?'combat:auto-aggressive':'combat:withdraw';
  if(s.pending){
   const p=s.pending;
-  if(p==='stage')return choice(s,'restore')&&s.foundationStrain&&s.wounds===0&&policy==='conservative'?'choice:restore':choice(s,policy==='risky'&&!(route==='taiwei'&&s.origin==='scholar'&&s.dao<4)?'hasty':'patient')||'choice:defer';
+  if(p==='stage'){
+   if(policy==='full-polish')return (G.polishReady(s)?choice(s,'perfect'):choice(s,'polish'))||'choice:defer';
+   if(policy==='mixed'&&s.foundationGrades.every(g=>g===3)&&s.dao>=5)return (G.polishReady(s)?choice(s,'perfect'):choice(s,'polish'))||'choice:defer';
+   return choice(s,'patient')||'choice:defer';
+  }
   if(p==='attempt')return policy==='risky'?'choice:bold':'choice:steady';
   if(p==='ordealHelp'){
    const preference=route==='star'?['ordealGu','ordealYe','ordealCheng']:route==='green'?['ordealYe','ordealGu','ordealCheng']:['ordealCheng','ordealGu','ordealYe'];
@@ -63,9 +67,9 @@ function command(s,route,policy,buyPill,opening='transition'){
   if(visitor){if(s.location!=='arena')return travel(s,'arena');return 'action:ordealDuel';}
  }
  const target=route==='star'?4:route==='green'?5:3;
- if(s.grain<(policy==='conservative'?8:4)){if(s.location!=='mountain')return travel(s,'mountain');return s.focus<12?'action:rest':'action:gather';}
- if(s.focus<(policy==='conservative'?40:policy==='risky'?18:25))return 'action:rest';
- if(s.wounds>=(policy==='conservative'?1:policy==='risky'?4:2))return 'action:rest';
+ if(s.grain<(policy==='full-polish'?10:4)){if(s.location!=='mountain')return travel(s,'mountain');return s.focus<12?'action:rest':'action:gather';}
+ if(s.focus<(policy==='full-polish'?45:25))return 'action:rest';
+ if(s.wounds>=(policy==='full-polish'?1:2))return 'action:rest';
  if(s.stage<3&&s.progress>=G.cap(s))return 'action:stage';
  if(opening==='basic'&&!s.manuals.includes(1)&&s.practice[0]<24)return 'action:secludeYear';
  if(!s.manuals.includes(1)&&(opening!=='basic'||s.practice[0]>=24)){
@@ -220,9 +224,11 @@ if(require.main===module){
   if(replay.successMonth!==winner.successMonth||replay.manual!==winner.manual)throw Error(`Manual ${manual} route replay did not reproduce`);
   manualResults[manual]={...winner,actions:replay.actions};
  }
+ const summarize=items=>{const attempts=items.filter(x=>x.attemptMonth!=null),successes=items.filter(x=>x.successMonth!=null),sorted=a=>a.filter(Number.isFinite).sort((x,y)=>x-y),quantile=(a,q)=>{const v=sorted(a);return v.length?v[Math.floor((v.length-1)*q)]:null;},foundationGrades={},finalGrades={};for(const x of items){for(const grade of x.grades||[])foundationGrades[grade]=(foundationGrades[grade]||0)+1;if(x.finalGrade)finalGrades[x.finalGrade]=(finalGrades[x.finalGrade]||0)+1;}return {total:items.length,attempts:attempts.length,successes:successes.length,medianAttemptMonth:quantile(attempts.map(x=>x.attemptMonth),.5),p90AttemptMonth:quantile(attempts.map(x=>x.attemptMonth),.9),medianSuccessMonth:quantile(successes.map(x=>x.successMonth),.5),flawlessFoundations:items.filter(x=>x.grades?.length===3&&x.grades.every(g=>g===3)).length,foundationGrades,finalGrades};};
+ const strata={overall:summarize(rows),policy:{},origin:{},route:{},policyByOrigin:{},policyByRoute:{}};for(const p of policies){strata.policy[p]=summarize(rows.filter(x=>x.policy===p));strata.policyByOrigin[p]={};strata.policyByRoute[p]={};for(const o of origins)strata.policyByOrigin[p][o]=summarize(rows.filter(x=>x.policy===p&&x.origin===o));for(const r of routes)strata.policyByRoute[p][r]=summarize(rows.filter(x=>x.policy===p&&x.route===r));}for(const o of origins)strata.origin[o]=summarize(rows.filter(x=>x.origin===o));for(const r of routes)strata.route[r]=summarize(rows.filter(x=>x.route===r));
  const bestResult={objective:'earliest successful meridian opening (month)',seedCount:count,buyPill,best,improvements,bestByBuild,bestActions:replay?.actions||[],...(groupByManual?{manualImprovements,bestByManual:manualResults}:{})};
  if(outIndex>=0)fs.writeFileSync(process.argv[outIndex+1],JSON.stringify(bestResult,null,2)+'\n');
  const by={};for(const x of rows){const key=[x.opening,x.origin,x.route,x.reason].join('/');by[key]=(by[key]||0)+1;}
- console.log(JSON.stringify({count:rows.length,by,attempted:rows.filter(x=>x.attemptMonth!=null).length,records:rows.map(({state,...x})=>x),failures:rows.filter(x=>x.attemptMonth==null).map(x=>({origin:x.origin,talent:x.talent,route:x.route,policy:x.policy,seed:x.seed,reason:x.reason,month:x.month||x.state?.month,command:x.command||x.last,stage:x.state?.stage,manual:x.state?.manual,focus:x.state?.focus,grain:x.state?.grain,pending:x.state?.pending,story:x.state?.story})).slice(0,30),bestResult},null,2));
+ console.log(JSON.stringify({count:rows.length,by,attempted:rows.filter(x=>x.attemptMonth!=null).length,strata,records:rows.map(({state,...x})=>x),failures:rows.filter(x=>x.attemptMonth==null).map(x=>({origin:x.origin,talent:x.talent,route:x.route,policy:x.policy,seed:x.seed,reason:x.reason,month:x.month||x.state?.month,command:x.command||x.last,stage:x.state?.stage,manual:x.state?.manual,focus:x.state?.focus,grain:x.state?.grain,pending:x.state?.pending,story:x.state?.story})).slice(0,30),bestResult},null,2));
 }
 module.exports={simulate};

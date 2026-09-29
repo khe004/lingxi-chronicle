@@ -598,7 +598,8 @@ let springFight=G.create({origin:'herbalist'});springFight.location='mountain';s
 let springLoss=G.create({origin:'herbalist'});springLoss.location='mountain';springLoss.flags.herbalist=true;springLoss.story.yeClue='trust';springLoss.grain=30;springLoss.insight=5;springLoss=run(springLoss,'action:stoneScout');springLoss=run(springLoss,'choice:contestSpring');springLoss.combat.player.currentQi=1;springLoss.combat.enemy.attack=300;springLoss.combat.intent='strike';springLoss=run(springLoss,'combat:guard',0);assert.equal(springLoss.story.stoneMissed,true);assert.equal(springLoss.story.stonePriority,undefined);assert.ok(G.options(Object.assign(springLoss,{pending:'stoneScout'})).some(o=>o.id==='seekStone'));
 for(const method of [3,4,5])for(const pool of [3,4,5]){
  const sample=G.create();sample.manual=method;sample.spring=pool;sample.root=6;sample.insight=9;sample.foundation=3;sample.foundationGrades=[2,2,2];sample.wounds=0;
- assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path`);
+ for(const roll of [0,.01,.03,.05,.5,.99])for(const mode of ['steady','bold'])assert.notEqual(G.grade(sample,roll,mode),'上上品',`${method}/${pool}/${roll}/${mode} cannot bypass imperfect foundation`);
+ sample.foundationGrades=[3,3,3];assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path`);
 }
 // Clear Meridian keeps its five-point opening advantage even when a fully prepared route reaches the base chance ceiling.
 for(const origin of ['scholar','merchant','herbalist']){
@@ -915,12 +916,17 @@ test('地点事件按实际解决方式塑造不同属性而不是固定直加',
 
 
 test('元基打磨以月份换确定上品且道心越高越快',()=>{
- assert.equal(G.polishNeed({dao:3}),4);assert.equal(G.polishNeed({dao:6}),1);
- let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.grain=30;s.focus=100;s.events.nextMonth=999;
- const need=G.polishNeed(s),startMonth=s.month;
- for(let i=0;i<need;i++){s=run(s,'choice:polish',.99);if(s.pending?.startsWith('scene-'))s.pending='stage';}
- assert.ok(G.polishReady(s));assert.equal(s.month,startMonth+need);
+ assert.equal(G.polishNeed({dao:3}),4);assert.equal(G.polishNeed({dao:4}),3);assert.equal(G.polishNeed({dao:5}),2);assert.equal(G.polishNeed({dao:6}),1);
+ let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.totalProgress=500;s.month=10;s.ageMonths+=10;s.grain=30;s.focus=100;s.events.nextMonth=999;
+ const startMonth=s.month;
+ while(!G.polishReady(s)){assert.ok(G.options(s).some(x=>x.id==='polish'&&!x.disabled));s=run(s,'choice:polish',.99);}
+ assert.equal(s.month-startMonth,s.foundationPolish);assert.ok(s.foundationPolish<=4);
  const oldStage=s.stage;s=run(s,'choice:perfect',.99);assert.equal(s.stage,oldStage+1);assert.equal(s.foundationGrades.at(-1),3);assert.equal(s.foundationPolish,0);assert.equal(s.foundationStrain,0);
+});
+
+test('跨年打磨保留筑元关口直到完成圆满筑元',()=>{
+ let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.totalProgress=500;s.month=10;s.ageMonths+=10;s.grain=30;s.focus=100;s.events.nextMonth=999;
+ s=run(s,'choice:polish',.99);assert.equal(s.month,11);assert.equal(s.pending,'stage');assert.equal(s.foundationPolish,1);
 });
 
 test('任何真实元基掉档都会永久失去上上品资格',()=>{

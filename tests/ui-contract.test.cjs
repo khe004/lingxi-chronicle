@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const html = fs.readFileSync('dist/index.html', 'utf8');
 const app = fs.readFileSync('dist/app.js', 'utf8');
 const style = fs.readFileSync('dist/style.css', 'utf8');
+const engine = require('../dist/engine.js');
 
 assert.match(html, /class="data-row small chapter-deadline-row"[^>]*>.*?id="chapter-deadline"/s,
   'the chapter deadline belongs in the always-visible status block');
@@ -33,6 +34,15 @@ assert.doesNotMatch(app, /已得的功法可以随时切换/,
   'the old immediate-switch promise must not remain visible');
 assert.doesNotMatch(app, /s\.studyWork|G\.studyNeed/,
   'hidden wisdom aptitude progress must not be rendered in the interface');
+const stageMenuState = engine.create({ origin: 'scholar' });
+stageMenuState.pending = 'stage'; stageMenuState.progress = engine.cap(stageMenuState);
+stageMenuState.totalProgress = 500; stageMenuState.foundationPolish = 1;
+stageMenuState.grain = 30; stageMenuState.focus = 100;
+const stageMenu = engine.options(stageMenuState);
+assert.match(stageMenu.find(x => x.id === 'polish').label, /打磨元基 · 1 \/ \d+ 月/,
+  'the polish action must show its current and required months');
+for (const id of ['patient', 'hasty']) assert.match(stageMenu.find(x => x.id === id).detail, /放弃本关未完成的打磨/,
+  'ordinary breakthroughs must explain that unfinished polishing is discarded');
 assert.match(app, /悟性影响解卷与参悟所需时间/,
   'the character panel should explain wisdom without showing hidden progress');
 
