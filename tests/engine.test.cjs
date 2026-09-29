@@ -907,8 +907,8 @@ test('人物事件的直接属性奖励迁入统一历练通道',()=>{
 });
 
 test('地点事件按实际解决方式塑造不同属性而不是固定直加',()=>{
- let s=G.create({origin:'merchant'});s.pending='scene-marketRumor';s.focus=100;s.grain=30;s.events.nextMonth=999;
+ let s=G.create({origin:'merchant'});s.pending='scene-marketGrain';s.focus=100;s.grain=30;s.events.nextMonth=999;
  const social=s.social;s=run(s,'choice:bargain',.99);assert.equal(s.social,social);assert.ok(s.aptitudeXp.social>=2);
- let t=G.create({origin:'herbalist'});t.pending='scene-mountainHerbs';t.focus=100;t.grain=30;t.events.nextMonth=999;
- const body=t.body;t=run(t,'choice:harvest',.99);assert.equal(t.body,body);assert.ok(t.aptitudeXp.body>=2);
+ let t=G.create({origin:'herbalist'});t.pending='scene-mountainMist';t.focus=100;t.grain=30;t.events.nextMonth=999;
+ const body=t.body;t=run(t,'choice:shortcut',.99);assert.equal(t.body,body);assert.ok(t.aptitudeXp.body>=2);
 });

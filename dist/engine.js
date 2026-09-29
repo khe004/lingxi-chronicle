@@ -558,12 +558,12 @@ function rawOptions(s){
     gu:[{id:'publish',label:'与顾闻溪公开勘误',detail:'一月、口粮 1、心神 −18、顾好感 +1；公开自己的旧注也有纰漏',disabled:s.focus<18},{id:'reserve',label:'先留误字，独自重校',detail:'一月、口粮 1、心神 −12、顾好感 −1；保住优先校注权',disabled:s.focus<12}],
     ye:[{id:'treat',label:'送药给伤者，和叶青蘅同去',detail:'一月、口粮 1、灵草 −2、心神 −12、叶好感 +1；留下一份来日的谢礼',disabled:s.herbs<2||s.focus<12},{id:'keep',label:'把药留下，先养自己的经脉',detail:'一月、口粮 1、灵草 −1、暗伤 −1、心神 +12、叶好感 −1',disabled:s.herbs<1}],
     lu:[{id:'honor',label:'替陆知衡送还余卷',detail:'一月、口粮 1、银钱 −5、陆好感 +1；商路留给你一份回礼',disabled:s.silver<5},{id:'broker',label:'留下余卷，替他接一笔新买卖',detail:'一月、口粮 1、心神 −15、银钱 +8、陆好感 −1；须自行承担往后误传的争议',disabled:s.focus<15}],
-    cheng:[{id:'teach',label:'代上师教新弟子行气',detail:'一月、口粮 1、心神 −20、程好感 +1、道心 +1；承下一次教学回访',disabled:s.focus<20},{id:'withdraw',label:'谢绝教习，取回自己校卷的报酬',detail:'不耗月份；银钱 +6、程好感 −1，留下完整闭关时间'}]
+    cheng:[{id:'teach',label:'代上师教新弟子行气',detail:'一月、口粮 1、心神 −20、程好感 +1、道心历练；承下一次教学回访',disabled:s.focus<20},{id:'withdraw',label:'谢绝教习，取回自己校卷的报酬',detail:'不耗月份；银钱 +6、程好感 −1，留下完整闭关时间'}]
    };return [...choices[who],back];
   }
   const choices={
    gu:first==='publish'?[{id:'annotate',label:'共同补完校本',detail:'一月、口粮 1、心神 −16、顾好感 +1',disabled:s.focus<16},{id:'fee',label:'让她独自完稿，领取译注酬金',detail:'不耗月份；银钱 +7，不再参与校订'}]:[{id:'correct',label:'把留存的误字告诉顾闻溪',detail:'一月、口粮 1、心神 −14、顾好感 +1',disabled:s.focus<14},{id:'sell',label:'将自己的校注另售书商',detail:'不耗月份；银钱 +9、顾好感 −1'}],
-   ye:first==='treat'?[{id:'receive',label:'领伤者备下的药材',detail:'不耗月份；灵草 +3、叶好感 +1'},{id:'visit',label:'陪叶青蘅回山诊脉',detail:'一月、口粮 1、心神 −16、暗伤 −2、叶好感 +1',disabled:s.focus<16}]:[{id:'remedy',label:'带药去补上当时的诊治',detail:'一月、口粮 1、灵草 −2、叶好感 +1、道心 +1',disabled:s.herbs<2},{id:'formula',label:'向叶青蘅购一份自养药方',detail:'不耗月份；银钱 −4、暗伤 −2',disabled:s.silver<4}],
+   ye:first==='treat'?[{id:'receive',label:'领伤者备下的药材',detail:'不耗月份；灵草 +3、叶好感 +1'},{id:'visit',label:'陪叶青蘅回山诊脉',detail:'一月、口粮 1、心神 −16、暗伤 −2、叶好感 +1',disabled:s.focus<16}]:[{id:'remedy',label:'带药去补上当时的诊治',detail:'一月、口粮 1、灵草 −2、叶好感 +1、道心历练',disabled:s.herbs<2},{id:'formula',label:'向叶青蘅购一份自养药方',detail:'不耗月份；银钱 −4、暗伤 −2',disabled:s.silver<4}],
    lu:first==='honor'?[{id:'credit',label:'收下商路信用凭票',detail:'不耗月份；银钱 +10、陆好感 +1'},{id:'supplies',label:'将回礼换成闭关米粮',detail:'不耗月份；口粮 +18'}]:[{id:'settle',label:'补偿误传的抄卷人',detail:'不耗月份；银钱 −6、陆好感 +1',disabled:s.silver<6},{id:'defend',label:'亲自辩清余卷的来历',detail:'一月、口粮 1、心神 −18；陆好感不变',disabled:s.focus<18}],
    cheng:first==='teach'?[{id:'guide',label:'再为弟子解一段行气难题',detail:'一月、口粮 1、心神 −18、程好感 +1',disabled:s.focus<18},{id:'entrust',label:'将教习交还上师，领走资粮',detail:'不耗月份；口粮 +10，程好感不变'}]:[{id:'lecture',label:'带着旧注回来与上师论法',detail:'一月、口粮 1、心神 −15、程好感 +1',disabled:s.focus<15},{id:'keepPay',label:'仍按旧约各修各道',detail:'不耗月份；银钱 +5，程好感不变'}]
   };return [...choices[who],back];
@@ -580,7 +580,7 @@ function rawOptions(s){
  if(s.pending==='trueText')return [withRequirements({id:'undertake',label:'应下校卷之约',detail:'一月、口粮 1、心神 −20；完成后方能向上师求取秘传真章'},[resourceRequirement(s,'focus',20)]),{id:'defer',label:'暂且告退',detail:'不耗月份；半年后可再来商谈'}];
  if(s.pending==='guFollowup')return [withRequirements({id:'compare',label:'与顾闻溪对读残卷',detail:'一月、口粮 1、心神 −16；顾好感 +1'},[resourceRequirement(s,'focus',16)]),{id:'commission',label:'替她向书商交稿',detail:'一月、口粮 1；银钱 +8；顾好感不变'},{id:'decline',label:'留心自己的修行',detail:'不耗时间，顾闻溪会记住你这次的决定'}];
  if(s.pending==='guReturn')return s.story.guRoute==='compare'?[{id:'joint',label:'合力校定泉脉注解',detail:'一月、口粮 1、心神 −18；顾好感 +1，寻泉费用少 1',disabled:s.focus<18},{id:'private',label:'只借旧注自参',detail:'不耗月份；蚀文研读 +1，顾好感 −1，不取得寻泉线索'}]:[{id:'copy',label:'誊录书商带来的药方',detail:'一月、口粮 1；灵草 +2，顾好感 +1'},{id:'wage',label:'帮书商跑一趟山路',detail:'一月、口粮 1；银钱 +6，不取得药方'}];
- if(s.pending==='chengFollowup')return [withRequirements({id:'guard',label:'替上师守一夜藏书阁',detail:'一月、口粮 1、心神 −20；程好感 +1、道心 +1'},[resourceRequirement(s,'focus',20)]),{id:'copyForPay',label:'替上师抄卷换资粮',detail:'一月、口粮 1；银钱 +8，不增加好感'},{id:'pass',label:'婉拒这份差事',detail:'不耗月份；此后仍可正常求法'}];
+ if(s.pending==='chengFollowup')return [withRequirements({id:'guard',label:'替上师守一夜藏书阁',detail:'一月、口粮 1、心神 −20；程好感 +1、道心历练'},[resourceRequirement(s,'focus',20)]),{id:'copyForPay',label:'替上师抄卷换资粮',detail:'一月、口粮 1；银钱 +8，不增加好感'},{id:'pass',label:'婉拒这份差事',detail:'不耗月份；此后仍可正常求法'}];
  if(s.pending==='chengReturn'){const leave={id:'back',label:'暂且告退',detail:'不耗月份、不改变关系；这桩旧事以后仍可再谈'};if(s.story.chengRoute==='guard'){const gain=eventProgressGain(s,8);return [withRequirements({id:'askMethod',label:'再请教行气疑难',detail:`一月、口粮 1、心神 −18；本层功行 +${gain}，程好感 +1`},[resourceRequirement(s,'focus',18),progressSpaceRequirement(s,8)]),{id:'askSupply',label:'领一份闭关资粮',detail:'不耗月份；口粮 +5、程好感 −1'},leave];}return [{id:'settle',label:'结清抄卷酬劳',detail:'不耗月份；银钱 +5，程好感 −1'},{id:'gift',label:'留下抄卷作人情',detail:'不耗月份；程好感 +1，放弃酬劳'},leave];}
  if(s.pending?.startsWith('scene-')){
   const id=s.pending.slice(6);
