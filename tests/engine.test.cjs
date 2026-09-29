@@ -840,3 +840,27 @@ test('凡灵仙法卷均可按悟性参透，旧存档已得法卷保留可修',
  let old=G.create();old.version=8;old.manuals.push(2,4);delete old.decodedManuals;delete old.decodeWork;old.insight=7;
  old=G.migrate(old);assert.equal(old.insight,0);assert.ok(G.manualDecoded(old,2)&&G.manualDecoded(old,4));
 });
+
+
+test('五项属性成长 2.0 使用统一隐藏历练阈值且高属性更难成长',()=>{
+ assert.ok(G.aptitudeNeed('root',5)>G.aptitudeNeed('root',2));
+ assert.ok(G.aptitudeNeed('wit',6)>G.aptitudeNeed('wit',3));
+ const s=G.create({origin:'scholar'});assert.deepEqual(s.aptitudeXp,{root:0,wit:0,body:0,dao:0,social:0});
+});
+
+test('研读与采药分别塑造悟性和体魄历练，不再依赖功法固定次数直加属性',()=>{
+ let study=G.create({origin:'herbalist'});study.location='cliff';study.grain=50;study.focus=100;study.events.nextMonth=999;
+ const wit=study.wit;for(let i=0;i<4;i++){study=run(study,'action:study',.99);if(study.pending==='scroll')study=run(study,'choice:reserve',.99);if(study.focus<20)study=run(study,'action:rest',.99);}
+ assert.ok(study.wit>wit,'连续真实研读应积累到一次悟性成长');
+ let gather=G.create({origin:'scholar'});gather.location='mountain';gather.grain=50;gather.focus=100;gather.events.nextMonth=999;gather.flags.herbalist=true;
+ const body=gather.body;for(let i=0;i<10;i++){gather=run(gather,'action:gather',.99);if(gather.pending?.startsWith('scene-'))gather=run(gather,'choice:ignore',.99);if(gather.focus<20)gather=run(gather,'action:rest',.99);}
+ assert.ok(gather.body>body,'长期行山采药应塑造体魄');
+});
+
+test('功法实修不再按旧功法专属周期直接赠送五项属性',()=>{
+ let s=G.create({origin:'scholar'});s.manuals=[0,1];s.decodedManuals=[0,1];s.manual=1;s.grain=100;s.focus=100;s.events.nextMonth=999;
+ const start={wit:s.wit,body:s.body,dao:s.dao,social:s.social};
+ for(let i=0;i<16;i++){s=run(s,'action:cultivate',.99);if(s.pending==='stage')s=run(s,'choice:defer',.99);if(s.focus<20)s=run(s,'action:rest',.99);}
+ assert.equal(s.wit,start.wit);assert.equal(s.body,start.body);assert.equal(s.dao,start.dao);assert.equal(s.social,start.social);
+ assert.ok(s.root>=3,'修行本身通过统一承载历练塑造根骨');
+});
