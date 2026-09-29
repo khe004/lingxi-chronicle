@@ -794,3 +794,18 @@ test('限时破碍修士只在期限内出现',()=>{
  const s=G.create({});s.stage=3;s.progress=30;s.location='arena';s.story.ordeal={triggered:true,resolved:false,triggerMonth:1,visitorUntil:8};s.month=8;
  assert.ok(G.available(s).some(x=>x.id==='ordealDuel'));s.month=9;assert.ok(!G.available(s).some(x=>x.id==='ordealDuel'));
 });
+
+test('心得不再是可积累资源，研读蚀文留下具体研读经历',()=>{
+ let s=G.create({origin:'scholar',talent:'clarity'});s.location='cliff';s.grain=20;s.focus=100;
+ assert.equal(s.insight,0);s=run(s,'action:study',0.99);assert.equal(s.insight,0);assert.equal(s.story.scriptureReads,1);
+});
+test('悟性不再提高参透后的长期功行速度',()=>{
+ const low=G.create({origin:'herbalist'}),high=G.create({origin:'scholar'});low.wit=2;high.wit=7;low.manual=0;high.manual=0;
+ assert.equal(G.cultivationGain(low),G.cultivationGain(high));
+});
+test('新取得功法必须先参悟，悟性越高所需月份越少',()=>{
+ let low=G.create({origin:'herbalist'}),high=G.create({origin:'scholar',talent:'clarity'});
+ low.manuals.push(2);high.manuals.push(2);low.decodedManuals=[0];high.decodedManuals=[0];low.decodeWork=Array(7).fill(0);high.decodeWork=Array(7).fill(0);
+ assert.ok(G.decodeNeed(low,2)>G.decodeNeed(high,2));
+ low.pending='manual';assert.ok(G.options(low).some(o=>o.id==='decode-2'));assert.ok(!G.options(low).some(o=>o.id==='equip-2'));
+});
