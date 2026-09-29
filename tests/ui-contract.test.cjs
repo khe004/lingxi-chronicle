@@ -19,5 +19,11 @@ assert.match(app, /title\.ordealHelp='问气机逆乱'/,
   'the new ordeal investigation should have an explicit prompt title');
 assert.match(app, /description\.ordealHelp='[^']*调查不耗月份，也不锁路线/,
   'the new ordeal investigation should explain that inspection is free and does not lock a route');
+assert.match(style, /@media\(max-width:767px\)\{\s*\.ui-redesign \.compact-values\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/s,
+  'the mobile resource strip should keep all five values across one full-width row');
+assert.match(style, /\.ui-redesign \.compact-values span\{[^}]*flex-direction:row[^}]*white-space:nowrap/,
+  'each mobile resource label and value should stay on the same line');
+assert.match(style, /@media\(max-width:1023px\)\{[\s\S]*?\.ui-redesign \.primary-tabs\{position:fixed[\s\S]*?\.ui-redesign \.compact-values\{display:flex;justify-content:space-between/,
+  'the top resource strip and fixed bottom tabs should switch together, with resources distributed across the row');
 
 console.log('Deadline UI contract checks passed');
