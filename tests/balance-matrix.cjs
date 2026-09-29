@@ -178,9 +178,10 @@ if(require.main===module){
  const outIndex=process.argv.indexOf('--best-out');
  if(outIndex>=0&&!process.argv[outIndex+1])throw Error('--best-out requires a file path');
  const count=Number(process.argv.find(x=>/^\d+$/.test(x))||1);
- const seedStart=Number(process.argv[process.argv.indexOf('--seed-start')+1]||1),seedEnd=Number(process.argv[process.argv.indexOf('--seed-end')+1]||count);
+ const seedStartIndex=process.argv.indexOf('--seed-start'),seedEndIndex=process.argv.indexOf('--seed-end');
+ const seedStart=Number(seedStartIndex>=0?process.argv[seedStartIndex+1]:1),seedEnd=Number(seedEndIndex>=0?process.argv[seedEndIndex+1]:count);
  const originFilter=process.argv.includes('--origin')?process.argv[process.argv.indexOf('--origin')+1]:null,routeFilter=process.argv.includes('--route')?process.argv[process.argv.indexOf('--route')+1]:null;
- if(seedStart<1||seedEnd>count||seedStart>seedEnd)throw Error('invalid seed range');
+ if(!Number.isInteger(seedStart)||!Number.isInteger(seedEnd)||seedStart<1||seedEnd>count||seedStart>seedEnd)throw Error('invalid seed range');
  for(const opening of openings)for(const origin of origins.filter(x=>!originFilter||x===originFilter))for(const talent of talents)for(const route of routes.filter(x=>!routeFilter||x===routeFilter))for(const policy of policies)for(let seed=seedStart;seed<=seedEnd;seed++){
   const x=simulate({origin,talent,route,policy,seed,buyPill,opening});rows.push(x);
   if(x.successMonth==null)continue;
