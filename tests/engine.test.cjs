@@ -897,3 +897,18 @@ test('三次稳固筑元的道心历练达到程上师路线门槛',()=>{
  for(let i=0;i<3;i++){s.progress=G.cap(s);s=run(s,'action:stage',0);assert.equal(s.pending,'stage');s=run(s,'choice:patient',0);}
  assert.equal(s.dao,4);assert.equal(s.aptitudeXp.dao,1);
 });
+
+
+test('人物事件的直接属性奖励迁入统一历练通道',()=>{
+ let s=G.create({origin:'scholar'});s.pending='chengFollowup';s.focus=100;s.grain=30;const dao=s.dao;
+ s=run(s,'choice:guard',.99);assert.equal(s.dao,dao,'一次守阁不应直接道心 +1');assert.ok(s.aptitudeXp.dao>=4,'守阁应留下道心历练');
+ let t=G.create({origin:'scholar'});t.pending='after-cheng-1';t.focus=100;t.grain=30;const dao2=t.dao;
+ t=run(t,'choice:teach',.99);assert.equal(t.dao,dao2,'教习事件不应直接改道心');assert.ok(t.aptitudeXp.dao>=4,'教习应积累道心历练');
+});
+
+test('地点事件按实际解决方式塑造不同属性而不是固定直加',()=>{
+ let s=G.create({origin:'merchant'});s.pending='scene-marketRumor';s.focus=100;s.grain=30;s.events.nextMonth=999;
+ const social=s.social;s=run(s,'choice:bargain',.99);assert.equal(s.social,social);assert.ok(s.aptitudeXp.social>=2);
+ let t=G.create({origin:'herbalist'});t.pending='scene-mountainHerbs';t.focus=100;t.grain=30;t.events.nextMonth=999;
+ const body=t.body;t=run(t,'choice:harvest',.99);assert.equal(t.body,body);assert.ok(t.aptitudeXp.body>=2);
+});
