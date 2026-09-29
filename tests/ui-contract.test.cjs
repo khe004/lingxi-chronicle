@@ -25,5 +25,7 @@ assert.match(style, /\.ui-redesign \.compact-values span\{[^}]*flex-direction:ro
   'each mobile resource label and value should stay on the same line');
 assert.match(style, /@media\(max-width:1023px\)\{[\s\S]*?\.ui-redesign \.primary-tabs\{position:fixed[\s\S]*?\.ui-redesign \.compact-values\{display:flex;justify-content:space-between/,
   'the top resource strip and fixed bottom tabs should switch together, with resources distributed across the row');
+assert.match(style, /@media\(max-width:767px\)\{[\s\S]*?\.ui-redesign \.collection-tabs\{position:static;top:auto;z-index:auto;background:transparent\}/,
+  'mobile collection tabs should scroll with their content on the normal panel background');
 
 console.log('Deadline UI contract checks passed');
