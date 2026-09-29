@@ -104,7 +104,7 @@ function create({name,origin='scholar',talent='clarity',gender='female',elements
  const body=o.body+(t==='vitality'?1:0);
  if(!compatibleElements(elements))throw new RangeError('五行相克或属性无效，不能同时选取');
  const birth=elements.includes('plain')?[]:elements;
-const s={version:9,name:clean,gender:gender==='male'?'male':'female',elements:birth,polarity:Object.hasOwn(POLARITIES,polarity)?polarity:'harmony',affinityPoints:innatePoints(birth,polarity),knownTechniques:[],techniquePractice:{},codex:{people:[],beasts:[],combatants:[],combatantNotes:{},gear:[],elixirs:[]},origin:ORIGINS[origin]?origin:'scholar',talent:t,month:0,ageMonths:16*12,lifeLimitMonths:(o.life+(body-3)+(t==='vitality'?6:0))*12,location:'temple',stage:0,progress:0,totalProgress:0,practice:[0,0,0,0,0,0,0],affinityTraining:[0,0,0,0,0,0,0],studyWork:0,manuals:[0],decodedManuals:[0],decodeWork:[0,0,0,0,0,0,0],foundationGrades:[],foundationStrain:0,focus:100,wounds:0,silver:o.silver,grain:o.grain,herbs:o.herbs,root:o.root+(t==='meridian'?1:0),wit:o.wit,body,dao:3,social:o.social,insight:0,foundation:0,manual:0,spring:0,npcFavor:{gu:0,ye:0,cheng:0,lu:0,wen:0},flags:{scroll:false,herbalist:false,mentor:false,elixir:false},elixirBoost:0,story:{arenaLessonSeen:false,yeRoute:null,yeMonth:null,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0,guRoute:null,guMonth:null,chengRoute:null,chengMonth:null,guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false},events:{seen:[],nextMonth:0},trainingGear:{staff:false,vest:false,shoes:false,talisman:false},sparRecord:{wins:0,losses:0,withdrawals:0,draws:0,last:null},combat:null,pending:null,ending:null,logs:[],books:[]};
+const s={version:10,name:clean,gender:gender==='male'?'male':'female',elements:birth,polarity:Object.hasOwn(POLARITIES,polarity)?polarity:'harmony',affinityPoints:innatePoints(birth,polarity),knownTechniques:[],techniquePractice:{},codex:{people:[],beasts:[],combatants:[],combatantNotes:{},gear:[],elixirs:[]},origin:ORIGINS[origin]?origin:'scholar',talent:t,month:0,ageMonths:16*12,lifeLimitMonths:(o.life+(body-3)+(t==='vitality'?6:0))*12,location:'temple',stage:0,progress:0,totalProgress:0,practice:[0,0,0,0,0,0,0],affinityTraining:[0,0,0,0,0,0,0],aptitudeXp:{root:0,wit:0,body:0,dao:0,social:0},studyWork:0,manuals:[0],decodedManuals:[0],decodeWork:[0,0,0,0,0,0,0],foundationGrades:[],foundationStrain:0,focus:100,wounds:0,silver:o.silver,grain:o.grain,herbs:o.herbs,root:o.root+(t==='meridian'?1:0),wit:o.wit,body,dao:3,social:o.social,insight:0,foundation:0,manual:0,spring:0,npcFavor:{gu:0,ye:0,cheng:0,lu:0,wen:0},flags:{scroll:false,herbalist:false,mentor:false,elixir:false},elixirBoost:0,story:{arenaLessonSeen:false,yeRoute:null,yeMonth:null,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0,guRoute:null,guMonth:null,chengRoute:null,chengMonth:null,guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false},events:{seen:[],nextMonth:0},trainingGear:{staff:false,vest:false,shoes:false,talisman:false},sparRecord:{wins:0,losses:0,withdrawals:0,draws:0,last:null},combat:null,pending:null,ending:null,logs:[],books:[]};
  note(s,openingStory(s.origin,s.talent),'开篇');return syncIds(s);
 }
 function note(s,text,tag='日常',effect=''){s.logs.push({month:s.month,text,tag,effect,...(s.batchActive&&['修行','日常','采集'].includes(tag)?{batch:true}:{})});if(s.logs.length>220)s.logs.shift();
@@ -217,7 +217,7 @@ function finishSpar(s,result){const c=s.combat,storyEncounter=c.storyEncounter,r
   record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']=(record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']||0)+1;
   record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity}};
   s.story.arenaFirstWins=s.story.arenaFirstWins||{};let reward='';
-  if(result==='胜出'&&!s.story.arenaFirstWins[c.id]){s.story.arenaFirstWins[c.id]=true;if(c.id==='novice'){s.story.arenaLessons=(s.story.arenaLessons||0)+1;reward='演武见闻 +1';}else if(c.id==='keeper'){s.dao=clamp(s.dao+1,0,6);reward='道心 +1';}else if(c.id==='swift'){add(s,{silver:4});reward='银钱 +4';}if(reward){c.history[c.history.length-1]+=`守坪弟子记下你的首次胜绩，并送上演武首胜之礼（${reward}）。`;record.last.history=c.history.slice();}}
+  if(result==='胜出'&&!s.story.arenaFirstWins[c.id]){s.story.arenaFirstWins[c.id]=true;if(c.id==='novice'){s.story.arenaLessons=(s.story.arenaLessons||0)+1;reward='演武见闻 +1';}else if(c.id==='keeper'){gainAptitude(s,'dao',3,'与护台人反复印证守势');reward='道心历练';}else if(c.id==='swift'){add(s,{silver:4});reward='银钱 +4';}if(reward){c.history[c.history.length-1]+=`守坪弟子记下你的首次胜绩，并送上演武首胜之礼（${reward}）。`;record.last.history=c.history.slice();}}
   note(s,`你将这个月的大半闲暇用在演武坪。与${c.enemy.name}正式换招后，又调息养气、复盘得失，并以数次短练印证这一战。`,'演武',`耗时 1 月${reward?' · 首胜 '+reward:''}`);turn(s);
  }
  if(storyEncounter)record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity},storyEncounter};
@@ -297,11 +297,16 @@ function eventProgressGain(s,amount){
  const remainingPractice=s.manual===1&&s.root<3?Math.max(0,16-s.practice[1]):s.manual===2&&!s.manuals.some(m=>ITEMS.manual[m]?.rarity==='仙品')?Math.max(0,14-s.practice[2]):0;
  return Math.max(0,Math.round(Math.min(amount,cap(s)-s.progress-remainingPractice*cultivationGain(s))*100)/100);
 }
-function studyNeed(wit){return 2+(wit-2)**2;}
-function study(s){if(s.wit>=8)return;
- s.studyWork++;
- if(s.studyWork>=studyNeed(s.wit)){s.studyWork=0;s.wit++;note(s,`反复推敲蚀文之后，你的悟性提升至 ${s.wit}。`,'悟道','悟性 +1');}
-}
+const APTITUDE_NAMES={root:'根骨',wit:'悟性',body:'体魄',dao:'道心',social:'处世'};
+const APTITUDE_CAPS={root:8,wit:8,body:8,dao:6,social:8};
+function aptitudeNeed(key,level){const base={root:7,wit:7,body:7,dao:8,social:7}[key]||7;return base+Math.max(0,level-2)*3;}
+function aptitudeXp(s){s.aptitudeXp=s.aptitudeXp||{root:0,wit:0,body:0,dao:0,social:0};for(const key of Object.keys(APTITUDE_NAMES))if(!Number.isFinite(s.aptitudeXp[key]))s.aptitudeXp[key]=0;return s.aptitudeXp;}
+function gainAptitude(s,key,amount=1,reason='长期历练'){if(!Object.hasOwn(APTITUDE_NAMES,key)||amount<=0)return false;const cap=APTITUDE_CAPS[key],xp=aptitudeXp(s);if(s[key]>=cap){xp[key]=0;return false;}xp[key]+=amount;let raised=false;
+ while(s[key]<cap&&xp[key]>=aptitudeNeed(key,s[key])){xp[key]-=aptitudeNeed(key,s[key]);s[key]++;raised=true;note(s,`${reason}，你的${APTITUDE_NAMES[key]}提升至 ${s[key]}。`,key==='wit'?'悟道':'修行',`${APTITUDE_NAMES[key]} +1`);}
+ if(s[key]>=cap)xp[key]=0;s.studyWork=xp.wit;return raised;}
+function studyNeed(wit){return aptitudeNeed('wit',wit);}
+function study(s){gainAptitude(s,'wit',2,'反复推敲蚀文');}
+
 function missingAttributes(s,manual){return Object.entries(ITEMS.manual[manual]?.requirements||{}).filter(([k,v])=>s[k]<v).map(([k,v])=>`${{root:'根骨',wit:'悟性',dao:'道心',body:'体魄'}[k]} ${v}`);}
 function stageChance(s,mode='patient'){
  const raw=8+manualPower(s)*9+s.root*2+s.dao*2+effectiveBody(s)*1.5+Math.min(16,Math.floor(s.totalProgress/25))-(s.stage*7)-(s.wounds*8)+(s.talent==='meridian'?5:0)+(mode==='patient'?12:-8);
@@ -317,20 +322,14 @@ function affinityTrainingNeed(s,manual){
  const base=method.rarity==='仙品'?10:method.rarity==='灵品'?14:method.rarity==='凡品'?8:24;
  return Math.ceil(base*(level>=5?2.8:level>=4?1.7:1));
 }
-function trainAttribute(s){const n=++s.practice[s.manual],manual=s.manual;
+function trainAttribute(s){++s.practice[s.manual];const manual=s.manual;
  s.affinityTraining=s.affinityTraining||Array(ITEMS.manual.length).fill(0);s.affinityTraining[manual]=(s.affinityTraining[manual]||0)+1;
  const need=affinityTrainingNeed(s,manual);
  if(s.affinityTraining[manual]>=need){s.affinityTraining[manual]=0;const method=ITEMS.manual[manual],elements=method.elements.length?method.elements:Object.keys(ELEMENTS),polarities=method.polarity==='harmony'?['yin','yang']:[method.polarity];
   const raised=[...elements,...polarities].filter(key=>raiseAffinity(s,key));
   if(raised.length)note(s,`你长期循${method.name}调息，${raised.map(key=>ELEMENTS[key]||POLARITIES[key]).join('、')}的亲和更进一步。`,'修行');}
-
- if(manual===0&&n%48===0&&s.wit<8){s.wit++;note(s,'持久吐纳之后，你对行气的悟性略有增进。','修行');}
- if(manual===1&&n%16===0&&s.root<8){s.root++;note(s,'青篆行气渐熟，根骨受到温养。','修行');}
- if(manual===2&&n%14===0){if(s.root<8)s.root++;if(s.dao<6)s.dao++;note(s,'澄元导脉经淬炼根骨，也使求道之心更笃定。','修行');}
- if(manual===3&&n%12===0&&s.body<8){s.body++;s.lifeLimitMonths+=12;note(s,'太微真章洗炼形神，体魄提升，寿限延长一年。','延寿');}
- if(manual===4&&n%14===0&&s.wit<8){s.wit++;note(s,'星篆逐渐明朗，你对蚀文的理解更深，悟性有所增长。','悟道','悟性 +1');}
- if(manual===5&&n%12===0&&s.herbs>=1){add(s,{herbs:-1,wounds:-1});if(s.body<8){s.body++;s.lifeLimitMonths+=24;}note(s,'你耗去一株灵草依青华法温养经脉，伤势渐轻，体魄提升并延寿两年。','延寿','灵草 −1');}
- if(manual===6&&n%16===0&&s.social<8){s.social++;note(s,'行云寄脉书中人脉与气脉互参，你更懂得与同道往来。','修行');}
+ const rarity=ITEMS.manual[manual]?.rarity||'基础';gainAptitude(s,'root',rarity==='仙品'?2:1,'长期承受吐纳行气');
+ if(manual===5&&s.practice[manual]%12===0&&s.herbs>=1){add(s,{herbs:-1,wounds:-1});s.lifeLimitMonths+=12;gainAptitude(s,'body',2,'依青华法以灵草温养经络');note(s,'你耗去一株灵草依青华法温养经脉，伤势渐轻，寿限延长一年。','延寿','灵草 −1 · 寿限 +1 年');}
 }
 function upgradeRoutes(s){s.version=7;upgradeAffinity(s);s.practice=Array.from({length:ITEMS.manual.length},(_,i)=>s.practice?.[i]||0);s.npcFavor={gu:0,ye:0,cheng:0,wen:0,...s.npcFavor,lu:s.npcFavor?.lu||0,wen:s.npcFavor?.wen||0};s.story={guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:s.origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false,...s.story};return syncIds(s);}
 function upgradeStory(s){
@@ -341,7 +340,7 @@ function upgradeStory(s){
  s.version=6;return s;
 }
 function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(input.books)||!Number.isFinite(input.ageMonths))return null;
- if(input.version===9||input.version===8||input.version===7){input.version=9;input.techniquePractice=input.techniquePractice||{};input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
+ if(input.version===10||input.version===9||input.version===8||input.version===7){input.version=10;input.techniquePractice=input.techniquePractice||{};input.aptitudeXp=input.aptitudeXp||{root:0,wit:Math.max(0,input.studyWork||0),body:0,dao:0,social:0};input.studyWork=input.aptitudeXp.wit||0;input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
   if(!input.affinityPoints||'plain' in input.affinityPoints||'harmony' in input.affinityPoints){input=upgradeAffinity(copy(input));}
   input.story=input.story||{};input.story.ordeal=input.story.ordeal||null;input.insight=0;input.decodedManuals=input.decodedManuals||[...new Set([0,...(input.manuals||[])])];input.decodeWork=input.decodeWork||Array(ITEMS.manual.length).fill(0);input.codex=input.codex||{};input.codex.combatants=input.codex.combatants||[];input.codex.combatantNotes=input.codex.combatantNotes||{};input.codex.elixirs=(input.codex.elixirs||[]).filter(id=>id!=='yangyuan');
   for(const id of input.codex.beasts||[]){if(!input.codex.combatants.includes(id)){input.codex.combatants.push(id);const foe=SPAR_OPPONENTS[id],seenArts=foe?.innate?Object.keys(FOE_ARTS).filter(art=>FOE_ARTS[art].name===foe.innate):[];input.codex.combatantNotes[id]={kind:'beast',seenArts,seenGear:[]};}}
@@ -597,7 +596,7 @@ function rawOptions(s){
  if(s.pending==='mentor')return [{id:'serve',label:'整理道书，先结一份善缘 · 仅一次',detail:`一月、口粮 1；留下校卷经历、银钱 +2、程上师好感 +${s.social>=5?2:1}`,disabled:s.flags.mentor},{id:'guidance',label:`请教${ITEMS.manual[2].name} · 需好感 1、实际整理过旧卷、根骨 3、悟性 3`,detail:'一月、口粮 1；取得灵品法卷，到手后仍需参悟才能修习',rarity:ITEMS.manual[2].rarity,disabled:s.npcFavor.cheng<1||!s.flags.mentor||missingAttributes(s,2).length>0||s.manuals.includes(2)},...(s.story?.trueTextReady&&!s.manuals.includes(3)?[{id:'raretext',label:`求取${ITEMS.manual[3].name} · 需好感 3、灵草 2、根骨 4、悟性 4、道心 4`,detail:'一月、口粮 1、灵草 −2、程上师好感 −1；取得仙品法卷，到手后仍需参悟',rarity:ITEMS.manual[3].rarity,disabled:s.npcFavor.cheng<3||s.herbs<2||missingAttributes(s,3).length>0||s.manuals.includes(3)}]:[]),{id:'depart',label:'告辞',detail:'不耗月份与资源'}];
  if(s.pending==='spring'){const path=springPath(s),routeLabel=path.name==='叶青蘅同行'?'与叶青蘅同行':path.name==='叶青蘅旧图'?'按叶青蘅旧图':path.name==='独行泉径'?'循独行泉径':'请故友引路';const mountain=s.location==='mountain';return [...(mountain?[{id:'common',label:`取用${ITEMS.spring[1].name}`,rarity:ITEMS.spring[1].rarity,detail:'一月、口粮 1；无额外门槛',disabled:s.spring>=1},{id:'deep',label:`循地脉寻${ITEMS.spring[2].name}`,rarity:ITEMS.spring[2].rarity,detail:'一月、口粮 1、心神 −25；需至少实际研读过蚀文',disabled:!s.flags.scroll||s.focus<25||s.spring>=2},{id:'hidden',label:`${routeLabel}寻${ITEMS.spring[3].name}`,rarity:ITEMS.spring[3].rarity,detail:`一月、口粮 1、银钱 −${path.silver}、心神 −${path.focus}；需已有泉径线索${path.name==='独行泉径'?'、根骨 4／悟性 5／道心 4 之一':path.name==='叶青蘅旧图'?'、顾闻溪好感 1':'、顾闻溪与叶青蘅好感各 1'}`,disabled:!path.ready||s.silver<path.silver||s.focus<path.focus||s.spring>=3},...(s.story.stoneClue?[{id:'stone',label:`取用${ITEMS.spring[5].name}`,rarity:'仙品',detail:`一月、口粮 1、灵草 −${s.story.stonePriority?1:2}、心神 −30；需已取得石髓池线索、根骨 4、体魄 4；未养足体魄会留下暗伤${s.story.stonePriority?'；优先权减免 1 株灵草':''}`,disabled:s.root<4||s.body<4||s.herbs<(s.story.stonePriority?1:2)||s.focus<30||s.wounds>=5||s.spring>=3}]:[])]:[]),...(!mountain&&s.story.sealPermit?[{id:'sealed',label:`取用${ITEMS.spring[4].name}`,rarity:'仙品',detail:'一月、口粮 1、灵草 −2、心神 −20；需已取得池契；可疗暗伤，但顶级品相仍要稳固元基',disabled:s.herbs<2||s.focus<20||s.spring>=3}]:[]),{id:'back',label:'暂不决定',detail:'不耗月份与资源'}];}
  if(s.pending==='manual')return s.manuals.map(m=>{const decoded=manualDecoded(s,m),p=decodeProgress(s,m),missing=affinityMissing(s,ITEMS.manual[m]);return decoded?{id:`equip-${m}`,label:`修习${ITEMS.manual[m].name} · 本层上限 ${cap(s,m)} · 每月约 +${ITEMS.manual[m].speed}`,detail:missing.join('、')||'法义已明，属性已契合',rarity:ITEMS.manual[m].rarity,disabled:m===s.manual||missing.length>0}:{id:`decode-${m}`,label:`参悟${ITEMS.manual[m].name} · ${p.current} / ${p.required} 月`,detail:`一月、口粮 1、心神 −16；悟性 ${s.wit}${s.talent==='clarity'?' · 慧心缩短参悟':''}`,rarity:ITEMS.manual[m].rarity,disabled:s.focus<12};}).concat({id:'back',label:'暂不切换'});
- if(s.pending==='stage')return [{id:'patient',label:`稳固根基 · 成功率 ${stageChance(s)}% · 预计${['','下','中','上'][stageGrade(s,'patient')]}品元基`,detail:`两月、口粮 2、心神 −10；成功道心 +1，失败暗伤 +1、裂隙 +1${downgradeChance(s,'patient')?`；成功仍有 ${downgradeChance(s,'patient')}% 降一品风险`:''}`,disabled:s.grain<3||s.progress<cap(s)},{id:'hasty',label:`急进冲关 · 成功率 ${stageChance(s,'hasty')}% · 预计${['','下','中','上'][stageGrade(s,'hasty')]}品元基`,detail:`一月、口粮 1；成功暗伤 +1，失败暗伤 +2、裂隙 +2${downgradeChance(s,'hasty')?`；成功仍有 ${downgradeChance(s,'hasty')}% 降一品风险`:''}`,disabled:s.progress<cap(s)},{id:'restore',label:`静养修补元基 · 当前裂隙 ${s.foundationStrain||0}`,detail:'两月、口粮 2、灵草 −1、心神 −12；裂隙 −1，伤势另需调养',disabled:!(s.foundationStrain>0)||s.herbs<1||s.grain<3||s.focus<12},{id:'defer',label:'暂缓冲关 · 留待换法或调养',detail:'不耗月份与资源'}];
+ if(s.pending==='stage')return [{id:'patient',label:`稳固根基 · 成功率 ${stageChance(s)}% · 预计${['','下','中','上'][stageGrade(s,'patient')]}品元基`,detail:`两月、口粮 2、心神 −10；稳固过程积累道心历练，失败暗伤 +1、裂隙 +1${downgradeChance(s,'patient')?`；成功仍有 ${downgradeChance(s,'patient')}% 降一品风险`:''}`,disabled:s.grain<3||s.progress<cap(s)},{id:'hasty',label:`急进冲关 · 成功率 ${stageChance(s,'hasty')}% · 预计${['','下','中','上'][stageGrade(s,'hasty')]}品元基`,detail:`一月、口粮 1；成功暗伤 +1，失败暗伤 +2、裂隙 +2${downgradeChance(s,'hasty')?`；成功仍有 ${downgradeChance(s,'hasty')}% 降一品风险`:''}`,disabled:s.progress<cap(s)},{id:'restore',label:`静养修补元基 · 当前裂隙 ${s.foundationStrain||0}`,detail:'两月、口粮 2、灵草 −1、心神 −12；裂隙 −1，伤势另需调养',disabled:!(s.foundationStrain>0)||s.herbs<1||s.grain<3||s.focus<12},{id:'defer',label:'暂缓冲关 · 留待换法或调养',detail:'不耗月份与资源'}];
  if(s.pending==='attempt')return [{id:'steady',label:`守正开脉 · 成功率 ${chance(s)}%`,detail:'一月、口粮 1、心神 −35；失败即终局'},{id:'bold',label:`强求上品 · 成功率 ${chance(s,'bold')}%`,detail:'一月、口粮 1、心神 −35；提高冲出高品与大幅掉档的机会，失败即终局'},{id:'back',label:'再准备一番',detail:'不耗月份与资源'}];
  return [];
 }
@@ -608,7 +607,7 @@ function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
  const base=[{id:'secludeYear',label:'闭关修炼',detail:blocked?'气机逆乱中：闭关只会尝试一个月并立即中断':batchRisk?'已接近本章期限或暗伤过重，请逐月决定行动':'自动逐月结算，至多一年；满额、事件、缺粮或危险即停；后山可采药补给',disabled:s.progress>=cap(s)||batchRisk},{id:'cultivate',label:'吐纳修炼',detail:blocked?`一月、口粮 1、心神 −22 · 气机逆乱未解，功行 +0`:`一月、口粮 1、心神 −22 · 功行约 +${cultivationGain(s)}，本层上限 ${cap(s)}`,disabled:s.focus<18||s.progress>=cap(s)},{id:'manual',label:'切换功法',detail:`打开菜单不耗月份 · 已得 ${s.manuals.length} 门，未参透的法卷须先参悟`},{id:'rest',label:'静养调息',detail:`一月、口粮 1 · 心神约 +${48+(effectiveBody(s)-3)*4+(s.talent==='vitality'?12:0)}、暗伤 −${effectiveBody(s)>=5?2:1}`}];
  if(s.location==='cliff'){
   for(const part of [1,2])if(afterManualReady(s,'gu',part))base.push({id:`after-gu-${part}`,label:part===1?'顾闻溪 · 星篆误字':'顾闻溪 · 校本来信',detail:'得法后的旧事有了下文；打开不耗月份'});
-  base.push({id:'study',label:'研读蚀文',detail:`一月、口粮 1、心神 −16 · 留下研读经历 · ${s.wit>=8?'悟性已至上限':`悟性修习 ${s.studyWork}/${studyNeed(s.wit)}`}`,disabled:s.focus<12});
+  base.push({id:'study',label:'研读蚀文',detail:`一月、口粮 1、心神 −16 · 留下具体卷页、异文与理解${s.wit>=8?' · 悟性已至上限':''}`,disabled:s.focus<12});
   if(s.flags.scroll&&!s.story?.guRoute&&s.month>=(s.story?.guMonth??0)+3)base.push({id:'guFollowup',label:'顾闻溪来邀校卷',detail:'她记得你如何处理那页残卷；打开事件不耗月份'});
   if(['compare','commission'].includes(s.story?.guRoute)&&!s.story?.guReturn&&s.month>=s.story.guMonth+5)base.push({id:'guReturn',label:'顾闻溪的回信',detail:'此前的合作有了下文；打开事件不耗月份'});
   if(s.flags.scroll&&!s.story.guText&&!s.manuals.includes(4))base.push({id:'guText',label:'追索残篇异文',detail:'那页蚀文似乎还有前后残缺；可与顾闻溪合校，也可独自考据，打开不耗时'});
@@ -719,7 +718,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(id==='cultivate'){const gained=ordealActive(s)?0:Math.min(cultivationGain(s),Math.max(0,cap(s)-s.progress));s.progress=Math.round((s.progress+gained)*100)/100;s.totalProgress=Math.round((s.totalProgress+gained)*100)/100;add(s,{focus:-22});if(!ordealActive(s))trainAttribute(s);if((s.elixirBoost||0)>0)s.elixirBoost--;note(s,ordealActive(s)?'你依旧法强行吐纳一月，逆乱气机却总在同一处折返，未能积下新的功行。':`你依${ITEMS.manual[s.manual].name}吐纳行气，积累这一层的功行。`,'修行',`功行 +${gained.toFixed(2)}${s.elixirBoost>0?` · 聚气余效 ${s.elixirBoost} 次`:''}`);turn(s);if(!s.ending){ensureOrdeal(s);if(s.stage<3&&s.progress>=cap(s))s.pending='stage';}}
   if(id==='rest'){const body=effectiveBody(s);add(s,{focus:48+(body-3)*4+(s.talent==='vitality'?12:0),wounds:body>=5?-2:-1});note(s,'你暂歇一月，收束杂念，调养经脉。','日常');turn(s);}
   if(id==='study'){add(s,{focus:-16});s.story.scriptureReads=(s.story.scriptureReads||0)+1;note(s,'你推演蚀文，一字多解。留下的是读过的卷页、校过的异文与自己的理解，而不是可积攒的“研读经历”。','研经',`蚀文研读 ${s.story.scriptureReads} 次`);study(s);turn(s);if(!s.ending&&!s.flags.scroll){s.flags.scroll=true;s.pending='scroll';}}
-  if(id==='gather'){add(s,{focus:-15,herbs:rand(rng)<.28?2:1,grain:5});if(s.story.yeText&&s.story.yeText!=='complete')s.story.yeHerbWork=Math.min(2,(s.story.yeHerbWork||0)+1);note(s,'你沿山径采下灵草，也带回一些野菜与谷物，足够支撑一阵子。','采集');turn(s);if(!s.ending&&!s.flags.herbalist){s.flags.herbalist=true;s.pending='herbalist';}}
+  if(id==='gather'){add(s,{focus:-15,herbs:rand(rng)<.28?2:1,grain:5});gainAptitude(s,'body',1,'长期行山采药');if(s.story.yeText&&s.story.yeText!=='complete')s.story.yeHerbWork=Math.min(2,(s.story.yeHerbWork||0)+1);note(s,'你沿山径采下灵草，也带回一些野菜与谷物，足够支撑一阵子。','采集');turn(s);if(!s.ending&&!s.flags.herbalist){s.flags.herbalist=true;s.pending='herbalist';}}
   if(id==='yeFollowup')s.pending='yeFollowup';
   if(id==='stoneScout')s.pending='stoneScout';
   if(['guFollowup','guReturn','chengFollowup','chengReturn','guText','guFinish','yeText','yeFinish','luMeet','luReturn','sealAudience','stoneScout'].includes(id))s.pending=id;
@@ -736,7 +735,7 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(id==='findFragments'){add(s,{focus:-24,wounds:effectiveBody(s)<4?1:0});s.story.guFragments=true;note(s,'你循残卷中的山势标记，从岩缝里找到星篆缺页。此行劳损经脉，需回千丈岩试行真章。','法门');turn(s);}
   if(id==='bodyTonic'){add(s,{herbs:-2,focus:-16,body:1});s.lifeLimitMonths+=12;note(s,'你依叶青蘅所示，将两株灵草炼为温养汤，体魄稍健，寿限也延长一年。','延寿','体魄 +1 · 寿限 +1 年');turn(s);}
   if(id==='heal'){add(s,{silver:-5,wounds:-2,focus:12});note(s,'医者以药汤疏通郁结，暗伤渐消。','伤病');turn(s);}
-  if(id==='marketWalk'){note(s,'你在坊市听商贩与行脚修士议论山中近况，顺手帮摊主理了货。','交易');if(!s.story.luHeard){s.story.luHeard=true;note(s,'坊间有人说商旅陆知衡正在寻护卷之人，你记住了他的名字。','人情');}turn(s);sceneEvent(s,rng);if(!s.pending&&!s.ending){add(s,{silver:2});note(s,'这一月没有新奇线索，摊主结了两两工钱。','交易','银钱 +2');}return s;}
+  if(id==='marketWalk'){gainAptitude(s,'social',2,'在坊市反复识人议价');note(s,'你在坊市听商贩与行脚修士议论山中近况，顺手帮摊主理了货。','交易');if(!s.story.luHeard){s.story.luHeard=true;note(s,'坊间有人说商旅陆知衡正在寻护卷之人，你记住了他的名字。','人情');}turn(s);sceneEvent(s,rng);if(!s.pending&&!s.ending){add(s,{silver:2});note(s,'这一月没有新奇线索，摊主结了两两工钱。','交易','银钱 +2');}return s;}
   if(id==='buyelixir'){add(s,{silver:-10});s.flags.elixir=true;s.elixirBoost=6;note(s,`你换来一枚${ITEMS.elixir.name}。接下来六次实际吐纳，所得功行提高四分之一。`,'修行','银钱 −10 · 6 次吐纳功行 +25%');}
   if(s.month>beforeMonth)sceneEvent(s,rng);
  }
@@ -898,11 +897,11 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
    if(id==='defer')return s;
    if(id==='restore'){add(s,{herbs:-1,focus:-12});turn(s);if(s.ending)return s;turn(s);if(s.ending)return s;s.foundationStrain=Math.max(0,(s.foundationStrain||0)-1);note(s,'你以灵草缓缓温养破损的元基，裂隙合拢一层。暗伤仍须另行调养。','突破',`元基裂隙 ${s.foundationStrain}`);return s;}
    const old=s.stage,odds=stageChance(s,id),expected=stageGrade(s,id),drop=downgradeChance(s,id);
-   if(id==='patient')add(s,{focus:-10});
+   if(id==='patient'){add(s,{focus:-10});gainAptitude(s,'dao',2,'耐心稳固元基');}
    turn(s);if(s.ending)return s;
    if(id==='patient'){turn(s);if(s.ending)return s;}
    if(rand(rng)<odds/100){const lowered=drop>0&&rand(rng)<drop/100,grade=Math.max(1,expected-(lowered?1:0));s.stage++;s.progress=0;s.foundationGrades.push(grade);s.foundationStrain=0;
-    if(id==='patient')add(s,{foundation:1,dao:1});else add(s,{wounds:1});
+    if(id==='patient')add(s,{foundation:1});else add(s,{wounds:1});
     note(s,`你依${ITEMS.manual[s.manual].name}冲开第${old+1}道筑元关，${lowered?'旧日冲关留下的元基裂隙在合脉时复发，品级跌落一档，':''}凝成${['','下品','中品','上品'][grade]}元基，踏入${STAGES[s.stage]}。`,'突破');
     if(s.month%12===0){const current=s.books.find(b=>b.year===year(s.month));if(current)current.stage=STAGES[s.stage];}
     if(s.wounds>=6)end(s,'death','仓促冲关留下的暗伤齐发，你终究未能走出这一关。');
