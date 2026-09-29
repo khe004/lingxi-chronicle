@@ -543,9 +543,9 @@ function rawOptions(s){
  if(s.ending)return [];
  if(s.pending==='ordealHelp')return [...ordealNpcOptions(s),{id:'back',label:'暂不求助',detail:'调查不耗月份，也不锁定人物或演武路线'}];
  if(s.pending==='guText')return [withRequirements({id:'collaborate',label:'与顾闻溪合校残篇',detail:'一月、口粮 1、心神 −16；日后仍要搜集缺页'},[requirement('顾闻溪好感',s.npcFavor.gu,1),requirement('蚀文研读',s.story.scriptureReads||0,2),resourceRequirement(s,'wit',4),resourceRequirement(s,'focus',16)]),withRequirements({id:'independent',label:'自购残篇，独自考据',detail:'一月、口粮 1、银钱 −6、心神 −20；顾好感 −1'},[resourceRequirement(s,'silver',6),requirement('蚀文研读',s.story.scriptureReads||0,3),resourceRequirement(s,'wit',5),resourceRequirement(s,'focus',20)]),{id:'back',label:'暂不立题',detail:'不耗月份与资源；日后仍可继续追索'}];
- if(s.pending==='guFinish'){const req=[{label:'星篆缺页',current:s.story.guFragments?'已齐':'未齐',required:'已齐',met:!!s.story.guFragments,text:`星篆缺页 ${s.story.guFragments?'已齐':'未齐'} / 已齐`},requirement('蚀文研读',s.story.scriptureReads||0,3),resourceRequirement(s,'root',3),resourceRequirement(s,'wit',5),practiceAnyRequirement(s,{1:8,2:6,6:8}),resourceRequirement(s,'focus',25),...(s.story.guText==='independent'?[resourceRequirement(s,'herbs',1)]:[]),{label:'真章',current:s.manuals.includes(4)?'已习得':'未习得',required:'未习得',met:!s.manuals.includes(4),text:s.manuals.includes(4)?'《星篆玄息录》已习得':'《星篆玄息录》尚未习得'}];return [withRequirements({id:'verify',label:'试行校成的星篆法',rarity:'仙品',detail:`一月、口粮 1、心神 −25${s.story.guText==='independent'?'、灵草 −1':''}；所得真章适合考据修行`},req),{id:'back',label:'继续推敲'}];}
+ if(s.pending==='guFinish'){const req=[{label:'残篇缺页',current:s.story.guFragments?'已齐':'未齐',required:'已齐',met:!!s.story.guFragments,text:`残篇缺页 ${s.story.guFragments?'已齐':'未齐'} / 已齐`},requirement('蚀文研读',s.story.scriptureReads||0,3),resourceRequirement(s,'root',3),resourceRequirement(s,'wit',5),practiceAnyRequirement(s,{1:8,2:6,6:8}),resourceRequirement(s,'focus',25),...(s.story.guText==='independent'?[resourceRequirement(s,'herbs',1)]:[]),{label:'校本',current:s.manuals.includes(4)?'已完成':'未完成',required:'未完成',met:!s.manuals.includes(4),text:s.manuals.includes(4)?'残篇已校成':'残篇尚待试行核定'}];return [withRequirements({id:'verify',label:'试行校成的残篇',detail:`一月、口粮 1、心神 −25${s.story.guText==='independent'?'、灵草 −1':''}；只有亲自运转后，才能知道这些散页究竟记载了什么`},req),{id:'back',label:'继续推敲'}];}
  if(s.pending==='yeText')return [withRequirements({id:'tend',label:'替叶青蘅养护泉脉',detail:'一月、口粮 1、灵草 −1、心神 −16；叶好感 +1；后续须亲自采药验证'},[resourceRequirement(s,'herbs',1),resourceRequirement(s,'focus',16)]),withRequirements({id:'sample',label:'独取药径泉样',detail:'一月、口粮 1、灵草 −1、心神 −12、暗伤 +1；叶好感 −1，换取独立验证'},[resourceRequirement(s,'herbs',1),resourceRequirement(s,'focus',12),requirement('暗伤',s.wounds,4,'max')]),{id:'back',label:'暂不问法',detail:'不耗月份与资源；日后仍可再来'}];
- if(s.pending==='yeFinish'){const req=[requirement('采药验证',s.story.yeHerbWork||0,2),requirement('蚀文研读',s.story.scriptureReads||0,2),resourceRequirement(s,'root',4),resourceRequirement(s,'wit',3),resourceRequirement(s,'body',4),practiceAnyRequirement(s,{1:10,2:6,6:10}),resourceRequirement(s,'herbs',2),resourceRequirement(s,'focus',22),{label:'青华篇',current:s.manuals.includes(5)?'已习得':'未习得',required:'未习得',met:!s.manuals.includes(5),text:s.manuals.includes(5)?'《青华养脉篇》已习得':'《青华养脉篇》尚未习得'}];return [withRequirements({id:'healVein',label:'以灵草试行青华篇',rarity:'仙品',detail:'一月、口粮 1、灵草 −2、心神 −22'},req),{id:'back',label:'留待来日'}];}
+ if(s.pending==='yeFinish'){const req=[requirement('采药验证',s.story.yeHerbWork||0,2),requirement('蚀文研读',s.story.scriptureReads||0,2),resourceRequirement(s,'root',4),resourceRequirement(s,'wit',3),resourceRequirement(s,'body',4),practiceAnyRequirement(s,{1:10,2:6,6:10}),resourceRequirement(s,'herbs',2),resourceRequirement(s,'focus',22),{label:'药径法',current:s.manuals.includes(5)?'已完成':'未完成',required:'未完成',met:!s.manuals.includes(5),text:s.manuals.includes(5)?'药径法已验证':'还需完成最后一次养脉验证'}];return [withRequirements({id:'healVein',label:'以灵草验证养脉法',detail:'一月、口粮 1、灵草 −2、心神 −22；若经络与泉药之法真正相合，也许会显出完整传承'},req),{id:'back',label:'留待来日'}];}
  if(s.pending==='luMeet')return [{id:'pledge',label:'押资护卷，立下契书',detail:'一月、口粮 1、银钱 −6；需处世 4、根骨 3、悟性 3；得灵品《行云寄脉书》，以后还要履约换回真章',rarity:'灵品',disabled:s.silver<6||s.social<4||missingAttributes(s,6).length>0},{id:'escort',label:'替商队护送散卷',detail:'一月、口粮 1、心神 −30、暗伤 +1；需体魄 3、根骨 3、悟性 3；得灵品过渡法',rarity:'灵品',disabled:s.focus<30||s.body<3||s.wounds>=5||missingAttributes(s,6).length>0},{id:'fight',label:'出手护卷，截住拦路修士',detail:'一月、口粮 1；可能立即发生战斗；胜利推进护卷契约，失手或撤退会使卷册受损、契约延期',rarity:'灵品'},{id:'back',label:'暂不介入',detail:'不耗月份；日后仍可回来商谈'}];
  if(s.pending==='luReturn'&&s.story.luRoute==='fightDelayed')return [{id:'repairScrollSilver',label:'赔付银钱，修复散卷',detail:'一月、口粮 1、银钱 −4；补全卷册，继续护卷契约',disabled:s.silver<4},{id:'repairScrollHerbs',label:'以灵草抵补散卷',detail:'一月、口粮 1、灵草 −2；补全卷册，继续护卷契约',disabled:s.herbs<2},{id:'sellPapers',label:'卖出残卷，放下这条路',detail:'银钱 +6；结束护卷契约，仍可通过其他路线求仙品法'},{id:'back',label:'暂缓补偿'}];
  if(s.pending==='luReturn'&&s.manuals.includes(3))return [{id:'back',label:'真章已得',detail:'你已从别处承受太微真章，此契不再以求法为终点；可自行离开'}];
@@ -611,16 +611,16 @@ function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
   base.push({id:'study',label:'研读蚀文',detail:`一月、口粮 1、心神 −16 · 留下研读经历 · ${s.wit>=8?'悟性已至上限':`悟性修习 ${s.studyWork}/${studyNeed(s.wit)}`}`,disabled:s.focus<12});
   if(s.flags.scroll&&!s.story?.guRoute&&s.month>=(s.story?.guMonth??0)+3)base.push({id:'guFollowup',label:'顾闻溪来邀校卷',detail:'她记得你如何处理那页残卷；打开事件不耗月份'});
   if(['compare','commission'].includes(s.story?.guRoute)&&!s.story?.guReturn&&s.month>=s.story.guMonth+5)base.push({id:'guReturn',label:'顾闻溪的回信',detail:'此前的合作有了下文；打开事件不耗月份'});
-  if(s.flags.scroll&&!s.story.guText&&!s.manuals.includes(4))base.push({id:'guText',label:'追索星篆残篇',detail:'与顾闻溪合校，或自购残篇；看实际研读、关系与悟性，打开不耗时'});
-  if(s.story.guText&&s.story.guText!=='complete'&&s.month>=s.story.guTextMonth+3)base.push({id:'guFinish',label:'试行星篆真章',detail:'需搜齐缺页并完成前置实修、根骨与悟性要求；打开不耗时'});
+  if(s.flags.scroll&&!s.story.guText&&!s.manuals.includes(4))base.push({id:'guText',label:'追索残篇异文',detail:'那页蚀文似乎还有前后残缺；可与顾闻溪合校，也可独自考据，打开不耗时'});
+  if(s.story.guText&&s.story.guText!=='complete'&&s.month>=s.story.guTextMonth+3)base.push({id:'guFinish',label:'核定残篇行气法',detail:'需搜齐缺页并完成前置实修、根骨与悟性要求；真正试行前仍看不出它是否是一部完整传承'});
  }
  if(s.location==='mountain'){
   for(const part of [1,2])if(afterManualReady(s,'ye',part))base.push({id:`after-ye-${part}`,label:part===1?'叶青蘅 · 药笺':'叶青蘅 · 山中回音',detail:'得法后的旧事有了下文；打开不耗月份'});
   base.push({id:'gather',label:'采药',detail:'一月、口粮 1、心神 −15 · 灵草至少 +1、口粮 +2',disabled:s.focus<12});
   base.push({id:'gatherSeason',label:'连采至多半年',detail:batchRisk?'寿元剩余不足一年或暗伤过重，请逐月采药':'逐月采药，心神不足先静养；遇人物事件或危险立即停下',disabled:batchRisk||(s.focus<12&&s.grain===0)});
   if(s.story?.yeRoute&&!s.story.yeFollowup&&s.month>=s.story.yeMonth+2)base.push({id:'yeFollowup',label:'药径旧事',detail:`叶青蘅记得你${{help:'分药相助',trade:'索酬指路',leave:'绕道而去'}[s.story.yeRoute]}；再作一次选择`});
-  if((s.story.yeRoute||s.codex?.people?.includes('ye'))&&!s.story.yeText&&!s.manuals.includes(5))base.push({id:'yeText',label:'问叶青蘅青华养脉法',detail:'需灵草，择同行养脉或独自取样；打开不耗时'});
-  if(s.story.yeText&&s.story.yeText!=='complete'&&s.month>=s.story.yeTextMonth+2)base.push({id:'yeFinish',label:'试行青华养脉篇',detail:`已采药验证 ${s.story.yeHerbWork||0}/2 次；还需采药验证、根骨、悟性、体魄及灵草`});
+  if((s.story.yeRoute||s.codex?.people?.includes('ye'))&&!s.story.yeText&&!s.manuals.includes(5))base.push({id:'yeText',label:'向叶青蘅请教药径养脉',detail:'她有一套以泉药调理经络的经验；需灵草，可同行养护或独自取样，打开不耗时'});
+  if(s.story.yeText&&s.story.yeText!=='complete'&&s.month>=s.story.yeTextMonth+2)base.push({id:'yeFinish',label:'验证药径养脉法',detail:`已采药验证 ${s.story.yeHerbWork||0}/2 次；还需采药验证、根骨、悟性、体魄及灵草`});
   if(s.story.yeText&&s.body<4)base.push({id:'bodyTonic',label:'以灵草温养体魄',detail:'一月、口粮 1、灵草 −2、心神 −16；体魄 +1、寿限 +1 年；仅养脉求法时可用',disabled:s.herbs<2||s.focus<16});
   if(s.story.guText&&!s.story.guFragments)base.push({id:'findFragments',label:'沿山脉寻星篆缺页',detail:'一月、口粮 1、心神 −24；体魄不足 4 时暗伤 +1；亦可在坊市购得',disabled:s.focus<24||s.wounds>=5&&effectiveBody(s)<4});
   if(!s.story.stoneClue&&(s.story.yeClue||s.origin==='herbalist'||s.root>=5&&effectiveBody(s)>=4) )base.push({id:'stoneScout',label:'探访苍梧石髓池',detail:'与寻泉客闻秋相遇，可让泉、议价、独探或争夺本次优先权；打开不耗时'});
@@ -773,15 +773,15 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   }
   if(event==='guText'){
    if(id==='back')return s;s.story.guText=id;s.story.guTextMonth=s.month;
-   if(id==='collaborate'){add(s,{focus:-16});favor(s,'gu',1);note(s,'你与顾闻溪合校星篆残篇，她指出缺失的一页须另寻，允你校成后自行试法。','法门','顾闻溪 +1 · 尚缺一页');}
-   else {add(s,{silver:-6,focus:-20});favor(s,'gu',-1);note(s,'你向书商自购星篆残篇，避开顾闻溪独自考据，缺页仍须另寻。','抉择','银钱 −6 · 顾闻溪 −1');}
+   if(id==='collaborate'){add(s,{focus:-16});favor(s,'gu',1);note(s,'你与顾闻溪合校那叠无名残篇。她指出前后气脉并不完整，尚缺关键一页；只有补齐后亲自试行，才能判断这些文字究竟是不是一门完整法。','法门','顾闻溪 +1 · 尚缺一页');}
+   else {add(s,{silver:-6,focus:-20});favor(s,'gu',-1);note(s,'你向书商自购同源残篇，避开顾闻溪独自考据。几页文字彼此呼应，却仍缺关键一页，暂时看不出完整来历。','抉择','银钱 −6 · 顾闻溪 −1');}
    turn(s);return s;
   }
   if(event==='guFinish'){
    if(id==='back')return s;add(s,{focus:-25,herbs:s.story.guText==='independent'?-1:0});s.story.guText='complete';earnManual(s,4,s.story.guFirst==='hide'?'昔日曾私藏蚀文，如今将残篇重新核定':'你将星篆残页逐字核对');turn(s);return s;
   }
   if(event==='yeText'){
-   if(id==='back')return s;s.story.yeText=id;s.story.yeTextMonth=s.month;add(s,{herbs:-1,focus:id==='tend'?-16:-12,wounds:id==='sample'?1:0});favor(s,'ye',id==='tend'?1:-1);note(s,id==='tend'?'你与叶青蘅一起养护泉脉，抄得青华篇的行气纲目；仍要亲自采药验证。':'你独取泉样推演青华篇，虽伤了经脉，却不欠同行人情；仍要亲自采药验证。',id==='tend'?'人情':'抉择');turn(s);return s;
+   if(id==='back')return s;s.story.yeText=id;s.story.yeTextMonth=s.month;add(s,{herbs:-1,focus:id==='tend'?-16:-12,wounds:id==='sample'?1:0});favor(s,'ye',id==='tend'?1:-1);note(s,id==='tend'?'你与叶青蘅一起养护泉脉，记下她以泉药调理经络的次序；这更像多年经验，还看不出是不是成体系的修法，仍要亲自采药验证。':'你独取泉样推演叶青蘅的养脉手段，虽伤了经脉，却不欠同行人情；这套做法能否成法，仍要亲自采药验证。',id==='tend'?'人情':'抉择');turn(s);return s;
   }
   if(event==='yeFinish'){
    if(id==='back')return s;add(s,{herbs:-2,focus:-22});s.story.yeText='complete';earnManual(s,5,'两次采药验证之后，青华法脉终于应和你自身经络');turn(s);return s;
