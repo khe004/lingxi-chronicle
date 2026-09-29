@@ -17,7 +17,11 @@ function command(s,route,policy,buyPill,opening='transition'){
    const preference=route==='star'?['ordealGu','ordealYe','ordealCheng']:route==='green'?['ordealYe','ordealGu','ordealCheng']:['ordealCheng','ordealGu','ordealYe'];
    return preference.map(id=>choice(s,id)).find(Boolean)||'choice:back';
   }
-  if(p==='manual')return (route==='taiwei'&&s.origin!=='scholar'&&s.root<4&&choice(s,'equip-1'))||choice(s,`equip-${route==='star'?4:route==='green'?5:3}`)||choice(s,'equip-1')||choice(s,'equip-2')||choice(s,'equip-6')||'choice:back';
+  if(p==='manual'){
+   const order=[route==='star'?4:route==='green'?5:3,route==='taiwei'&&s.origin==='scholar'?2:6,1];
+   for(const id of order)if(s.manuals.includes(id)&&!G.manualDecoded(s,id))return choice(s,`decode-${id}`)||'choice:back';
+   return (route==='taiwei'&&s.origin!=='scholar'&&s.root<4&&choice(s,'equip-1'))||order.map(id=>choice(s,`equip-${id}`)).find(Boolean)||'choice:back';
+  }
   if(p==='spring')return (route==='star'?choice(s,'hidden'):route==='green'?choice(s,'stone'):choice(s,'sealed'))||'choice:back';
   if(p==='scroll')return 'choice:share';
   if(p==='herbalist')return choice(s,'help')||'choice:leave';
@@ -73,9 +77,9 @@ function command(s,route,policy,buyPill,opening='transition'){
  const openingPractice=1;
  if(!s.manuals.includes(target)){
   if(s.focus<35)return 'action:rest';
-  const needInsight=route==='star'?8:route==='green'?5:8;
+  const needReads=route==='star'?3:route==='green'?2:s.origin==='scholar'?0:7;
   const needWit=route==='star'?5:route==='green'?3:4;
-  if(s.insight<needInsight||s.wit<needWit){if(s.location!=='cliff')return travel(s,'cliff');return s.focus<16?'action:rest':'action:study';}
+  if((s.story.scriptureReads||0)<needReads||s.wit<needWit){if(s.location!=='cliff')return travel(s,'cliff');return s.focus<16?'action:rest':'action:study';}
   if(route==='star'){
    if(!s.flags.scroll){if(s.location!=='cliff')return travel(s,'cliff');return 'action:study';}
    if(!s.story.guText){if(s.location!=='cliff')return travel(s,'cliff');return 'action:guText';}
@@ -95,10 +99,11 @@ function command(s,route,policy,buyPill,opening='transition'){
   if(route==='taiwei'){
    if(s.origin==='scholar'){
     if(s.root<3||s.practice[openingPractice]<16)return 'action:secludeYear';
-    if(!s.flags.mentor||!s.manuals.includes(2)){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
-    if(s.manual!==2)return 'action:manual';
-    if(s.practice[2]<14||s.root<4||s.dao<4)return 'action:secludeYear';
-    if(!s.story.trueTextReady||s.npcFavor.cheng<3){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
+   if(!s.flags.mentor||!s.manuals.includes(2)){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
+   if(s.manual!==2)return 'action:manual';
+   if(s.practice[2]<14||s.root<4||s.dao<4)return 'action:secludeYear';
+   if(s.npcFavor.cheng<4){if(s.location!=='temple')return travel(s,'temple');if(ready(s,'chengFollowup'))return 'action:chengFollowup';if(ready(s,'chengReturn'))return 'action:chengReturn';return 'action:rest';}
+   if(!s.story.trueTextReady||s.npcFavor.cheng<3){if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';}
     if(s.herbs<2){if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';}
     if(s.location!=='temple')return travel(s,'temple');return 'action:mentor';
    }
@@ -120,7 +125,7 @@ function command(s,route,policy,buyPill,opening='transition'){
    if(s.location!=='mountain')return travel(s,'mountain');return 'action:gather';
   }
   if(route==='green'&&s.focus<35)return 'action:rest';
-  if(s.insight<7){if(s.location!=='cliff')return travel(s,'cliff');return 'action:study';}
+   if(route==='star'&&(s.story.scriptureReads||0)<3){if(s.location!=='cliff')return travel(s,'cliff');return 'action:study';}
   if(route==='green'){
    if(!s.story.yeClue&&s.story.yeRoute&&!s.story.yeFollowup){if(s.location!=='mountain')return travel(s,'mountain');if(ready(s,'yeFollowup'))return 'action:yeFollowup';return 'action:rest';}
    if(!s.story.stoneClue){if(s.location!=='mountain')return travel(s,'mountain');return 'action:stoneScout';}
@@ -147,7 +152,7 @@ function command(s,route,policy,buyPill,opening='transition'){
 }
 function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false,opening='transition'}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
- let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
+ let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstDecoded=null,firstPractice=null,firstSpring=null,attemptMonth=null,attemptChance=null,minGrain=s.grain,last='',actions=[],affinityAt={};
  while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
   // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
   if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
@@ -160,17 +165,23 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
   if(trace)actions.push({month:at,command:c,monthAfter:s.month});
   if(!firstSpirit&&(s.manuals.includes(2)||s.manuals.includes(6)))firstSpirit=s.month;
   if(!firstManual&&s.manuals.includes(route==='star'?4:route==='green'?5:3))firstManual=s.month;
+  const target=route==='star'?4:route==='green'?5:3;
+  if(firstDecoded===null&&G.manualDecoded(s,target))firstDecoded=s.month;
+  if(firstPractice===null&&s.practice[target]>0)firstPractice=s.month;
   if(!firstSpring&&s.spring>=3)firstSpring=s.month;
   if(JSON.stringify([s.month,s.pending,s.location,s.progress,s.manual,s.spring,s.focus,s.grain,s.herbs,s.silver,s.stage])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,opening,command:c,state:s};
  }
- return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
+ return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstDecoded,firstPractice,firstSpring,attemptMonth,attemptChance,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
 }
 if(require.main===module){
  const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual'),compareOpenings=process.argv.includes('--compare-openings'),openings=compareOpenings?['basic','transition','specialist']:['transition'];
  const outIndex=process.argv.indexOf('--best-out');
  if(outIndex>=0&&!process.argv[outIndex+1])throw Error('--best-out requires a file path');
  const count=Number(process.argv.find(x=>/^\d+$/.test(x))||1);
- for(const opening of openings)for(const origin of origins)for(const talent of talents)for(const route of routes)for(const policy of policies)for(let seed=1;seed<=count;seed++){
+ const seedStart=Number(process.argv[process.argv.indexOf('--seed-start')+1]||1),seedEnd=Number(process.argv[process.argv.indexOf('--seed-end')+1]||count);
+ const originFilter=process.argv.includes('--origin')?process.argv[process.argv.indexOf('--origin')+1]:null,routeFilter=process.argv.includes('--route')?process.argv[process.argv.indexOf('--route')+1]:null;
+ if(seedStart<1||seedEnd>count||seedStart>seedEnd)throw Error('invalid seed range');
+ for(const opening of openings)for(const origin of origins.filter(x=>!originFilter||x===originFilter))for(const talent of talents)for(const route of routes.filter(x=>!routeFilter||x===routeFilter))for(const policy of policies)for(let seed=seedStart;seed<=seedEnd;seed++){
   const x=simulate({origin,talent,route,policy,seed,buyPill,opening});rows.push(x);
   if(x.successMonth==null)continue;
   if(groupByManual){
