@@ -105,7 +105,7 @@
  .narrative-head{display:none}
  .primary-tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#101b1c;border-top:1px solid rgba(190,160,95,.28)}
  .primary-tabs button{min-height:48px;font-size:15px}
- .collection-tabs{position:sticky;top:0;z-index:12;background:#101b1c;padding:8px}
+ .collection-tabs{position:static;background:transparent;padding:8px}
  .mobile-status-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:sticky;top:0;z-index:11;margin:-12px -4px 10px;padding:9px 8px;background:#101b1c;border-bottom:1px solid rgba(190,160,95,.22);font-size:13px}
  .mobile-status-strip span{display:flex;flex-direction:column;min-width:0}.mobile-status-strip b{font-size:15px}
  .mobile-location{display:flex;position:relative;align-items:center;justify-content:space-between;margin:10px 0 14px}
@@ -180,7 +180,7 @@
  .ui-redesign .action-group-items{grid-template-columns:1fr}
  .ui-redesign .primary-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
  .ui-redesign .primary-tabs button{min-width:0;min-height:48px;padding:8px 2px;font-size:14px}
- .ui-redesign .collection-tabs{position:sticky;top:81px;z-index:12}
+ .ui-redesign .collection-tabs{position:static;top:auto;z-index:auto;background:transparent}
  .ui-redesign .event-prompt,.ui-redesign .mobile-actions>h2{scroll-margin-top:94px}
  .ui-redesign .action,.ui-redesign .prompt-options button{font-size:16px}
 }
