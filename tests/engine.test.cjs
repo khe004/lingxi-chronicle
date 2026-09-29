@@ -912,3 +912,23 @@ test('地点事件按实际解决方式塑造不同属性而不是固定直加',
  let t=G.create({origin:'herbalist'});t.pending='scene-mountainMist';t.focus=100;t.grain=30;t.events.nextMonth=999;
  const body=t.body;t=run(t,'choice:shortcut',.99);assert.equal(t.body,body);assert.ok(t.aptitudeXp.body>=2);
 });
+
+
+test('元基打磨以月份换确定上品且道心越高越快',()=>{
+ assert.equal(G.polishNeed({dao:3}),4);assert.equal(G.polishNeed({dao:6}),1);
+ let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.grain=30;s.focus=100;s.events.nextMonth=999;
+ const need=G.polishNeed(s),startMonth=s.month;
+ for(let i=0;i<need;i++){s=run(s,'choice:polish',.99);if(s.pending?.startsWith('scene-'))s.pending='stage';}
+ assert.ok(G.polishReady(s));assert.equal(s.month,startMonth+need);
+ const oldStage=s.stage;s=run(s,'choice:perfect',.99);assert.equal(s.stage,oldStage+1);assert.equal(s.foundationGrades.at(-1),3);assert.equal(s.foundationPolish,0);assert.equal(s.foundationStrain,0);
+});
+
+test('任何真实元基掉档都会永久失去上上品资格',()=>{
+ const s=G.create({origin:'scholar'});s.foundationGrades=[3,2,3];assert.equal(G.flawlessFoundation(s),false);
+ s.foundationGrades=[3,3,3];assert.equal(G.flawlessFoundation(s),true);
+});
+
+test('径行或急进冲关会清空本关未完成的打磨',()=>{
+ let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.grain=30;s.focus=100;s.foundationPolish=1;s.events.nextMonth=999;
+ s=run(s,'choice:hasty',0);assert.equal(s.foundationPolish,0);
+});
