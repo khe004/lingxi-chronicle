@@ -42,6 +42,8 @@ test('the single action surface preserves event locks and settles each click onc
   const after = click('action:gather');
   assert.equal(after.month, initial.month + 1);
   assert.equal(after.pending, 'herbalist');
+  assert.equal(element('event-prompt').hidden, false, 'an event opens its single decision surface');
+  assert.equal(element('mobile-actions').hidden, true, 'the action panel stays locked while an event is pending');
   assert.equal(element('mobile-action-list').innerHTML.includes('data-command="action:gather"'), false);
   assert.equal(element('latest-result').innerHTML.includes('口粮 +4'), true, 'show net grain after harvest and monthly cost');
   const beforeViewing = store.value;
@@ -58,5 +60,6 @@ test('the single action surface preserves event locks and settles each click onc
   const opened = click('action:manual');
   assert.equal(opened.month, repeat.month, 'opening a menu is free');
   assert.equal(opened.pending, 'manual');
-  assert.equal(element('latest-result').hidden, true, 'a free menu does not claim a new result');
+  assert.equal(element('latest-result').hidden, false, 'a free menu preserves the last settled result');
+  assert.equal(element('latest-result').innerHTML.includes('口粮 +4'), true, 'opening a menu does not replace the last summary');
 });
