@@ -748,13 +748,15 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
     publish:[{focus:-18,insight:2},'gu',1,'顾闻溪将误字连同你的旧注一并誊入校本。她说：“错处有名有姓，后来人才知道从哪里接着读。”你们各自在卷末署名。'],reserve:[{focus:-12,insight:1},'gu',-1,'你留下误字独自重校。顾闻溪看见缺了的一页，合上卷册：“我等你的定本，但这一行不能再让人照着练。”'],
     treat:[{herbs:-2,focus:-12},'ye',1,'叶青蘅接过你分出的药，先替伤者止血，才有空擦手上的泥。“药不是长在账册里的，”她说，“你这份我记得。”'],keep:[{herbs:-1,wounds:-1,focus:12},'ye',-1,'你用药护住自己的经络，山径的伤者由叶青蘅另寻药治。她只说：“你也要冲关，我明白。下一次上山，记得多备些。”'],
     honor:[{silver:-5},'lu',1,'陆知衡把余卷一页页点清，抽出你写的履约文书夹在账里。“银钱可结，信用要走过一趟商路才算数。”你替他把卷送回原主。'],broker:[{focus:-15,silver:8},'lu',-1,'你将余卷押在坊市，替陆知衡谈成一笔新买卖。他在契尾添了一行小字：“若拓本误传，持卷人自行说明。”'],
-    teach:[{focus:-20,dao:1},'cheng',1,'程上师把一群刚入观的弟子交到你面前：“会练是一回事，教得别人不走岔路，又是一回事。”你陪他们从最浅的一口气练起。'],withdraw:[{silver:6},'cheng',-1,'你接过校卷酬劳，谢绝教习。程上师收起戒尺：“修自己的道也要时日。只望你日后记得，这门法从谁手中来。”'],
+    teach:[{focus:-20},'cheng',1,'程上师把一群刚入观的弟子交到你面前：“会练是一回事，教得别人不走岔路，又是一回事。”你陪他们从最浅的一口气练起。'],withdraw:[{silver:6},'cheng',-1,'你接过校卷酬劳，谢绝教习。程上师收起戒尺：“修自己的道也要时日。只望你日后记得，这门法从谁手中来。”'],
     annotate:[{focus:-16,insight:2},'gu',1,'数月后，顾闻溪把校本寄到你案头，误字旁已补上两种读法。“前一版是我们共同犯的错，”她在信末写道，“这一版也是共同改的。”'],fee:[{silver:7},'gu',0,'顾闻溪独自校成新本，按约送来译注酬金。她在附笺里写道：“你那一行旧解，我留着给后学辨。”'],correct:[{focus:-14,insight:1},'gu',1,'你终于把留存的误字交还。顾闻溪没有责问，只将两张旧注叠在一起：“肯改过来，后学就少走一段歧路。”'],sell:[{silver:9},'gu',-1,'书商买下你的单行校注；顾闻溪在摊前认出了笔迹。她不拦这笔生意，只不再与你合署新的卷册。'],
-    receive:[{herbs:3},'ye',1,'叶青蘅捎来一包晒好的山药：“上回那人能走路了。她不识字，让我替她写一句谢。”包里另有三株灵草。'],visit:[{focus:-16,wounds:-2},'ye',1,'叶青蘅邀你同去回诊。伤者已能下地，她在灶边煮药，叶青蘅顺手替你清了旧伤：“给人诊脉，也看看自己的。”'],remedy:[{herbs:-2,dao:1},'ye',1,'你带药重走那条山径。叶青蘅收下药，只说：“来得迟些，总比把这事当成从未发生好。”'],formula:[{silver:-4,wounds:-2},'ye',0,'你付清药方钱，叶青蘅在纸角添了服药的时辰：“买卖归买卖，药煎错了我还是会骂你。”'],
+    receive:[{herbs:3},'ye',1,'叶青蘅捎来一包晒好的山药：“上回那人能走路了。她不识字，让我替她写一句谢。”包里另有三株灵草。'],visit:[{focus:-16,wounds:-2},'ye',1,'叶青蘅邀你同去回诊。伤者已能下地，她在灶边煮药，叶青蘅顺手替你清了旧伤：“给人诊脉，也看看自己的。”'],remedy:[{herbs:-2},'ye',1,'你带药重走那条山径。叶青蘅收下药，只说：“来得迟些，总比把这事当成从未发生好。”'],formula:[{silver:-4,wounds:-2},'ye',0,'你付清药方钱，叶青蘅在纸角添了服药的时辰：“买卖归买卖，药煎错了我还是会骂你。”'],
     credit:[{silver:10},'lu',1,'商队凭你的履约文书放出一张信用票。陆知衡说：“这一回不用你押银了。可别让我在账上改主意。”'],supplies:[{grain:18},'lu',0,'你没有收回礼的银钱，叫陆知衡换成十八份闭关口粮。他把每袋都记了重，免得人说商路亏了你。'],settle:[{silver:-6},'lu',1,'你把误传的抄卷人请到摊前，赔清六两。陆知衡看着你重写卷目：“契外的账，也算你肯认。”'],defend:[{focus:-18,insight:2},'lu',0,'你当众辨出余卷的来源，逐处指给抄卷人看。陆知衡听完合上账：“有些亏损能用话补，有些不能；今天这笔算补上了。”'],
     guide:[{focus:-18,insight:2},'cheng',1,'一个弟子拿着你旧日写下的行气注来问，程上师站在门边没有替你回答。你重新推演一遍，才发现当年的省略处。'],entrust:[{grain:10},'cheng',0,'你将教习的笔记交还程上师。他给你十份口粮：“各有自己的关要过，去闭你的关吧。”'],lecture:[{focus:-15,insight:2},'cheng',1,'你携旧注回观，程上师用朱笔圈出两处异文：“取了酬劳，也没有把学问丢下。”这次你们谈到暮钟响起。'],keepPay:[{silver:5},'cheng',0,'程上师照旧约结清后续抄卷银钱，没有再派差事。你带着资粮离开，得以安心修自己的功课。']
    };
    const [delta,person,favorChange,line]=outcomes[id];add(s,delta);if(favorChange)favor(s,person,favorChange);
+   const aptitudeByAfterChoice={publish:['wit',3,'共同校勘并公开纠错'],reserve:['wit',2,'独自重校误字'],treat:['body',3,'随叶青蘅救治伤者'],keep:['body',1,'权衡药力护住自身经络'],honor:['social',3,'履约送卷并维护信用'],broker:['social',3,'在坊市替商旅斡旋'],teach:['dao',4,'把行气法教给后学'],annotate:['wit',3,'继续校订旧注'],correct:['wit',2,'重校并交还误字'],visit:['body',3,'随叶青蘅回诊辨脉'],remedy:['dao',3,'补偿旧事并重走山径'],defend:['social',3,'当众辨明卷物流转'],guide:['dao',3,'重新推演并指点后学'],lecture:['wit',3,'与程上师复核异文']};
+   const aptitudeGain=aptitudeByAfterChoice[id];if(aptitudeGain)gainAptitude(s,...aptitudeGain);
    if(part==='1'){record.first=id;record.month=s.month;}else record.second=id;
    note(s,line,part==='1'?'抉择':'人情',Object.entries(delta).filter(([key])=>key!=='insight').map(([key,val])=>`${{focus:'心神',herbs:'灵草',wounds:'暗伤',silver:'银钱',dao:'道心',grain:'口粮'}[key]} ${val>0?'+':''}${val}`).concat(favorChange?`${{gu:'顾闻溪',ye:'叶青蘅',lu:'陆知衡',cheng:'程上师'}[person]} ${favorChange>0?'+':''}${favorChange}`:[]).join(' · '));
    if(new Set(['publish','reserve','treat','keep','honor','broker','teach','annotate','correct','visit','remedy','defend','guide','lecture']).has(id))turn(s);
@@ -847,8 +849,8 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   }
   if(event==='chengFollowup'){
    s.story.chengRoute=id;s.story.chengMonth=s.month;
-   if(id==='guard'){add(s,{focus:-20,dao:1});favor(s,'cheng',1);note(s,'程上师托你守藏书阁一夜。你没有翻阅不该看的卷册，他对你的道心更有把握。','人情','道心 +1 · 程上师 +1');turn(s);}
-   if(id==='copyForPay'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{silver:8});note(s,'你替程上师抄完旧卷，收下一笔润笔银，也辨明了卷末蚀文。','抉择','银钱 +8');turn(s);}
+   if(id==='guard'){add(s,{focus:-20});gainAptitude(s,'dao',4,'守藏书阁而不越界');favor(s,'cheng',1);note(s,'程上师托你守藏书阁一夜。你没有翻阅不该看的卷册，他对你的道心更有把握。','人情','道心历练 · 程上师 +1');turn(s);}
+   if(id==='copyForPay'){s.story.scriptureReads=(s.story.scriptureReads||0)+1;add(s,{silver:8});gainAptitude(s,'wit',2,'抄卷时辨读卷末蚀文');note(s,'你替程上师抄完旧卷，收下一笔润笔银，也辨明了卷末蚀文。','抉择','银钱 +8 · 悟性历练');turn(s);}
    if(id==='pass')note(s,'你婉拒程上师的差事。上师点头放你继续修行，旧卷便交给了旁人。','抉择');
   }
   if(event==='chengReturn'){
@@ -861,11 +863,13 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(event.startsWith('scene-')){
    if(id==='ignore'){note(s,'你把刚才的偶遇留在身后，继续原定的修行。','抉择');return s;}
    const key=event.slice(6);if(key==='mountainHerbs'&&id==='engageApe'){startSceneCombat(s,'ape');return s;}if(key==='mountainHerbs'&&id==='bypassApe'){s.story.apeEncounter='bypassed';add(s,{grain:1});note(s,'你循着猿踪绕过药丛，平安回到山径，改在别处采得些许口粮。','见闻','口粮 +1');return s;}
-   const cost={keep:{focus:-12,insight:1},rest:{focus:16,grain:-1},audit:{focus:-12,grain:3},deliver:{grain:-2,silver:7},argue:{focus:-14,insight:1},listen:{focus:12},trace:{focus:-16,herbs:2},shelter:{focus:12,grain:1},harvest:{focus:-12,herbs:2},replant:{grain:3,dao:1},shortcut:{focus:-15,silver:5,wounds:effectiveBody(s)<5?1:0},wait:{focus:12,grain:2},bargain:{focus:-12,silver:4},stock:{silver:-2,grain:5},decode:{silver:-2,insight:1},sell:{silver:5,focus:-10}};
+   const cost={keep:{focus:-12,insight:1},rest:{focus:16,grain:-1},audit:{focus:-12,grain:3},deliver:{grain:-2,silver:7},argue:{focus:-14,insight:1},listen:{focus:12},trace:{focus:-16,herbs:2},shelter:{focus:12,grain:1},harvest:{focus:-12,herbs:2},replant:{grain:3},shortcut:{focus:-15,silver:5,wounds:effectiveBody(s)<5?1:0},wait:{focus:12,grain:2},bargain:{focus:-12,silver:4},stock:{silver:-2,grain:5},decode:{silver:-2,insight:1},sell:{silver:5,focus:-10}};
    const advanced={sortPulse:{focus:-18,insight:2},sortStore:{focus:-10,grain:6},readPulse:{focus:-18,progress:8},leadGroup:{focus:-10,silver:8},tapVein:{focus:-18,herbs:3},drawVein:{grain:-2,progress:7},buyScript:{silver:-5,progress:9},sellScript:{herbs:-1,silver:8},repairSeal:{herbs:-1,focus:-18},readSeal:{focus:-20,progress:11},forceFlow:{wounds:1,progress:12},holdArray:{insight:-1,focus:20},healCave:{herbs:-2,wounds:-2},seekCave:{focus:-20,herbs:4},buyPact:{silver:-6,progress:12},tradePact:{focus:-22,silver:10},closeBreath:{herbs:-1,focus:35,wounds:-1},openBreath:{focus:-24,progress:15},observeSky:{focus:-20,insight:2},guideSky:{focus:-20,silver:12},washSpring:{herbs:-2,wounds:-2,focus:20},gatherSpring:{focus:-20,herbs:4},buyRations:{silver:-7,grain:16},sellGoods:{herbs:-2,silver:12}};
    const delta=cost[id]||advanced[id],gained=eventProgressGain(s,delta.progress||0);
    if(delta.progress){delete delta.progress;add(s,{totalProgress:gained,progress:gained});ensureOrdeal(s);}
    add(s,delta);if(id==='listen')study(s);
+   const aptitudeByScene={audit:['wit',2,'核对旧账与异文'],deliver:['social',2,'替人送货交涉'],argue:['social',2,'与人据理争辩'],trace:['body',2,'循迹踏查山径'],harvest:['body',2,'辨草采药'],replant:['dao',2,'克制眼前收获而回植药苗'],shortcut:['body',2,'在山雾中辨路赶行'],bargain:['social',2,'与摊主往来议价'],decode:['wit',2,'辨读残缺蚀文'],sortPulse:['wit',3,'梳理地脉异象'],sortStore:['social',2,'替众人清点调配资粮'],readPulse:['wit',3,'参读地脉纹理'],leadGroup:['social',3,'带领同行者处置纷争'],tapVein:['body',3,'亲身探查地脉药气'],repairSeal:['dao',3,'耐心修补旧阵封印'],readSeal:['wit',3,'辨读阵纹旧记'],forceFlow:['root',3,'强承灵流冲击'],healCave:['body',3,'借药处理洞中伤势'],seekCave:['body',3,'深入洞径搜寻灵药'],tradePact:['social',3,'与人周旋交换契约'],closeBreath:['root',3,'收束气机承受地势'],openBreath:['root',3,'引导灵流贯体'],observeSky:['wit',3,'观天象推演气机'],guideSky:['social',3,'为同行者解释天象'],washSpring:['body',3,'以泉药洗炼伤势'],gatherSpring:['body',3,'涉泉采集灵材'],sellGoods:['social',3,'处置灵材换取资粮']};
+   const sceneAptitude=aptitudeByScene[id];if(sceneAptitude)gainAptitude(s,...sceneAptitude);
    if(id==='repairSeal')s.foundationStrain=Math.max(0,(s.foundationStrain||0)-1);
    const option=opt.label;note(s,`${LOCATIONS[s.location].name}的一桩小事：你选择${option}。`,'抉择',opt.detail.replace('刚才的行动已耗一月；',''));
    if(key==='mountainMist'&&id==='shortcut'&&effectiveBody(s)<5)note(s,'山雾遮住石阶，跌伤留下一点暗伤。','伤病');
