@@ -599,7 +599,9 @@ let springLoss=G.create({origin:'herbalist'});springLoss.location='mountain';spr
 for(const method of [3,4,5])for(const pool of [3,4,5]){
  const sample=G.create();sample.manual=method;sample.spring=pool;sample.root=6;sample.insight=9;sample.foundation=3;sample.foundationGrades=[2,2,2];sample.wounds=0;
  for(const roll of [0,.01,.03,.05,.5,.99])for(const mode of ['steady','bold'])assert.notEqual(G.grade(sample,roll,mode),'上上品',`${method}/${pool}/${roll}/${mode} cannot bypass imperfect foundation`);
- sample.foundationGrades=[3,3,3];assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path`);
+ sample.foundationGrades=[3,3,3];const fit=G.springHarmony(sample);
+ if(fit.level!=='相冲')assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path when not clashing`);
+ else for(const roll of [0,.001,.02,.5,.99])assert.notEqual(G.grade(sample,roll,'steady'),'上上品',`${method}/${pool} cannot bypass the compatibility gate`);
 }
 // Clear Meridian keeps its five-point opening advantage even when a fully prepared route reaches the base chance ceiling.
 for(const origin of ['scholar','merchant','herbalist']){
@@ -947,6 +949,13 @@ test('华池契合同时考虑人物亲和与当前功法',()=>{
  assert.ok(water.score>metal.score);assert.ok(['上佳','相合'].includes(water.level));assert.ok(water.reasons.some(x=>x.includes('当前功法')));
 });
 
+test('相生华池能承接异行功法形成合理契合',()=>{
+ const s=G.create({origin:'scholar',elements:['wood'],polarity:'yin'});s.manual=4;s.affinityPoints.wood=6;s.affinityPoints.yin=5;
+ const spring=G.springHarmony(s,1);
+ assert.ok(spring.score>=2);assert.ok(['上佳','相合'].includes(spring.level));
+ assert.ok(spring.reasons.some(x=>x.includes('五行相生')));
+});
+
 test('华池契合影响开脉但品级仍保留独立强度',()=>{
  const s=G.create({origin:'scholar',elements:['water'],polarity:'yin'});s.manual=2;s.affinityPoints.water=5;s.affinityPoints.yin=5;
  const good=G.springHarmony(s,2),bad=G.springHarmony(s,5);
@@ -957,4 +966,9 @@ test('相冲仙品华池不能仅凭稀有度取得上上资格',()=>{
  const s=G.create({origin:'scholar',elements:['water'],polarity:'yin'});s.manual=4;s.spring=5;s.foundation=3;s.foundationGrades=[3,3,3];s.wit=8;s.root=8;s.wounds=0;s.affinityPoints.water=6;s.affinityPoints.yin=6;
  assert.ok(G.springHarmony(s).score<2);
  for(const roll of [0,.001,.02,.5,.99])assert.notEqual(G.grade(s,roll,'steady'),'上上品');
+});
+
+test('满足全部条件且华池相合时上上品资格可达',()=>{
+ const s=G.create({origin:'scholar',talent:'clarity',elements:['water'],polarity:'yin'});s.manual=3;s.spring=4;s.foundation=3;s.foundationGrades=[3,3,3];s.root=7;s.wit=5;s.wounds=0;s.affinityPoints={wood:1,fire:1,earth:0,metal:1,water:5,yin:5,yang:1};
+ assert.equal(G.springHarmony(s).level,'上佳');assert.equal(G.grade(s,0,'steady'),'上上品');
 });

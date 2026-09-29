@@ -34,6 +34,15 @@ assert.doesNotMatch(app, /已得的功法可以随时切换/,
   'the old immediate-switch promise must not remain visible');
 assert.doesNotMatch(app, /s\.studyWork|G\.studyNeed/,
   'hidden wisdom aptitude progress must not be rendered in the interface');
+const poolMenuState = engine.create({ origin: 'scholar', elements: ['water'], polarity: 'yin' });
+poolMenuState.pending = 'spring'; poolMenuState.location = 'mountain';
+poolMenuState.flags.scroll = true; poolMenuState.story.yeClue = 'map'; poolMenuState.story.stoneClue = true;
+poolMenuState.root = 5; poolMenuState.body = 5; poolMenuState.herbs = 20; poolMenuState.focus = 100; poolMenuState.silver = 100;
+const poolMenu = engine.options(poolMenuState);
+assert.match(poolMenu.find(x => x.id === 'common').detail, /契合：(?:上佳|相合|尚可|相冲) · 自身/,
+  'spring choices must show fit category and a plain-language reason');
+assert.doesNotMatch(poolMenu.find(x => x.id === 'common').detail, /score|quality|chance|契合分|成功率|质量分/,
+  'spring choices must not reveal internal fit or chance numbers');
 const stageMenuState = engine.create({ origin: 'scholar' });
 stageMenuState.pending = 'stage'; stageMenuState.progress = engine.cap(stageMenuState);
 stageMenuState.totalProgress = 500; stageMenuState.foundationPolish = 1;

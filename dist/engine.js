@@ -3,6 +3,7 @@
 const KEY='lingxi-opening-v2';
 const ELEMENTS={wood:'木',fire:'火',earth:'土',metal:'金',water:'水'};
 const ELEMENT_BEATS={wood:'earth',earth:'water',water:'fire',fire:'metal',metal:'wood'};
+const ELEMENT_GENERATES={wood:'fire',fire:'earth',earth:'metal',metal:'water',water:'wood'};
 const POLARITIES={yin:'阴',yang:'阳',harmony:'冲和'};
 const AFFINITY_KEYS=[...Object.keys(ELEMENTS),'yin','yang'];
 function innatePoints(elements=[],polarity='harmony'){
@@ -86,13 +87,17 @@ function springHarmony(s,spring=s.spring){
  let score=playerBest>=5?2:playerBest>=3?1:playerBest<=1?-1:0;
  if(pool.polarity&&pool.polarity!=='harmony'){const v=p[pool.polarity]||0;score+=v>=5?1:v>=3?0:v<=1?-1:0;}
  if(aspectCompatible(pool,manual)){score+=2;reasons.push(`与当前功法${manual.name}同气或相容`);}else{
-  const opposed=(pool.elements||[]).some(a=>(manual.elements||[]).some(b=>ELEMENT_BEATS[a]===b||ELEMENT_BEATS[b]===a));
-  if(opposed){score-=2;reasons.push(`华池${elementNames}与当前功法五行相冲`);}else {score-=1;reasons.push(`华池气象与当前功法并非一路`);}
+  const poolElements=pool.elements||[],manualElements=manual.elements||[];
+  const generates=poolElements.some(a=>manualElements.some(b=>ELEMENT_GENERATES[a]===b||ELEMENT_GENERATES[b]===a));
+  const opposed=poolElements.some(a=>manualElements.some(b=>ELEMENT_BEATS[a]===b||ELEMENT_BEATS[b]===a));
+  if(generates){score+=1;reasons.push(`华池与当前功法五行相生`);}
+  if(opposed){score-=2;reasons.push(`华池${elementNames}与当前功法五行相冲`);}
+  if(!generates&&!opposed){score-=1;reasons.push(`华池气象与当前功法并非一路`);}
   if(pool.polarity!=='harmony'&&manual.polarity!=='harmony'&&pool.polarity!==manual.polarity){score-=1;reasons.push(`${POLARITIES[pool.polarity]}池与功法${POLARITIES[manual.polarity]}性相背`);}
  }
  reasons.unshift(playerBest>=4?`自身${elementNames}亲和足以承池`:playerBest>=2?`自身${elementNames}亲和尚可`:`自身${elementNames}亲和偏弱`);
- const level=score>=4?'上佳':score>=2?'相合':score>=0?'尚可':'相冲';
- return {level,score,chance:score>=4?6:score>=2?3:score<0?-7:0,quality:score>=4?2:score>=2?1:score<0?-2:0,reasons};
+ const level=score>=3?'上佳':score>=1?'相合':score>=0?'尚可':'相冲';
+ return {level,score,chance:score>=3?6:score>=1?3:score<0?-7:0,quality:score>=3?2:score>=1?1:score<0?-2:0,reasons};
 }
 function springHarmonyText(s,spring){const h=springHarmony(s,spring);return `契合：${h.level} · ${h.reasons.join('；')}`;}
 function syncIds(s){s.manualId=ITEMS.manual[s.manual]?.id||'breath';s.manualIds=[...new Set(s.manuals.map(n=>ITEMS.manual[n]?.id).filter(Boolean))];s.springId=ITEMS.spring[s.spring]?.id||null;return s;}
@@ -423,14 +428,14 @@ function turn(s){s.month++;s.ageMonths++;if(s.grain>0)s.grain--;else{add(s,{woun
 }
 function chance(s,mode='steady'){
  const legacyBonus=s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0);
- const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.root*1.5+Math.floor(s.focus/20)-(s.wounds*9)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)+springHarmony(s).chance-(mode==='bold'?19:0);
+  const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.root*1.5+Math.floor(s.focus/20)-(s.wounds*9)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)+springHarmony(s).chance-(mode==='bold'?19:0);
  return clamp(clamp(Math.floor(raw),15,63)+legacyBonus*2+(s.dao-3)*3-(s.body-effectiveBody(s))*3+(s.talent==='meridian'?5:0),5,84);
 }
 function quality(s){return manualPower(s)*2+springPower(s)*2+s.foundation*2+s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0)+s.root+(s.talent==='clarity'?1:0)+(s.manual===4&&s.wit>=6?1:0)+springHarmony(s).quality-s.wounds*2;}
 function grade(s,roll,mode){
  const names=['上上品','上中品','上下品','中上品','中中品','中下品','下上品','下中品','下下品'];
  const q=quality(s),r=rand(()=>roll),bold=mode==='bold';
- const topReady=q>=22&&ITEMS.manual[s.manual]?.rarity==='仙品'&&ITEMS.spring[s.spring]?.rarity==='仙品'&&springHarmony(s).score>=2&&s.foundation>=3&&flawlessFoundation(s)&&s.wit>=5&&s.wounds===0;
+ const topReady=q>=22&&ITEMS.manual[s.manual]?.rarity==='仙品'&&ITEMS.spring[s.spring]?.rarity==='仙品'&&springHarmony(s).level!=='相冲'&&s.foundation>=3&&flawlessFoundation(s)&&s.wit>=5&&s.wounds===0;
  const base=topReady?0:q>=22?1:q>=18?2:q>=15?3:q>=12?4:q>=9?5:q>=6?6:q>=3?7:8;
  let shift;
  if(base===0)shift=r<(bold?.60:.50)?0:r<(bold?.65:.85)?1:2;
@@ -954,5 +959,5 @@ function step(input,command,rng=Math.random){const s=stepInternal(input,command,
  if(pending==='luMeet'||pending.startsWith('lu')||pending.startsWith('after-lu'))discover(s,'people','lu');
  if(action[0]==='action'&&action[1]==='mentor')discover(s,'people','cheng');
  return syncIds(s); }
-return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,springHarmony,springHarmonyText,aptitudeNeed,polishNeed,polishReady,flawlessFoundation,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
+return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,ELEMENT_GENERATES,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,springHarmony,springHarmonyText,aptitudeNeed,polishNeed,polishReady,flawlessFoundation,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,LOCATIONS,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
 });
