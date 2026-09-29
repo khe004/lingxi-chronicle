@@ -27,5 +27,9 @@ assert.match(style, /@media\(max-width:1023px\)\{[\s\S]*?\.ui-redesign \.primary
   'the top resource strip and fixed bottom tabs should switch together, with resources distributed across the row');
 assert.match(style, /@media\(max-width:767px\)\{[\s\S]*?\.ui-redesign \.collection-tabs\{position:static;top:auto;z-index:auto;background:transparent\}/,
   'mobile collection tabs should scroll with their content on the normal panel background');
+assert.match(app, /新得法卷须按月参悟，参透且属性契合后才能转修/,
+  'the manuscript menu must explain the new prerequisite before switching');
+assert.doesNotMatch(app, /已得的功法可以随时切换/,
+  'the old immediate-switch promise must not remain visible');
 
 console.log('Deadline UI contract checks passed');
