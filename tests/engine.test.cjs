@@ -938,3 +938,23 @@ test('径行或急进冲关会清空本关未完成的打磨',()=>{
  let s=G.create({origin:'scholar'});s.pending='stage';s.progress=G.cap(s);s.grain=30;s.focus=100;s.foundationPolish=1;s.events.nextMonth=999;
  s=run(s,'choice:hasty',0);assert.equal(s.foundationPolish,0);
 });
+
+
+test('华池契合同时考虑人物亲和与当前功法',()=>{
+ const s=G.create({origin:'scholar',elements:['water'],polarity:'yin'});
+ s.manual=2;s.affinityPoints.water=5;s.affinityPoints.yin=5;
+ const water=G.springHarmony(s,2),metal=G.springHarmony(s,3);
+ assert.ok(water.score>metal.score);assert.ok(['上佳','相合'].includes(water.level));assert.ok(water.reasons.some(x=>x.includes('当前功法')));
+});
+
+test('华池契合影响开脉但品级仍保留独立强度',()=>{
+ const s=G.create({origin:'scholar',elements:['water'],polarity:'yin'});s.manual=2;s.affinityPoints.water=5;s.affinityPoints.yin=5;
+ const good=G.springHarmony(s,2),bad=G.springHarmony(s,5);
+ assert.ok(good.chance>bad.chance);assert.ok(good.quality>bad.quality);
+});
+
+test('相冲仙品华池不能仅凭稀有度取得上上资格',()=>{
+ const s=G.create({origin:'scholar',elements:['water'],polarity:'yin'});s.manual=4;s.spring=5;s.foundation=3;s.foundationGrades=[3,3,3];s.wit=8;s.root=8;s.wounds=0;s.affinityPoints.water=6;s.affinityPoints.yin=6;
+ assert.ok(G.springHarmony(s).score<2);
+ for(const roll of [0,.001,.02,.5,.99])assert.notEqual(G.grade(s,roll,'steady'),'上上品');
+});
