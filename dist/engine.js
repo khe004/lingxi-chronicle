@@ -1,6 +1,6 @@
 (function(root,factory){const game=factory();if(typeof module==='object'&&module.exports)module.exports=game;else root.LingxiEngine=game;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const RULE_VERSION='2.45';
+const RULE_VERSION='2.46';
 const KEY='lingxi-opening-v2';
 const CHECKPOINT_KEY='lingxi-opening-checkpoint-v1';
 const ELEMENTS={wood:'木',fire:'火',earth:'土',metal:'金',water:'水'};
@@ -999,11 +999,15 @@ function qiStable(q){if(q.blocked)return false;const v=q.values;if(Object.values
 }
 function fiveQiSummary(s){const q=s.mingqi?.fiveQi;if(!q)return null;const stable=qiStable(q),temporary=!stable&&(q.temporaryUntil||0)>s.month;
  const status=Object.entries(QI_ORGANS).map(([id,name])=>({id,name,label:q.blocked&&id==='wood'?'郁滞':q.values[id]>=2?'偏盛':q.values[id]<0?'偏衰':'平和'}));
- let advice=stable?'五气已有自洽循环，可安心静修数年；无需把五项补成相同数值。':q.blocked?'旧伤使肝木郁滞；先静养至暗伤低于三，或请程上师疏通、实修疏脉术。':'心火偏盛而肾水未济；普通吐纳可缓解，亦可研习已有仙品的调和法。';
- if(q.method==='star'&&!stable&&!q.blocked)advice='星篆保留火势，但脾土承转不足；再行火土承转，或以温土符暂护一次泄火。';
- if(q.method==='green'&&!stable&&!q.blocked)advice='木火循环受扰；再行疏木养土，勿连续强施泄火术。';
- if(q.method==='taiwei'&&!stable&&!q.blocked)advice='金水制火的循环受扰；重行金水引流，收敛火势。';
- return {status,stable,temporary,temporaryMonths:Math.max(0,(q.temporaryUntil||0)-s.month),method:QI_METHODS[q.method]?.name||(q.method==='breath'?'养息 · 水火相济':'尚未定法'),cause:q.lastCause,advice,arts:q.arts.map(id=>({drain:'泄火术',unblock:'疏脉术'}[id]||id)),cultivationMonths:q.cultivationMonths,items:{...q.items},debt:q.debt,aid:q.aid};
+ const issues=[];for(const [id,name] of Object.entries(QI_ORGANS))if(q.values[id]<-1)issues.push(`${name}耗损过深`);
+ if(q.blocked)issues.push('旧伤造成郁滞');
+ if(q.method==='star'){if(q.values.earth<2)issues.push('脾土不足以承火');if(q.values.water<0)issues.push('肾水未济');if(q.values.fire<1||q.values.fire>2)issues.push('心火不在火土承转范围');}
+ else if(q.method==='green'){if(q.values.wood<2)issues.push('肝木不能持续生火');if(q.values.earth<1)issues.push('脾土承接不足');if(q.values.water<0)issues.push('肾水未济');if(q.values.fire>1)issues.push('心火超出木火循环');}
+ else {if(q.values.fire>0)issues.push('心火尚未收敛');if(q.values.water<1)issues.push('肾水不足以相济');if(q.method==='taiwei'&&q.values.metal<1)issues.push('肺金不能生水');}
+ const relation={taiwei:'肺金生水，肾水制火，火势收敛而循环自持。',star:'心火旺，但脾土足以承接；偏盛有出路，仍可稳定。',green:'肝木生火，脾土承接，木火有度而循环自持。',breath:'肾水与心火相济，不需要五项平均。'}[q.method]||'';
+ const advice=stable?relation+'已到本版内容终点；继续静修暂不解锁能力、事件或朝元。':(issues.length?issues.join('；')+'。':'')+(q.blocked?'先静养或疏脉；护法只解除郁滞，不治暗伤。':(q.method?'重行自身调和法。':'先研习已有功法的调和法，或完成养息引水制火。')+'温土符只保护一次施术的脾土，不能补救肝木损耗。');
+
+ return {status,stable,temporary,temporaryMonths:Math.max(0,(q.temporaryUntil||0)-s.month),method:QI_METHODS[q.method]?.name||(q.method==='breath'?'养息 · 水火相济':'尚未定法'),cause:q.lastCause,advice,issues,relation,arts:q.arts.map(id=>({drain:'泄火术',unblock:'疏脉术'}[id]||id)),cultivationMonths:q.cultivationMonths,items:{...q.items},debt:q.debt,aid:q.aid};
 }
 function qiReshape(q,method){const v=q.values;q.method=method;for(const k of Object.keys(v))v[k]=Math.max(-1,v[k]);
  if(method==='taiwei'){v.metal=Math.max(1,v.metal);v.water=Math.max(1,v.water+2);v.fire=Math.min(0,v.fire-2);}
@@ -1028,8 +1032,8 @@ function fiveQiAvailable(s){if(!s.mingqi.introComplete)return [];
  else action('qiDrain','施泄火术试法','一月、口粮 1、心神 −18；火势 −1、脾土 −1、肝木 −1；温土符可护本次脾土，连续强施会扰乱循环',[resourceRequirement(s,'focus',18)]);
  if(!q.arts.includes('unblock'))action('qiLearnUnblock','实修疏脉术','两月学成，每月口粮 1、心神 −12；学成后可自行疏通郁滞',[resourceRequirement(s,'focus',12)]);
  else if(q.blocked)action('qiUnblock','以疏脉术疏通旧伤','一月、口粮 1、心神 −20；解除行气郁滞，不改变暗伤，不平衡盛衰',[resourceRequirement(s,'focus',20)]);
- if(!qiStable(q)&&(q.temporaryUntil||0)>s.month)action('qiMedicineRest','借丹静修一月','一月、口粮 1、心神 −6；借清心丹药效静修，药散后不能继续，未永久成环',[resourceRequirement(s,'focus',6)]);
- if(qiStable(q))action('qiSeclude','循法静修一年','十二月、口粮 12、心神 −20；沿现有循环修习，不增长亲和，不需逐月调气',[resourceRequirement(s,'grain',12),resourceRequirement(s,'focus',20),flagRequirement('护卷旧契已结清',!s.story.luRoute||s.story.luRoute==='complete'||s.story.luDefaulted,'先结清护卷旧契，避免闭关中误期')]);
+ if(!qiStable(q)&&(q.temporaryUntil||0)>s.month)action('qiMedicineRest','借丹静修一月','一月、口粮 1、心神 −6；当前仅记静修月份，无成长收益；药散后不能继续',[resourceRequirement(s,'focus',6)]);
+ if(qiStable(q))action('qiSeclude','循法静修一年','十二月、口粮 12、心神 −20；当前仅记静修月份，暂不增长能力或解锁内容',[resourceRequirement(s,'grain',12),resourceRequirement(s,'focus',20),flagRequirement('护卷旧契已结清',!s.story.luRoute||s.story.luRoute==='complete'||s.story.luDefaulted,'先结清护卷旧契，避免闭关中误期')]);
  if(s.location==='market'){
   action('qiTrade','出售一株灵草','不耗月；灵草 −1、银钱 +3',[resourceRequirement(s,'herbs',1)]);
   action('qiBuyCooling','购一丸清心丹','不耗月；银钱 −5；压制火患三月，不能代替循环',[resourceRequirement(s,'silver',5)]);
@@ -1037,7 +1041,7 @@ function fiveQiAvailable(s){if(!s.mingqi.introComplete)return [];
  }
  if(q.items.cooling>0)action('qiCooling','服清心丹','不耗月；消耗一丸，暂压火患三月，不永久调和五气');
  if(s.location==='temple'){
-  if(!q.aid)action('qiAskAid','请程上师疏通行气','一月、口粮 1；只解除郁滞，留下一个护法人情，不替你调平五气');
+  if(q.blocked&&!q.aid)action('qiAskAid','请程上师疏通行气','一月、口粮 1；只解除郁滞，留下一个护法人情，不替你调平五气');
   if(q.debt>0)action('qiRepay','替程上师誊卷还情','一月、口粮 1、心神 −10；偿还一次护法人情',[resourceRequirement(s,'focus',10)]);
  }
  if(s.location==='mountain'&&!q.echo&&qiYeFact(s))action('qiYeEcho','叶青蘅 · 药径旧恩','一月、口粮 1；她记起你亲自分药相救的旧事，赠一株灵草及清心丹，不让旁人自动知情');
@@ -1063,7 +1067,7 @@ function fiveQiStep(s,id){
  if(id==='qiRepay'){add(s,{focus:-10});q.debt--;markTrait(s,'重诺');note(s,'你花一月替程上师誊卷，履行这次疏脉护法之约。','人情');qiWitness(s,'mingqi.qiRepay',['cheng'],'偿还疏脉护法之约。','kept');}
  if(id==='qiYeEcho'){q.echo=true;q.items.cooling++;add(s,{herbs:1});const fact=qiYeFact(s);note(s,'叶青蘅记得你在药径上亲手分药：“那时你肯停步，今日这株药与一丸清心丹，算我还你。”这份旧恩只由她亲历，不会自动传给别的故人。','人情');qiWitness(s,'mingqi.qiYeEcho',['ye'],'叶青蘅记起分药相救，赠药与清心丹。');q.echoFact=fact.id;}
  if(monthly)turn(s);
- if(!s.ending&&!oldStable&&qiStable(q))note(s,'五气形成自洽循环。接下来可沿法静修数年，重大施术或新伤才须重新察看；不必每月调气。','五气');
+ if(!s.ending&&!oldStable&&qiStable(q))note(s,'五气形成自洽循环。已到本版内容终点，可留卷等待后续；继续静修暂不解锁新内容。','五气');
  if(oldStable&&!qiStable(q))note(s,'循环因本次施术受到扰动；先重行调和法，再考虑长久静修。','五气');
  return s;
 }
