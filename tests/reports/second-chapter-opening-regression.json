@@ -1,0 +1,8 @@
+{
+  "baseline": "25105f1607e3d9f0624a5daf9de61f4313b53f5d",
+  "testedRuleVersion": "2.48",
+  "finalRuleVersion": "2.49",
+  "matrixCount": 5400,
+  "pairedRecordDifferences": 0,
+  "note": "Final v2.49 changes only five-qi reflow after awakening; full v2.48 opening records match baseline exactly. Test helper optional returnState does not affect policies or records."
+}

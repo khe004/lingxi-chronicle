@@ -1,0 +1,105 @@
+{
+  "ruleVersion": "2.49",
+  "scope": "Nine complete public-action first-chapter to second-chapter runs; supplies obtained through actual mountain gathering, no injected chapter-two stock",
+  "records": [
+    {
+      "origin": "scholar",
+      "route": "taiwei",
+      "seed": 1,
+      "openingMonth": 159,
+      "months": 38,
+      "grade": "上下品",
+      "remaining": 763,
+      "grain": 73,
+      "wounds": 0
+    },
+    {
+      "origin": "scholar",
+      "route": "star",
+      "seed": 1,
+      "openingMonth": 110,
+      "months": 48,
+      "grade": "上下品",
+      "remaining": 802,
+      "grain": 42,
+      "wounds": 0
+    },
+    {
+      "origin": "scholar",
+      "route": "green",
+      "seed": 1,
+      "openingMonth": 127,
+      "months": 37,
+      "grade": "上中品",
+      "remaining": 808,
+      "grain": 46,
+      "wounds": 0
+    },
+    {
+      "origin": "merchant",
+      "route": "taiwei",
+      "seed": 1,
+      "openingMonth": 120,
+      "months": 39,
+      "grade": "上下品",
+      "remaining": 837,
+      "grain": 43,
+      "wounds": 0
+    },
+    {
+      "origin": "merchant",
+      "route": "star",
+      "seed": 1,
+      "openingMonth": 125,
+      "months": 40,
+      "grade": "上中品",
+      "remaining": 831,
+      "grain": 42,
+      "wounds": 0
+    },
+    {
+      "origin": "merchant",
+      "route": "green",
+      "seed": 3,
+      "openingMonth": 102,
+      "months": 45,
+      "grade": "上中品",
+      "remaining": 849,
+      "grain": 45,
+      "wounds": 0
+    },
+    {
+      "origin": "herbalist",
+      "route": "taiwei",
+      "seed": 1,
+      "openingMonth": 110,
+      "months": 43,
+      "grade": "上下品",
+      "remaining": 903,
+      "grain": 43,
+      "wounds": 0
+    },
+    {
+      "origin": "herbalist",
+      "route": "star",
+      "seed": 1,
+      "openingMonth": 122,
+      "months": 46,
+      "grade": "上中品",
+      "remaining": 888,
+      "grain": 43,
+      "wounds": 0
+    },
+    {
+      "origin": "herbalist",
+      "route": "green",
+      "seed": 1,
+      "openingMonth": 105,
+      "months": 48,
+      "grade": "上中品",
+      "remaining": 903,
+      "grain": 43,
+      "wounds": 0
+    }
+  ]
+}

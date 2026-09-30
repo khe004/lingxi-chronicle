@@ -1,6 +1,6 @@
 (function(root,factory){const game=factory();if(typeof module==='object'&&module.exports)module.exports=game;else root.LingxiEngine=game;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const RULE_VERSION='2.48';
+const RULE_VERSION='2.49';
 const KEY='lingxi-opening-v2';
 const CHECKPOINT_KEY='lingxi-opening-checkpoint-v1';
 const ELEMENTS={wood:'木',fire:'火',earth:'土',metal:'金',water:'水'};
@@ -1011,7 +1011,7 @@ function fiveQiSummary(s){const q=s.mingqi?.fiveQi;if(!q)return null;const stabl
 
  return {status,stable,temporary,temporaryMonths:Math.max(0,(q.temporaryUntil||0)-s.month),method:QI_METHODS[q.method]?.name||(q.method==='breath'?'养息 · 水火相济':'尚未定法'),cause:q.lastCause,advice,issues,relation,arts:q.arts.map(id=>({drain:'泄火术',unblock:'疏脉术'}[id]||id)),cultivationMonths:q.cultivationMonths,items:{...q.items},debt:q.debt,aid:q.aid};
 }
-function qiReshape(q,method){const v=q.values;q.method=method;for(const k of Object.keys(v))v[k]=Math.max(-1,v[k]);
+function qiReshape(q,method){const v=q.values;q.method=method;for(const k of Object.keys(v))v[k]=Math.max(-1,v[k]);v.wood=Math.max(0,v.wood);
  if(method==='taiwei'){v.metal=Math.max(1,v.metal);v.water=1;v.fire=0;}
  if(method==='star'){v.earth=2;v.water=Math.max(0,v.water);v.fire=2;}
  if(method==='green'){v.wood=Math.max(2,v.wood);v.fire=Math.min(1,v.fire);v.earth=1;v.water=Math.max(0,v.water);}
