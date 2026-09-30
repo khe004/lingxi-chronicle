@@ -1,0 +1,71 @@
+{
+  "rulesVersion": "2.44",
+  "baselineSiteSource": "029a355244b99c737f7777b486a243b9a948556e",
+  "upstreamBase": "f4ca6bcf8f65f3203df6b9f67b5fbf939ec1ede0",
+  "commands": [
+    "node tests/balance-matrix.cjs 100 (v85 baseline)",
+    "node tests/balance-matrix.cjs 100 (current)"
+  ],
+  "matrixCount": 5400,
+  "attempts": 5398,
+  "openingSuccesses": 4339,
+  "pairedOutcomeDifferences": 0,
+  "comparedFields": [
+    "reason",
+    "attemptMonth",
+    "attemptChance",
+    "attemptQuality",
+    "attemptHarmonyScore",
+    "successMonth",
+    "finalGrade",
+    "month",
+    "manual",
+    "spring",
+    "grades",
+    "wounds",
+    "grain",
+    "silver",
+    "herbs",
+    "firstManual",
+    "firstSpring"
+  ],
+  "actualEntryCompletions": 4339,
+  "entryMonthDistribution": {
+    "3": 2578,
+    "4": 1464,
+    "5": 297
+  },
+  "entryFailureCount": 0,
+  "overall": {
+    "total": 5400,
+    "attempts": 5398,
+    "successes": 4339,
+    "successRate": 80.35,
+    "averageAttemptMonth": 119.19,
+    "medianAttemptMonth": 116,
+    "p90AttemptMonth": 139,
+    "medianSuccessMonth": 117,
+    "springSelections": {
+      "照骨玄泉": 1800,
+      "瑶光玉液池": 900,
+      "松风泉": 1800,
+      "苍梧石髓池": 900
+    },
+    "foundationGrades": {
+      "1": 805,
+      "2": 4901,
+      "3": 10494
+    },
+    "finalGrades": {
+      "上中品": 2357,
+      "上下品": 1364,
+      "中上品": 618
+    }
+  },
+  "policyChoiceDivergence": {
+    "changed": 1800,
+    "total": 2700,
+    "percent": 66.67
+  },
+  "note": "Fixed policies/seeds describe this matrix, not real player success rates. Intro is a bounded opening, not the complete mingqi/朝元 loop."
+}

@@ -303,3 +303,5 @@
  .ui-redesign .collection-tabs button:nth-child(4){grid-column:2 / span 2}
  .ui-redesign .collection-tabs button:nth-child(5){grid-column:4 / span 2}
 }
+
+.chapter-intro{border:1px solid var(--line,#50615b);padding:1rem;margin-bottom:1rem;border-radius:6px}.chapter-intro h2{font-size:1.25rem;margin:.4rem 0}.chapter-intro p{line-height:1.7}.chapter-milestones{display:flex;flex-wrap:wrap;gap:.5rem}.chapter-milestones span{font-size:.875rem;border:1px solid var(--line,#50615b);padding:.3rem .5rem;border-radius:4px}#compact-progress-label{font-style:normal}

@@ -1,6 +1,8 @@
 (function(root,factory){const game=factory();if(typeof module==='object'&&module.exports)module.exports=game;else root.LingxiEngine=game;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
+const RULE_VERSION='2.44';
 const KEY='lingxi-opening-v2';
+const CHECKPOINT_KEY='lingxi-opening-checkpoint-v1';
 const ELEMENTS={wood:'木',fire:'火',earth:'土',metal:'金',water:'水'};
 const ELEMENT_BEATS={wood:'earth',earth:'water',water:'fire',fire:'metal',metal:'wood'};
 const ELEMENT_GENERATES={wood:'fire',fire:'earth',earth:'metal',metal:'water',water:'wood'};
@@ -66,7 +68,7 @@ function matchup(offense,defense){const a=affinity(offense?.elements,offense?.po
  if(polarity===1&&ap)polarity=Math.min(1.5,(ap[a.polarity]||0)/3);
  return {element,polarity,attackFactor:1+element*.12+polarity*.08,defenseFactor:1-element*.10-polarity*.06};
 }
-const STAGES=['入门吐纳','凝元显意','淬元去芜','元成入真'];
+const STAGES=['入门吐纳','凝元显意','淬元去芜','元成入真','明气'];
 const NEED=[36,52,70,88];
 const OLD_NEED=[38,62,83,110];
 const MANUAL_BONUS=[0,12,20,26,30,26,18];
@@ -132,7 +134,7 @@ function create({name,origin='scholar',talent='clarity',gender='female',elements
  const body=o.body+(t==='vitality'?1:0);
  if(!compatibleElements(elements))throw new RangeError('五行相克或属性无效，不能同时选取');
  const birth=elements.includes('plain')?[]:elements;
-const s={version:11,chapter:'opening',world:{continent:'donghua',region:'cangwu'},lifeHistory:[],lifeTraits:{},name:clean,gender:gender==='male'?'male':'female',elements:birth,polarity:Object.hasOwn(POLARITIES,polarity)?polarity:'harmony',affinityPoints:innatePoints(birth,polarity),knownTechniques:[],techniquePractice:{},codex:{people:[],beasts:[],combatants:[],combatantNotes:{},gear:[],elixirs:[]},origin:ORIGINS[origin]?origin:'scholar',talent:t,month:0,ageMonths:16*12,lifeLimitMonths:(o.life+(body-3)+(t==='vitality'?6:0))*12,location:'temple',stage:0,progress:0,totalProgress:0,practice:[0,0,0,0,0,0,0],affinityTraining:[0,0,0,0,0,0,0],aptitudeXp:{root:0,wit:0,body:0,dao:0,social:0},studyWork:0,manuals:[0],decodedManuals:[0],decodeWork:[0,0,0,0,0,0,0],foundationGrades:[],foundationStrain:0,foundationPolish:0,focus:100,wounds:0,silver:o.silver,grain:o.grain,herbs:o.herbs,root:o.root+(t==='meridian'?1:0),wit:o.wit,body,dao:3,social:o.social,insight:0,foundation:0,manual:0,spring:0,npcFavor:{gu:0,ye:0,cheng:0,lu:0,wen:0},flags:{scroll:false,herbalist:false,mentor:false,elixir:false},elixirBoost:0,story:{arenaLessonSeen:false,yeRoute:null,yeMonth:null,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0,guRoute:null,guMonth:null,chengRoute:null,chengMonth:null,guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false},events:{seen:[],nextMonth:0},trainingGear:{staff:false,vest:false,shoes:false,talisman:false},sparRecord:{wins:0,losses:0,withdrawals:0,draws:0,last:null},combat:null,pending:null,ending:null,logs:[],books:[]};
+const s={version:12,chapter:'opening',world:{continent:'donghua',region:'cangwu'},lifeHistory:[],lifeTraits:{},name:clean,gender:gender==='male'?'male':'female',elements:birth,polarity:Object.hasOwn(POLARITIES,polarity)?polarity:'harmony',affinityPoints:innatePoints(birth,polarity),knownTechniques:[],techniquePractice:{},codex:{people:[],beasts:[],combatants:[],combatantNotes:{},gear:[],elixirs:[]},origin:ORIGINS[origin]?origin:'scholar',talent:t,month:0,ageMonths:16*12,lifeLimitMonths:(o.life+(body-3)+(t==='vitality'?6:0))*12,location:'temple',stage:0,progress:0,totalProgress:0,practice:[0,0,0,0,0,0,0],affinityTraining:[0,0,0,0,0,0,0],aptitudeXp:{root:0,wit:0,body:0,dao:0,social:0},studyWork:0,manuals:[0],decodedManuals:[0],decodeWork:[0,0,0,0,0,0,0],foundationGrades:[],foundationStrain:0,foundationPolish:0,focus:100,wounds:0,silver:o.silver,grain:o.grain,herbs:o.herbs,root:o.root+(t==='meridian'?1:0),wit:o.wit,body,dao:3,social:o.social,insight:0,foundation:0,manual:0,spring:0,npcFavor:{gu:0,ye:0,cheng:0,lu:0,wen:0},flags:{scroll:false,herbalist:false,mentor:false,elixir:false},elixirBoost:0,story:{arenaLessonSeen:false,yeRoute:null,yeMonth:null,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0,guRoute:null,guMonth:null,chengRoute:null,chengMonth:null,guText:null,guFragments:false,guTextMonth:0,yeText:null,yeTextMonth:0,yeHerbWork:0,luRoute:null,luMonth:0,luCredential:false,luHeard:origin==='merchant',luDefaulted:false,sealPermit:false,stoneClue:false},events:{seen:[],nextMonth:0},trainingGear:{staff:false,vest:false,shoes:false,talisman:false},sparRecord:{wins:0,losses:0,withdrawals:0,draws:0,last:null},combat:null,pending:null,ending:null,logs:[],books:[]};
  note(s,openingStory(s.origin,s.talent),'开篇');remember(s,'life.enter-cangwu',{outcome:'入山求道',tags:['求道','苍梧'],text:'十六岁辞别故里，来到东华洲苍梧山求道。'});return syncIds(s);
 }
 function note(s,text,tag='日常',effect=''){s.logs.push({month:s.month,text,tag,effect,...(s.batchActive&&['修行','日常','采集'].includes(tag)?{batch:true}:{})});if(s.logs.length>220)s.logs.shift();
@@ -293,7 +295,7 @@ function sparRound(s,id,rng){const c=s.combat;if(!c||!combatOptions(s).some(o=>o
  if(turn>=30){finishSpar(s,'平局');return;}
  c.round++;if(!interrupted)c.intent=sparIntent(e,c.round);
 }
-function cap(s,manual=s.manual){return NEED[s.stage]+(ITEMS.manual[manual]?.capBonus||0);}
+function cap(s,manual=s.manual){if(s.chapter==='mingqi')return 0;return NEED[s.stage]+(ITEMS.manual[manual]?.capBonus||0);}
 const ORDEAL_RATIO=.25,ORDEAL_VISITOR_MONTHS=8;
 function ordealThreshold(s){return Math.ceil(NEED[3]*ORDEAL_RATIO);}
 function ordealActive(s){return s.stage===3&&s.story?.ordeal?.triggered&&!s.story.ordeal.resolved;}
@@ -371,12 +373,12 @@ function upgradeStory(s){
  s.version=6;return s;
 }
 function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(input.books)||!Number.isFinite(input.ageMonths))return null;
- if(input.version===11||input.version===10||input.version===9||input.version===8||input.version===7){input.version=11;input.chapter=input.chapter||'opening';input.world=input.world||{continent:'donghua',region:LOCATIONS[input.location]?.region||'cangwu'};ensureLifeHistory(input);input.techniquePractice=input.techniquePractice||{};input.aptitudeXp=input.aptitudeXp||{root:0,wit:Math.max(0,input.studyWork||0),body:0,dao:0,social:0};input.studyWork=input.aptitudeXp.wit||0;input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
+ if(input.version===12||input.version===11||input.version===10||input.version===9||input.version===8||input.version===7){input.version=12;input.chapter=input.chapter||'opening';input.world=input.world||{continent:'donghua',region:LOCATIONS[input.location]?.region||'cangwu'};ensureLifeHistory(input);input.techniquePractice=input.techniquePractice||{};input.aptitudeXp=input.aptitudeXp||{root:0,wit:Math.max(0,input.studyWork||0),body:0,dao:0,social:0};input.studyWork=input.aptitudeXp.wit||0;input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
   if(!input.affinityPoints||'plain' in input.affinityPoints||'harmony' in input.affinityPoints){input=upgradeAffinity(copy(input));}
   input.story=input.story||{};input.story.ordeal=input.story.ordeal||null;input.foundationPolish=Number.isFinite(input.foundationPolish)?input.foundationPolish:0;input.insight=0;input.decodedManuals=input.decodedManuals||[...new Set([0,...(input.manuals||[])])];input.decodeWork=input.decodeWork||Array(ITEMS.manual.length).fill(0);input.codex=input.codex||{};input.codex.combatants=input.codex.combatants||[];input.codex.combatantNotes=input.codex.combatantNotes||{};input.codex.elixirs=(input.codex.elixirs||[]).filter(id=>id!=='yangyuan');
   for(const id of input.codex.beasts||[]){if(!input.codex.combatants.includes(id)){input.codex.combatants.push(id);const foe=SPAR_OPPONENTS[id],seenArts=foe?.innate?Object.keys(FOE_ARTS).filter(art=>FOE_ARTS[art].name===foe.innate):[];input.codex.combatantNotes[id]={kind:'beast',seenArts,seenGear:[]};}}
   const visitedMarket=input.location==='market'||input.flags?.elixir||input.logs.some(e=>e.text==='你来到山下集市。');
-  if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);ensureOrdeal(input);return input;
+  if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);if(input.chapter!=='mingqi')ensureOrdeal(input);if(input.ending?.kind==='success'&&input.chapter==='opening'){enterMingqi(input,input.ending.grade,true);sealOpeningCheckpoint(input);}return input;
  }
  if(input.version===6)return migrate(upgradeRoutes(copy(input)));
  if(input.version===5)return migrate(upgradeRoutes(upgradeStory(copy(input))));
@@ -407,9 +409,9 @@ function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(in
  s.studyWork=0;return migrate(upgradeRoutes(upgradeStory(s)));
 }
 function book(s,yr,partial=false){
- if(s.books.some(b=>b.year===yr))return;
+ const prior=s.books.find(b=>b.year===yr);if(prior&&!prior.partial)return;if(prior)s.books=s.books.filter(b=>b!==prior);
  const entries=s.logs.filter(x=>x.month>=(yr===1?0:(yr-1)*12+1)&&x.month<=yr*12);
- const tags=['开篇','人情','抉择','法门','华池','突破','开脉','结局','伤病','延寿','悟道','见闻'];
+ const tags=['开篇','人情','抉择','法门','华池','突破','开脉','结局','伤病','延寿','悟道','见闻','明气'];
  const lines=entries.filter(x=>tags.includes(x.tag)).map(x=>x.text);
  const counts={修行:0,研经:0,采集:0,交易:0};
  for(const e of entries)if(Object.hasOwn(counts,e.tag))counts[e.tag]++;
@@ -422,16 +424,16 @@ function end(s,kind,body,grade=''){
  s.ending={kind,grade,body};note(s,body,'结局');
  if(s.month%12!==0||s.month===0)book(s,year(s.month),true);else{const last=s.books.find(b=>b.year===year(s.month));if(last&&!last.lines.includes(body))last.lines.push(body);else if(!last)book(s,year(s.month));}
 }
-function lifeSummary(s){if(!s.ending)return [];
+function lifeSummary(s){if(!s.ending&&!s.openingResult)return [];const ending=s.ending||s.openingResult;
  const route={help:'分药救助叶青蘅',trade:'向叶青蘅索酬指路',leave:'绕过药径独行'}[s.story?.yeRoute]||'未遇叶青蘅';
  const follow={accompany:'后来与她同行辨泉',part:'后来采药各行',buyMap:'后来购得泉径旧图',cash:'后来接下山下短工',solo:'后来独自寻得泉径',forage:'后来避险采药'}[s.story?.yeFollowup]||'此事未有后续';
  const ranks=s.foundationGrades.length?s.foundationGrades.map((n,i)=>`第${i+1}关${['','下','中','上'][n]||'未定'}品`).join('、'):'尚未筑元';
- return [`${ORIGINS[s.origin]?.name||'求道者'}，天赋${TALENTS[s.talent]?.name||'平常'}；终局时 ${Math.floor(s.ageMonths/12)} 岁。`,`药径旧事：${route}；${follow}。`,`道途根基：${ranks}；历来累计功行 ${Number(s.totalProgress).toFixed(2)}。`,`终局所依：${ITEMS.manual[s.manual]?.name||'旧法'}、${ITEMS.spring[s.spring]?.name||'未得华池'}。`,`人物往来：顾闻溪 ${s.npcFavor.gu>=0?'+':''}${s.npcFavor.gu}，叶青蘅 ${s.npcFavor.ye>=0?'+':''}${s.npcFavor.ye}，程上师 ${s.npcFavor.cheng>=0?'+':''}${s.npcFavor.cheng}，陆知衡 ${(s.npcFavor.lu||0)>=0?'+':''}${s.npcFavor.lu||0}。`,...Object.entries({gu:'星篆校勘',ye:'青华药约',lu:'商路旧契',cheng:'上师传法'}).filter(([who])=>s.story.afterManual?.[who]?.first).map(([who,label])=>{const labels={publish:'公开勘误',reserve:'独自重校',annotate:'补注残文',credit:'署名刊行',treat:'送药救助',keep:'留药养脉',visit:'同访辨泉',receive:'收下回礼',honor:'守约还卷',broker:'承接新买卖',settle:'结清旧契',teach:'代授行气',withdraw:'婉拒差事',guide:'随师问道',lecture:'重听旧注'};return `${label}：${labels[s.story.afterManual[who].first]||'旧事已决'}；${labels[s.story.afterManual[who].second]||'后事未决'}。`;}),...(s.story.sealDebt?[`照骨玄泉池契：${s.story.sealDebt}。`]:[]),s.ending.kind==='success'?`开脉脉象：${s.ending.grade}。`:s.ending.kind==='mortal'?'开脉未成，归于凡俗。':s.ending.kind==='retired'?'三十未开脉，辞山归家。':'身死道消，此生道途止于苍梧。'];
+ return [`${ORIGINS[s.origin]?.name||'求道者'}，天赋${TALENTS[s.talent]?.name||'平常'}；终局时 ${Math.floor(s.ageMonths/12)} 岁。`,`药径旧事：${route}；${follow}。`,`道途根基：${ranks}；历来累计功行 ${Number(s.totalProgress).toFixed(2)}。`,`终局所依：${ITEMS.manual[s.manual]?.name||'旧法'}、${ITEMS.spring[s.spring]?.name||'未得华池'}。`,`人物往来：顾闻溪 ${s.npcFavor.gu>=0?'+':''}${s.npcFavor.gu}，叶青蘅 ${s.npcFavor.ye>=0?'+':''}${s.npcFavor.ye}，程上师 ${s.npcFavor.cheng>=0?'+':''}${s.npcFavor.cheng}，陆知衡 ${(s.npcFavor.lu||0)>=0?'+':''}${s.npcFavor.lu||0}。`,...Object.entries({gu:'星篆校勘',ye:'青华药约',lu:'商路旧契',cheng:'上师传法'}).filter(([who])=>s.story.afterManual?.[who]?.first).map(([who,label])=>{const labels={publish:'公开勘误',reserve:'独自重校',annotate:'补注残文',credit:'署名刊行',treat:'送药救助',keep:'留药养脉',visit:'同访辨泉',receive:'收下回礼',honor:'守约还卷',broker:'承接新买卖',settle:'结清旧契',teach:'代授行气',withdraw:'婉拒差事',guide:'随师问道',lecture:'重听旧注'};return `${label}：${labels[s.story.afterManual[who].first]||'旧事已决'}；${labels[s.story.afterManual[who].second]||'后事未决'}。`;}),...(s.story.sealDebt?[`照骨玄泉池契：${s.story.sealDebt}。`]:[]),ending.kind==='success'?`开脉脉象：${ending.grade}。`:ending.kind==='mortal'?'开脉未成，归于凡俗。':ending.kind==='retired'?'三十未开脉，辞山归家。':ending.kind==='lifespan'?'寿数已尽，此生道途落卷。':'身死道消，此生道途止于苍梧。'];
 }
 function turn(s){s.month++;s.ageMonths++;if(s.grain>0)s.grain--;else{add(s,{wounds:1});s.lifeLimitMonths=Math.max(s.ageMonths,s.lifeLimitMonths-3);note(s,'本月口粮断绝，饥寒损伤了身体，也折去些许寿元。','伤病');}
  if(s.story?.luRoute&&s.story.luRoute!=='complete'&&!s.story.luDefaulted&&s.month>=s.story.luMonth+60){s.story.luDefaulted=true;add(s,{silver:-Math.min(s.silver,6)});s.social=Math.max(1,s.social-1);favor(s,'lu',-2);note(s,'护卷契书五年未结，陆知衡遣人追索盘缠，你的处世声名因此受损；仍可结契求法。','抉择','银钱最多 −6 · 处世 −1 · 陆知衡 −2');}
  if(s.month%12===0)book(s,year(s.month));
- if(!s.ending&&s.ageMonths>=30*12){end(s,'retired','三十岁这一年，你仍未能叩开仙凡之门。你收起旧卷，辞别苍梧，下山归家；多年吐纳终成一段凡尘旧梦。');return;}if(s.ageMonths>=s.lifeLimitMonths||s.wounds>=6){end(s,'death',s.wounds>=6?'积伤难复，你在苍梧山的冬夜中溘然长逝。':'寿数已尽。你仍未求得长生之门，山中只余旧日道书。');}
+ if(!s.ending&&s.chapter!=='mingqi'&&s.ageMonths>=30*12){end(s,'retired','三十岁这一年，你仍未能叩开仙凡之门。你收起旧卷，辞别苍梧，下山归家；多年吐纳终成一段凡尘旧梦。');return;}if(s.ageMonths>=s.lifeLimitMonths||s.wounds>=6){end(s,s.chapter==='mingqi'&&s.wounds<6?'lifespan':'death',s.wounds>=6?'积伤难复，你在苍梧山的冬夜中溘然长逝。':'寿数已尽。你仍未求得长生之门，山中只余旧日道书。');}
 }
 function chance(s,mode='steady'){
  const legacyBonus=s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0);
@@ -569,6 +571,7 @@ function legacyRequirementDiagnostics(s,o){
 }
 
 function rawOptions(s){
+ if(s.chapter==='mingqi')return [];
  if(s.ending)return [];
  if(s.pending==='ordealHelp')return [...ordealNpcOptions(s),{id:'back',label:'暂不求助',detail:'调查不耗月份，也不锁定人物或演武路线'}];
  if(s.pending==='guText')return [withRequirements({id:'collaborate',label:'与顾闻溪合校残篇',detail:'一月、口粮 1、心神 −16；日后仍要搜集缺页'},[requirement('顾闻溪好感',s.npcFavor.gu,1),requirement('蚀文研读',s.story.scriptureReads||0,2),resourceRequirement(s,'wit',4),resourceRequirement(s,'focus',16)]),withRequirements({id:'independent',label:'自购残篇，独自考据',detail:'一月、口粮 1、银钱 −6、心神 −20；顾好感 −1'},[resourceRequirement(s,'silver',6),requirement('蚀文研读',s.story.scriptureReads||0,3),resourceRequirement(s,'wit',5),resourceRequirement(s,'focus',20)]),{id:'back',label:'暂不立题',detail:'不耗月份与资源；日后仍可继续追索'}];
@@ -630,7 +633,7 @@ function rawOptions(s){
  if(s.pending==='attempt')return [{id:'steady',label:`守正开脉 · 成功率 ${chance(s)}%`,detail:'一月、口粮 1、心神 −35；失败即终局'},{id:'bold',label:`强求上品 · 成功率 ${chance(s,'bold')}%`,detail:'一月、口粮 1、心神 −35；提高冲出高品与大幅掉档的机会，失败即终局'},{id:'back',label:'再准备一番',detail:'不耗月份与资源'}];
  return [];
 }
-function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];
+function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];if(s.chapter==='mingqi')return mingqiAvailable(s);
  if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...(ordealVisitorAvailable(s)?[{id:'ordealDuel',label:`破碍切磋 · ${SPAR_OPPONENTS.ordealVisitor.name}`,detail:`${SPAR_OPPONENTS.ordealVisitor.rank} · 约在第 ${s.story.ordeal.visitorUntil} 月离山；胜出可借战破除气机逆乱，失败只耗正常演武时间`}]:[]),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':' · 首胜另有奖励'}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
  const batchRisk=s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4;
  const blocked=ordealActive(s);
@@ -723,7 +726,7 @@ function batchGather(initial,rng){let s=initial,gathered=0,rested=0,reason='半�
  else note(s,`采药尚未开始：${reason}。`,'采药');
  return s;
 }
-function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.ending)return s;
+function stepInternal(input,command,rng=Math.random){const s=copy(input);if(command==='checkpoint:opening')return restoreOpeningCheckpoint(s);if(s.ending)return s;if(s.chapter==='mingqi')return mingqiStep(s,command);
  const [kind,id]=command.split(':');
  if(kind==='combat'){if(id==='auto-aggressive'||id==='auto-steady')autoSpar(s,id.slice(5),rng);else sparRound(s,id,rng);return s;}
  if(kind==='travel'){if(s.pending||s.combat||!LOCATIONS[id])return s;if(s.location==='arena'&&id!=='arena')s.trainingGear={staff:false,vest:false,shoes:false,talisman:false};s.location=id;note(s,`你来到${LOCATIONS[id].name}。`);if(id==='arena'&&!s.story.arenaLessonSeen){s.story.arenaLessonSeen=true;note(s,'演武坪上，传功弟子正给新入门弟子演示行气招式。你在旁看了一阵，见这些都是入门弟子可以习练的功夫，便也上前随众习招。此后可在此习招、切磋。','见闻');}
@@ -947,13 +950,78 @@ function stepInternal(input,command,rng=Math.random){const s=copy(input);if(s.en
   if(event==='attempt'){
    if(id==='back'){note(s,'你收回冲关之念，决定再作准备。');return s;}
    const odds=chance(s,id);add(s,{focus:-35});note(s,`你在${LOCATIONS[s.location].name}闭目运气，尝试冲击开脉。`,'开脉');turn(s);if(s.ending)return s;
-   if(rand(rng)<odds/100){const g=grade(s,rand(rng),id);s.lifeLimitMonths+=30*12;end(s,'success',`仙脉豁然贯通，脉象定为${g}，寿限也延长了三十年。你终于真正踏入玄门，第一章至此结束。`,g);}
+   if(rand(rng)<odds/100){const g=grade(s,rand(rng),id);s.lifeLimitMonths+=30*12;enterMingqi(s,g);}
    else if(s.wounds>=2||rand(rng)<.32){end(s,'death','冲关时气机倒卷，仙脉未成，你重伤不治，求道一生止于苍梧山。');}
    else {end(s,'mortal','仙脉闭塞，强求再无余地。你下山归于凡俗，将未竟道途写进余生的旧卷。');}
   }
  }
  return s;
 }
+
+// The opening snapshot is fixed and contains no nested checkpoint. Ordinary turns
+// only copy it; restoration never consumes RNG or replaces it with current state.
+function hashText(text){let h=2166136261;for(const c of text){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function enterMingqi(s,grade,legacy=false){
+ s.version=12;s.chapter='mingqi';s.stage=4;s.pending=null;s.combat=null;s.ending=null;
+ s.needsOpeningCheckpoint=true;s.openingResult={kind:'success',grade,month:s.month,ageMonths:s.ageMonths,legacy};
+ s.mingqi={version:1,entryMonth:s.month,completed:[],arts:[],inspections:0};
+ s.chapterSeed=hashText(JSON.stringify([s.name,s.origin,s.talent,s.month,grade,s.foundationGrades,s.affinityPoints,s.manual,s.spring]));
+ note(s,`仙脉贯通，脉象定为${grade}。你踏入明气，寿限${legacy?'保留开脉时所得':'延长三十年'}。从此不再受三十岁归家之约束；先在故地走一走，熟悉这副能感应灵息的身躯。`,'开脉');
+ remember(s,'realm.mingqi',{outcome:grade,tags:['开脉','入道'],text:`在苍梧山开脉，${grade}脉象，进入明气。`});
+ book(s,year(s.month),s.month%12!==0);
+}
+function sealOpeningCheckpoint(s){
+ if(s.chapterCheckpoint||s.chapter!=='mingqi')return;
+ delete s.needsOpeningCheckpoint;syncIds(s);const snapshot=copy(s);delete snapshot.chapterCheckpoint;
+ s.chapterCheckpoint={version:1,kind:'opening',seed:s.chapterSeed,state:snapshot};
+}
+function restoreOpeningCheckpoint(input){
+ const cp=input.chapterCheckpoint;
+ if(input.chapter!=='mingqi'||!['death','lifespan'].includes(input.ending?.kind)||cp?.version!==1||cp.kind!=='opening'||cp.state?.chapter!=='mingqi')return copy(input);
+ const s=copy(cp.state);s.chapterCheckpoint=copy(cp);return s;
+}
+// Future ordeals call this with a semantic key and their actual preparation.
+// Loading or restoring the same preparation yields the same roll.
+function chapterRoll(s,key,preparation){return hashText(JSON.stringify([s.chapterSeed,key,preparation]))/4294967296;}
+const mingqiMilestones={sense:'辨息入门',ridge:'重访险径',oldFriend:'故人道贺'};
+function mingqiAvailable(s){
+ const done=s.mingqi.completed,base=[];
+ if(!done.includes('sense'))base.push(withRequirements({id:'mingqiSense',label:'初学观息',detail:'一月、口粮 1、心神 −12；学会观息术，辨认身周灵息，不增加五行亲和'},[resourceRequirement(s,'focus',12)]));
+ if(s.location==='mountain'&&!done.includes('ridge'))base.push(withRequirements({id:'mingqiRidge',label:'重走旧日险径',detail:'一月、口粮 1、心神 −8；开脉后能从容通过，灵草 +2，记录一条出山线索'},[resourceRequirement(s,'focus',8)]));
+ if(s.location==='temple'&&!done.includes('oldFriend'))base.push({id:'mingqiFriend',label:'拜别程上师',detail:'一月、口粮 1；故人道贺，记下明气修行的指点，不增减好感'});
+ if(s.mingqi.arts.includes('observeBreath'))base.push({id:'mingqiObserve',label:'以观息术察看灵息',detail:'不耗月份与资源；察看当前地点的灵息，不重复领取收益'});
+ base.push({id:'mingqiRest',label:'静养调息',detail:'一月、口粮 1；心神 +48、暗伤 −1，不增加功行与亲和'});
+ if(s.location==='mountain')base.push({id:'mingqiForage',label:'循灵息采药备粮',detail:'一月、心神 −8；口粮 +5、灵草 +1，不增长资质或亲和',...withRequirements({},[resourceRequirement(s,'focus',8)])});
+ if(s.location==='market')base.push(withRequirements({id:'mingqiSupply',label:'购一程资粮',detail:'不耗月份；银钱 −2、口粮 +6'},[resourceRequirement(s,'silver',2)]));
+ return base;
+}
+function mingqiStep(s,command){
+ const [kind,id]=command.split(':');
+ if(kind==='travel'&&LOCATIONS[id]){if(s.location===id)return s;s.location=id;s.trainingGear={staff:false,vest:false,shoes:false,talisman:false};note(s,`你循熟路来到${LOCATIONS[id].name}。苍梧故地的往来尚不耗月；出山前先安顿好道途。`,'见闻');return s;}
+ if(kind!=='action'||!mingqiAvailable(s).some(o=>o.id===id&&!o.disabled))return s;
+ const done=s.mingqi.completed;
+ if(id==='mingqiObserve'){
+  const descriptions={mountain:'山间木气随草叶升发，石下土息沉稳。昔日只见险路，如今能辨出灵草生处。',temple:'观中灵息缓缓往复，与你主修法门的行气仍有不同。明气往后须明辨自身五气，而非只积功行。',cliff:'崖风里的灵息忽断忽续。你辨得起落，却还不能任意驾驭它。',market:'人来人往，灵息混杂。外物可助修行，仍须先认清自己所缺。',arena:'演武坪的行气痕迹尚在；开脉前的招式可以留作旧日见闻。'};
+  if(s.mingqi.lastObserved===s.location)return s;s.mingqi.lastObserved=s.location;s.mingqi.inspections++;note(s,descriptions[s.location],'明气');return s;
+ }
+ if(id==='mingqiSupply'){add(s,{silver:-2,grain:6});note(s,'你在坊市购下六个月口粮，为往后的行程留出余裕。','交易','银钱 −2 · 口粮 +6');return s;}
+ if(id==='mingqiSense'){add(s,{focus:-12});note(s,'你花一月收敛杂念，以新贯通的仙脉感应身周灵息。先前只有冷暖风声，如今能察觉其中缓急流转，初步学会观息术。','明气','观息术 · 可在各处察看灵息');}
+ if(id==='mingqiRidge'){add(s,{focus:-8});note(s,'旧日险径仍在，山风却不再让你步步惊心。你循着灵息从容走过崖隙，在草木间寻得两株灵草，又记下通往山外的路。','明气','灵草 +2 · 出山线索');}
+ if(id==='mingqiFriend'){
+  discover(s,'people','cheng');const known=s.npcFavor.cheng>0||s.story.trueTextReady;
+  note(s,known?'程上师记起与你在山中的往来，起身道贺：“从今日起，你我可论同一条道了。先辨自身五气，再谈朝元，不必急着再冲一关。”':'程上师听闻你开脉，依观中礼数道贺：“入道可喜，明气尚须自明五气。你若出山，先备好一程资粮。”他未把未曾共同经历的旧事认作人情。','人情');
+ }
+ if(id==='mingqiRest'){add(s,{focus:48,wounds:-1});note(s,'你静养一月，熟悉仙脉贯通后的行气，旧伤缓缓平复。','明气','心神 +48 · 暗伤 −1');}
+ if(id==='mingqiForage'){add(s,{focus:-8,grain:5,herbs:1});note(s,'你循山间灵息辨草，也收下一程野蔬与谷物。','采集','口粮 +5 · 灵草 +1');}
+ turn(s);if(s.ending)return s;
+ if(id==='mingqiSense'){done.push('sense');s.mingqi.arts.push('observeBreath');}
+ if(id==='mingqiRidge'){done.push('ridge');add(s,{herbs:2});}
+ if(id==='mingqiFriend')done.push('oldFriend');
+ if(['mingqiSense','mingqiRidge','mingqiFriend'].includes(id))remember(s,`mingqi.${id}`,{actors:id==='mingqiFriend'?['cheng']:[],outcome:'complete',tags:['明气','入道初行'],text:s.logs.findLast(e=>e.tag==='明气'||e.tag==='人情')?.text||'初入明气，熟悉故地。'});
+ if(done.length===3&&!s.mingqi.introComplete){s.mingqi.introComplete=true;note(s,'你已学会观息、重访险径并辞别故人。苍梧开脉的旧卷之后，明气初行也有了自己的篇章。山外道途尚待展开，可以在此留卷，来日继续。','明气');}
+ return s;
+}
+
 function discover(s,category,id){s.codex=s.codex||{people:[],beasts:[],gear:[],elixirs:[]};s.codex[category]=s.codex[category]||[];if(!s.codex[category].includes(id))s.codex[category].push(id);}
 function discoverCombatant(s,id){const foe=SPAR_OPPONENTS[id];if(!foe)return;s.codex=s.codex||{};s.codex.combatants=s.codex.combatants||[];s.codex.combatantNotes=s.codex.combatantNotes||{};if(!s.codex.combatants.includes(id))s.codex.combatants.push(id);const note=s.codex.combatantNotes[id]||(s.codex.combatantNotes[id]={kind:foe.kind||'human',seenArts:[],seenGear:[],observations:[]});note.seenArts=note.seenArts||[];note.seenGear=note.seenGear||[];note.observations=note.observations||[];for(const slot of Object.keys(foe.gear||{}))if(!note.seenGear.includes(slot))note.seenGear.push(slot);if(foe.kind==='beast')discover(s,'beasts',id);}
 function recordCombatantArt(s,id,art){if(!FOE_ARTS[art])return;discoverCombatant(s,id);const seen=s.codex.combatantNotes[id].seenArts;if(!seen.includes(art))seen.push(art);}
@@ -968,6 +1036,6 @@ function step(input,command,rng=Math.random){const sourcePending=input.pending||
  const choice=action[0]==='choice'?action[1]:null;
  if(choice&&sourcePending&&sourcePending!==s.pending)remember(s,`choice.${sourcePending}.${choice}.${s.month}`,{choice,outcome:s.pending||s.ending?.kind||'resolved',tags:['抉择',sourcePending],text:`在「${sourcePending}」中选择了「${choice}」。`});
  if(s.location&&LOCATIONS[s.location]){s.world=s.world||{};s.world.region=LOCATIONS[s.location].region;s.world.continent=REGIONS[s.world.region]?.parent||'donghua';}
- return syncIds(s); }
-return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,ELEMENT_GENERATES,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,springHarmony,springHarmonyText,aptitudeNeed,polishNeed,polishReady,flawlessFoundation,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,REGIONS,LOCATIONS,locationPath,ensureLifeHistory,remember,hasMemory,memoriesByTag,markTrait,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
+ if(s.needsOpeningCheckpoint)sealOpeningCheckpoint(s);return syncIds(s); }
+return {RULE_VERSION,KEY,CHECKPOINT_KEY,chapterRoll,restoreOpeningCheckpoint,mingqiMilestones,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,ELEMENT_GENERATES,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,springHarmony,springHarmonyText,aptitudeNeed,polishNeed,polishReady,flawlessFoundation,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,REGIONS,LOCATIONS,locationPath,ensureLifeHistory,remember,hasMemory,memoriesByTag,markTrait,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
 });

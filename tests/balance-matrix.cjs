@@ -156,12 +156,24 @@ function command(s,route,policy,buyPill,opening='transition'){
  if(s.grain<9&&s.silver>=3){if(s.location!=='market')return travel(s,'market');return 'action:buymax';}
  return s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4?'action:cultivate':'action:secludeYear';
 }
+function probeMingqiEntry(input){
+ if(input.chapter!=='mingqi')return null;
+ let s=input,steps=0;const entryMonth=s.month;
+ function prepare(){
+  if(s.grain<3){s=G.step(s,'travel:mountain');if(s.focus<8)s=G.step(s,'action:mingqiRest');s=G.step(s,'action:mingqiForage');steps++;}
+  if(s.focus<12){s=G.step(s,'action:mingqiRest');steps++;}
+ }
+ prepare();s=G.step(s,'action:mingqiSense');steps++;
+ prepare();s=G.step(s,'travel:mountain');s=G.step(s,'action:mingqiRidge');steps++;
+ prepare();s=G.step(s,'travel:temple');s=G.step(s,'action:mingqiFriend');steps++;
+ return {complete:!!s.mingqi?.introComplete,ending:s.ending?.kind||null,months:s.month-entryMonth,steps,grain:s.grain,focus:s.focus,wounds:s.wounds};
+}
 function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood'],polarity='yang',trace=false,opening='transition'}){
  // Hold the starting aspect constant across route comparisons; immortal acquisition later attunes its core aspect.
  let s=G.create({origin,talent,elements,polarity}),random=rng(seed),steps=0,pillsBought=0,firstSpirit=null,firstManual=null,firstDecoded=null,firstPractice=null,firstSpring=null,attemptMonth=null,attemptChance=null,attemptAptitude=null,attemptHarmony=null,attemptQuality=null,attemptTopReady=null,minGrain=s.grain,last='',actions=[],affinityAt={},aptitudeAt={};
  const aptitude=state=>({root:state.root,wit:state.wit,body:state.body,dao:state.dao,social:state.social});
  random.onMonth=state=>{if([60,120,168].includes(state.month))aptitudeAt[state.month]=aptitude(state);};
- while(!s.ending&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
+ while(!s.ending&&!s.openingResult&&steps<1500&&s.month<750){let c=command(s,route,policy,buyPill,opening);if(!c)return {reason:'policy-null',seed,origin,talent,route,policy,opening,state:s};
   // General cultivation actions are no longer offered at the market after the P0 menu cleanup.
   if(s.location==='market'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
   if(s.location==='arena'&&['action:rest','action:cultivate','action:secludeYear','action:manual','action:stage','action:attempt'].includes(c))c='travel:temple';
@@ -180,7 +192,7 @@ function simulate({origin,talent,route,policy,seed,buyPill=false,elements=['wood
   if(!firstSpring&&s.spring>=3)firstSpring=s.month;
   if(JSON.stringify([s.month,s.ageMonths,s.pending,s.location,s.progress,s.totalProgress,s.manual,s.manuals,s.decodedManuals,s.spring,s.foundation,s.foundationGrades,s.foundationStrain,s.root,s.wit,s.body,s.dao,s.social,s.aptitudeXp,s.practice,s.affinityPoints,s.affinityTraining,s.focus,s.grain,s.herbs,s.silver,s.wounds,s.lifeLimitMonths,s.npcFavor,s.flags,s.story,s.events,s.ending,s.combat?.id,s.combat?.round])===before)return {reason:'policy-stall',seed,origin,talent,route,policy,opening,command:c,state:s};
  }
- return {reason:s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstDecoded,firstPractice,firstSpring,attemptMonth,attemptChance,attemptAptitude,attemptHarmonyLevel:attemptHarmony?.level||null,attemptHarmonyScore:attemptHarmony?.score??null,attemptQuality,attemptTopReady,aptitudeAt,successMonth:s.ending?.kind==='success'?s.month:null,finalGrade:s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending?{state:s}:{})};
+ return {entryProbe:probeMingqiEntry(s),reason:s.openingResult?.kind||s.ending?.kind||'timeout',seed,origin,talent,route,policy,opening,steps,pillsBought,month:s.month,firstSpirit,firstManual,firstDecoded,firstPractice,firstSpring,attemptMonth,attemptChance,attemptAptitude,attemptHarmonyLevel:attemptHarmony?.level||null,attemptHarmonyScore:attemptHarmony?.score??null,attemptQuality,attemptTopReady,aptitudeAt,successMonth:s.openingResult?.kind==='success'?s.openingResult.month:null,finalGrade:s.openingResult?.grade||s.ending?.grade||null,minGrain,stage:s.stage,manual:s.manual,spring:s.spring,grain:s.grain,silver:s.silver,herbs:s.herbs,wounds:s.wounds,grades:s.foundationGrades,affinityAt,last,...(trace?{actions}:{}),...(!s.ending&&!s.openingResult?{state:s}:{})};
 }
 if(require.main===module){
  const rows=[],improvements=[],bestByBuild={},bestByManual={},manualImprovements=[],buyPill=process.argv.includes('--pill'),groupByManual=process.argv.includes('--best-by-manual'),compareOpenings=process.argv.includes('--compare-openings'),openings=compareOpenings?['basic','transition','specialist']:['transition'];
@@ -208,6 +220,7 @@ if(require.main===module){
   }
  }
  if(rows.length===5400&&openings.length===1&&openings[0]==='transition'){
+  for(const x of rows.filter(x=>x.reason==='success'))assert.ok(x.entryProbe?.complete&&!x.entryProbe.ending&&x.entryProbe.months<=6,`mingqi entry blocked: ${x.origin}/${x.talent}/${x.route}/${x.policy}/${x.seed}`);
   const blocked=rows.filter(x=>['policy-stall','policy-null','timeout'].includes(x.reason));
   assert.equal(blocked.length,0,`matrix has structural stalls: ${blocked.slice(0,3).map(x=>`${x.origin}/${x.talent}/${x.route}/${x.policy}/${x.seed}:${x.reason}`).join(', ')}`);
   const attempted=rows.filter(x=>x.attemptMonth!=null);
