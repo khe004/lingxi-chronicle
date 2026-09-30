@@ -6,8 +6,8 @@ assert.equal(s.version,12);
 assert.deepEqual(s.world,{continent:'donghua',region:'cangwu'});
 assert.equal(G.REGIONS.cangwu.parent,'donghua');
 for(const [id,loc] of Object.entries(G.LOCATIONS)){
-  assert.equal(loc.region,'cangwu',id+' should belong to 苍梧山');
-  assert.deepEqual(G.locationPath(id).slice(0,2),['东华洲','苍梧山']);
+  assert.equal(G.REGIONS[loc.region].parent,'donghua');
+  if(loc.region==='cangwu')assert.deepEqual(G.locationPath(id).slice(0,2),['东华洲','苍梧山']);
 }
 assert(G.hasMemory(s,'life.enter-cangwu'));
 assert.equal(G.memoriesByTag(s,'苍梧').length,1);

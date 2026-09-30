@@ -1,0 +1,30 @@
+[
+  {
+    "method": "taiwei",
+    "months": 15,
+    "grainSpent": 15,
+    "herbsSpent": 0,
+    "wounds": 1
+  },
+  {
+    "method": "star",
+    "months": 14,
+    "grainSpent": 14,
+    "herbsSpent": 0,
+    "wounds": 0
+  },
+  {
+    "method": "green",
+    "months": 14,
+    "grainSpent": 14,
+    "herbsSpent": 5,
+    "wounds": 0
+  },
+  {
+    "method": "breath",
+    "months": 17,
+    "grainSpent": 17,
+    "herbsSpent": 0,
+    "wounds": 1
+  }
+]
