@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const G=require('../dist/engine.js');
 const run=(s,command,roll=0)=>G.step(s,command,()=>roll);
 let s=G.create({name:'闻山',origin:'scholar',talent:'clarity'});s.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,6]));
-assert.equal(s.version,10);
+assert.equal(s.version,11);
 assert.equal(s.manual,0);
 assert.deepEqual(s.manuals,[0]);
 assert.equal(G.ITEMS.manual[0].name,'《养息吐纳诀》');
@@ -387,7 +387,7 @@ assert.ok(forage.herbs>=encounter.herbs+2);
 const oldEvent=structuredClone(bypassed);oldEvent.version=5;delete oldEvent.story;
 const migratedEvent=G.migrate(oldEvent);
 assert.equal(migratedEvent.story.yeRoute,'leave');
-assert.equal(migratedEvent.version,7);
+assert.equal(migratedEvent.version,11);
 assert.equal(G.migrate(migratedEvent),migratedEvent);
 s=run(s,'choice:help');
 s=run(s,'travel:market');s=run(s,'action:sellherb');
@@ -538,7 +538,7 @@ const mortal=G.step(s,'choice:steady',(()=>{const rolls=[.999,.999];return ()=>r
 assert.equal(mortal.ending.kind,'mortal');
 const legacy=G.create({name:'旧档'});legacy.version=3;delete legacy.totalProgress;delete legacy.practice;delete legacy.manuals;delete legacy.foundationGrades;legacy.progress=38;legacy.pending='stage';
 const restored=G.migrate(legacy);
-assert.equal(restored.version,7);
+assert.equal(restored.version,11);
 assert.equal(restored.studyWork,0);
 assert.equal(restored.pending,'stage');
 assert.equal(restored.progress,G.cap(restored));
@@ -548,12 +548,12 @@ const oldest=structuredClone(legacy);oldest.version=2;oldest.trust=2;
 delete oldest.body;delete oldest.dao;delete oldest.social;delete oldest.npcFavor;
 oldest.logs.push({month:1,text:'你将残卷的隐义如实告诉同门顾闻溪。她记下这份人情，也替你带来两两润笔银。',tag:'人情'});
 const converted=G.migrate(oldest);
-assert.equal(converted.version,7);
+assert.equal(converted.version,11);
 assert.deepEqual(converted.npcFavor,{gu:2,ye:0,cheng:1,lu:0,wen:0});
 assert.equal('trust' in converted,false);
 const prev=G.create({name:'上代修士'});prev.version=4;delete prev.studyWork;prev.wit=6;prev.progress=12.5;
 const continued=G.migrate(prev);
-assert.equal(continued.version,7);
+assert.equal(continued.version,11);
 assert.equal(continued.wit,6);
 assert.equal(continued.progress,12.5);
 assert.equal(continued.studyWork,0);
@@ -600,7 +600,7 @@ for(const method of [3,4,5])for(const pool of [3,4,5]){
  const sample=G.create();sample.manual=method;sample.spring=pool;sample.root=6;sample.insight=9;sample.foundation=3;sample.foundationGrades=[2,2,2];sample.wounds=0;
  for(const roll of [0,.01,.03,.05,.5,.99])for(const mode of ['steady','bold'])assert.notEqual(G.grade(sample,roll,mode),'上上品',`${method}/${pool}/${roll}/${mode} cannot bypass imperfect foundation`);
  sample.foundationGrades=[3,3,3];const fit=G.springHarmony(sample);
- if(fit.level!=='相冲')assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path when not clashing`);
+ if(fit.score>=1)assert.equal(G.grade(sample,0,'steady'),'上上品',`${method}/${pool} should have a viable top-grade path when not clashing`);
  else for(const roll of [0,.001,.02,.5,.99])assert.notEqual(G.grade(sample,roll,'steady'),'上上品',`${method}/${pool} cannot bypass the compatibility gate`);
 }
 // Clear Meridian keeps its five-point opening advantage even when a fully prepared route reaches the base chance ceiling.
@@ -613,7 +613,7 @@ for(const origin of ['scholar','merchant','herbalist']){
  assert.ok(G.chance({...prepared,talent:'meridian'})<=84);
 }
 const savedV6=G.create();savedV6.version=6;delete savedV6.manualId;delete savedV6.springId;delete savedV6.manualIds;delete savedV6.story.luHeard;savedV6.books=[{year:1,lines:['旧卷原文'],stage:'入门吐纳'}];
-const savedV7=G.migrate(savedV6);assert.equal(savedV7.version,7);assert.deepEqual(savedV7.books,savedV6.books);assert.equal(savedV7.manualId,'breath');assert.equal(savedV7.npcFavor.lu,0);
+const savedV7=G.migrate(savedV6);assert.equal(savedV7.version,11);assert.deepEqual(savedV7.books,savedV6.books);assert.equal(savedV7.manualId,'breath');assert.equal(savedV7.npcFavor.lu,0);
 const oldPending=G.create();oldPending.version=6;oldPending.pending='trueText';oldPending.flags.mentor=true;oldPending.story.trueTextReady=false;
 const continuedPending=G.migrate(oldPending);assert.equal(continuedPending.pending,'trueText');assert.ok(G.options(continuedPending).some(o=>o.id==='undertake'));
 let overdue=G.create({origin:'merchant'});overdue.location='market';overdue=run(overdue,'action:luMeet');overdue=run(overdue,'choice:pledge');
@@ -862,7 +862,7 @@ test('免费菜单、返回与坊市买卖不会增加五项隐藏历练',()=>{
 test('v9 存档迁移到 v10 时保留旧悟性历练并初始化其余历练',()=>{
  const old=G.create({origin:'scholar'});old.version=9;delete old.aptitudeXp;old.studyWork=5;
  const migrated=G.migrate(old);
- assert.equal(migrated.version,10);
+ assert.equal(migrated.version,11);
  assert.deepEqual(migrated.aptitudeXp,{root:0,wit:5,body:0,dao:0,social:0});
  assert.equal(migrated.studyWork,5);
 });
@@ -971,4 +971,12 @@ test('相冲仙品华池不能仅凭稀有度取得上上资格',()=>{
 test('满足全部条件且华池相合时上上品资格可达',()=>{
  const s=G.create({origin:'scholar',talent:'clarity',elements:['water'],polarity:'yin'});s.manual=3;s.spring=4;s.foundation=3;s.foundationGrades=[3,3,3];s.root=7;s.wit=5;s.wounds=0;s.affinityPoints={wood:1,fire:1,earth:0,metal:1,water:5,yin:5,yang:1};
  assert.equal(G.springHarmony(s).level,'上佳');assert.equal(G.grade(s,0,'steady'),'上上品');
+});
+
+test('尚可仙品池仍低于上上品的相合门槛',()=>{
+ const s=G.create({origin:'scholar'});s.manual=3;s.spring=3;s.foundation=3;s.foundationGrades=[3,3,3];s.root=8;s.wit=8;s.wounds=0;
+ s.affinityPoints=Object.fromEntries(G.AFFINITY_KEYS.map(k=>[k,0]));
+ assert.equal(G.springHarmony(s).level,'尚可');
+ for(const roll of [0,.01,.5,.99])assert.notEqual(G.grade(s,roll,'steady'),'上上品');
+ s.affinityPoints.metal=3;assert.equal(G.springHarmony(s).level,'相合');assert.equal(G.grade(s,0,'steady'),'上上品');
 });

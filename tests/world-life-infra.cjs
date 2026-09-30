@@ -25,4 +25,31 @@ assert.equal(migrated.version,11);
 assert.equal(migrated.chapter,'opening');
 assert.equal(migrated.world.region,'cangwu');
 assert(Array.isArray(migrated.lifeHistory));
+// A real completed choice records the source event, not the cleared menu.
+const event=G.create({origin:'scholar'});event.pending='scroll';event.location='cliff';event.grain=30;event.events.nextMonth=999;
+const resolved=G.step(event,'choice:share',()=>0);
+const decisions=G.memoriesByTag(resolved,'scroll');
+assert.equal(decisions.length,1);assert.equal(decisions[0].choice,'share');
+assert.equal(decisions[0].place,'cliff');assert.equal(decisions[0].region,'cangwu');
+assert.equal(event.lifeHistory.length,1,'stepping must preserve the input snapshot');
+const repeat=G.step(resolved,'choice:share',()=>0);
+assert.equal(repeat.lifeHistory.length,resolved.lifeHistory.length,'a stale choice cannot add a second fact');
+// Every supported historical schema reaches the current world/history schema in one load.
+for(const version of [2,3,4,5,6,7,8,9,10]){
+ const legacy=G.create({origin:'scholar'});legacy.version=version;
+ delete legacy.world;delete legacy.chapter;delete legacy.lifeHistory;delete legacy.lifeTraits;
+ const upgraded=G.migrate(legacy);
+ assert.equal(upgraded.version,11,`v${version}`);assert.equal(upgraded.world.region,'cangwu');
+ assert.deepEqual(upgraded.lifeHistory,[],'migration must not invent historical choices');
+ assert.deepEqual(upgraded.lifeTraits,{});
+}
+const roundtrip=G.migrate(JSON.parse(JSON.stringify(resolved)));G.markTrait(roundtrip,'重诺',2);
+const loaded=G.migrate(JSON.parse(JSON.stringify(roundtrip)));
+assert.deepEqual(loaded.lifeHistory,resolved.lifeHistory);assert.equal(loaded.lifeTraits['重诺'],2);
+assert.equal(G.migrate(loaded).lifeHistory.length,loaded.lifeHistory.length);
+for(const location of Object.keys(G.LOCATIONS)){
+ const moved=G.step(G.create(),'travel:'+location,()=>0);
+ assert.equal(moved.world.region,G.LOCATIONS[moved.location].region);
+ assert.equal(moved.world.continent,G.REGIONS[moved.world.region].parent);
+}
 console.log('world-life-infra: ok');

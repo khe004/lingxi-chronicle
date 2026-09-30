@@ -378,10 +378,10 @@ function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(in
   const visitedMarket=input.location==='market'||input.flags?.elixir||input.logs.some(e=>e.text==='你来到山下集市。');
   if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);ensureOrdeal(input);return input;
  }
- if(input.version===6)return upgradeRoutes(copy(input));
- if(input.version===5)return upgradeRoutes(upgradeStory(copy(input)));
+ if(input.version===6)return migrate(upgradeRoutes(copy(input)));
+ if(input.version===5)return migrate(upgradeRoutes(upgradeStory(copy(input))));
  if(input.version!==2&&input.version!==3&&input.version!==4)return null;
- if(input.version===4){const s=copy(input);s.studyWork=0;return upgradeRoutes(upgradeStory(s));}
+ if(input.version===4){const s=copy(input);s.studyWork=0;return migrate(upgradeRoutes(upgradeStory(s)));}
  const s=copy(input),o=ORIGINS[s.origin]||ORIGINS.scholar;
  if(s.version===2){s.version=3;s.body=o.body+(s.talent==='vitality'?1:0);s.dao=3;s.social=o.social;s.npcFavor={gu:0,ye:0,cheng:0};
  // Event prose was saved in both the recent log and annual books; deduplicate it.
@@ -404,7 +404,7 @@ function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(in
  const oldSteps=[...new Set([...s.books.flatMap(b=>b.lines||[]),...s.logs.map(e=>e.text)].filter(x=>/反复淬炼元灵|强行催动元灵/.test(x)))];
  s.foundationGrades=Array.from({length:oldStage},(_,i)=>oldSteps[i]?.includes('反复淬炼元灵')?2:i<s.foundation?2:1);
  if(s.pending==='stage'&&s.progress<cap(s))s.pending=null;
- s.studyWork=0;return upgradeRoutes(upgradeStory(s));
+ s.studyWork=0;return migrate(upgradeRoutes(upgradeStory(s)));
 }
 function book(s,yr,partial=false){
  if(s.books.some(b=>b.year===yr))return;
@@ -442,7 +442,7 @@ function quality(s){return manualPower(s)*2+springPower(s)*2+s.foundation*2+s.fo
 function grade(s,roll,mode){
  const names=['上上品','上中品','上下品','中上品','中中品','中下品','下上品','下中品','下下品'];
  const q=quality(s),r=rand(()=>roll),bold=mode==='bold';
- const topReady=q>=22&&ITEMS.manual[s.manual]?.rarity==='仙品'&&ITEMS.spring[s.spring]?.rarity==='仙品'&&springHarmony(s).level!=='相冲'&&s.foundation>=3&&flawlessFoundation(s)&&s.wit>=5&&s.wounds===0;
+ const topReady=q>=22&&ITEMS.manual[s.manual]?.rarity==='仙品'&&ITEMS.spring[s.spring]?.rarity==='仙品'&&springHarmony(s).score>=1&&s.foundation>=3&&flawlessFoundation(s)&&s.wit>=5&&s.wounds===0;
  const base=topReady?0:q>=22?1:q>=18?2:q>=15?3:q>=12?4:q>=9?5:q>=6?6:q>=3?7:8;
  let shift;
  if(base===0)shift=r<(bold?.60:.50)?0:r<(bold?.65:.85)?1:2;
@@ -958,7 +958,7 @@ function discover(s,category,id){s.codex=s.codex||{people:[],beasts:[],gear:[],e
 function discoverCombatant(s,id){const foe=SPAR_OPPONENTS[id];if(!foe)return;s.codex=s.codex||{};s.codex.combatants=s.codex.combatants||[];s.codex.combatantNotes=s.codex.combatantNotes||{};if(!s.codex.combatants.includes(id))s.codex.combatants.push(id);const note=s.codex.combatantNotes[id]||(s.codex.combatantNotes[id]={kind:foe.kind||'human',seenArts:[],seenGear:[],observations:[]});note.seenArts=note.seenArts||[];note.seenGear=note.seenGear||[];note.observations=note.observations||[];for(const slot of Object.keys(foe.gear||{}))if(!note.seenGear.includes(slot))note.seenGear.push(slot);if(foe.kind==='beast')discover(s,'beasts',id);}
 function recordCombatantArt(s,id,art){if(!FOE_ARTS[art])return;discoverCombatant(s,id);const seen=s.codex.combatantNotes[id].seenArts;if(!seen.includes(art))seen.push(art);}
 function recordCombatantObservation(s,id,text){discoverCombatant(s,id);const seen=s.codex.combatantNotes[id].observations;if(!seen.includes(text))seen.push(text);}
-function step(input,command,rng=Math.random){const s=stepInternal(input,command,rng),pending=s.pending||'',action=command.split(':');
+function step(input,command,rng=Math.random){const sourcePending=input.pending||'',s=stepInternal(input,command,rng),pending=s.pending||'',action=command.split(':');
  if(s.location==='market')discover(s,'elixirs',ITEMS.elixir.id);
  if(pending==='scroll'||pending.startsWith('gu')||pending.startsWith('after-gu'))discover(s,'people','gu');
  if(pending==='herbalist'||pending.startsWith('ye')||pending.startsWith('after-ye'))discover(s,'people','ye');
@@ -966,7 +966,7 @@ function step(input,command,rng=Math.random){const s=stepInternal(input,command,
  if(pending==='luMeet'||pending.startsWith('lu')||pending.startsWith('after-lu'))discover(s,'people','lu');
  if(action[0]==='action'&&action[1]==='mentor')discover(s,'people','cheng');
  const choice=action[0]==='choice'?action[1]:null;
- if(choice&&pending!==s.pending)remember(s,`choice.${pending}.${choice}.${s.month}`,{choice,outcome:s.pending||s.ending?.kind||'resolved',tags:['抉择',pending],text:`在「${pending}」中选择了「${choice}」。`});
+ if(choice&&sourcePending&&sourcePending!==s.pending)remember(s,`choice.${sourcePending}.${choice}.${s.month}`,{choice,outcome:s.pending||s.ending?.kind||'resolved',tags:['抉择',sourcePending],text:`在「${sourcePending}」中选择了「${choice}」。`});
  if(s.location&&LOCATIONS[s.location]){s.world=s.world||{};s.world.region=LOCATIONS[s.location].region;s.world.continent=REGIONS[s.world.region]?.parent||'donghua';}
  return syncIds(s); }
 return {KEY,STAGES,NEED,openingStory,affinityRequirement,ELEMENTS,ELEMENT_BEATS,ELEMENT_GENERATES,POLARITIES,AFFINITY_KEYS,points,affinityMissing,affinityTrainingNeed,springHarmony,springHarmonyText,aptitudeNeed,polishNeed,polishReady,flawlessFoundation,techniqueMissing,techniqueProgress,techniqueEffect,foeArtEffect,proficiencyName,aspectCompatible,compatibleElements,matchup,ORIGINS,TALENTS,REGIONS,LOCATIONS,locationPath,ensureLifeHistory,remember,hasMemory,memoriesByTag,markTrait,ITEMS,SPAR_OPPONENTS,TECHNIQUES,FOE_ARTS,EQUIPMENT,create,migrate,cap,cultivationGain,decodeNeed,manualDecoded,decodeProgress,studyNeed,stageChance,stageGrade,effectiveBody,combatStats,combatOptions,step,available,options,chance,quality,grade,year,time,lifeSummary};
