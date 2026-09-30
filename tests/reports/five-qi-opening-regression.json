@@ -1,0 +1,33 @@
+{
+  "baseline": "25105f1607e3d9f0624a5daf9de61f4313b53f5d",
+  "rulesVersion": "2.45",
+  "matrixCount": 5400,
+  "pairedRecordDifferences": 0,
+  "current": {
+    "total": 5400,
+    "attempts": 5398,
+    "successes": 4339,
+    "successRate": 80.35,
+    "averageAttemptMonth": 119.19,
+    "medianAttemptMonth": 116,
+    "p90AttemptMonth": 139,
+    "medianSuccessMonth": 117,
+    "springSelections": {
+      "照骨玄泉": 1800,
+      "瑶光玉液池": 900,
+      "松风泉": 1800,
+      "苍梧石髓池": 900
+    },
+    "foundationGrades": {
+      "1": 805,
+      "2": 4901,
+      "3": 10494
+    },
+    "finalGrades": {
+      "上中品": 2357,
+      "上下品": 1364,
+      "中上品": 618
+    }
+  },
+  "firstChapterNote": "Entire serialized per-run records, including actual mingqi entry probes, match the GitHub baseline."
+}
