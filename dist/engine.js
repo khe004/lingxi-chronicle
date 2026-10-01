@@ -447,9 +447,15 @@ function turn(s){s.month++;s.ageMonths++;if(s.grain>0)s.grain--;else{add(s,{woun
  if(!s.ending&&s.chapter!=='mingqi'&&s.ageMonths>=30*12){end(s,'retired','三十岁这一年，你仍未能叩开仙凡之门。你收起旧卷，辞别苍梧，下山归家；多年吐纳终成一段凡尘旧梦。');return;}if(s.ageMonths>=s.lifeLimitMonths||s.wounds>=6){end(s,s.chapter==='mingqi'&&s.wounds<6?'lifespan':'death',s.wounds>=6?'积伤难复，你在苍梧山的冬夜中溘然长逝。':'寿数已尽。你仍未求得长生之门，山中只余旧日道书。');}
 }
 function chance(s,mode='steady'){
- const legacyBonus=s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0);
-  const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.root*1.5+Math.floor(s.focus/20)-(s.wounds*9)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)+springHarmony(s).chance-(mode==='bold'?19:0);
- return clamp(clamp(Math.floor(raw),15,63)+legacyBonus*2+(s.dao-3)*3-(s.body-effectiveBody(s))*3+(s.talent==='meridian'?5:0),5,84);
+ const legacyBonus=s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0),harmony=springHarmony(s);
+ const agePenalty=(s.body-effectiveBody(s))*3;
+ const raw=20+manualPower(s)*8+springPower(s)*7+s.foundation*4+Math.min(12,Math.floor(s.totalProgress/35))+s.root*1.5+Math.floor(s.focus/20)+(s.body-3)*2+(s.spring===4?4:0)+(s.spring===5&&s.root>=5?2:0)+harmony.chance;
+ let odds=clamp(Math.floor(raw),15,78)+legacyBonus*2+(s.dao-3)*3+(s.talent==='meridian'?5:0);
+ const complete=flawlessFoundation(s)&&ITEMS.manual[s.manual]?.rarity==='仙品'&&ITEMS.spring[s.spring]?.rarity==='仙品'&&harmony.score>=1;
+ // Complete preparation earns a reliable crossing; injuries and depleted focus still matter.
+ if(complete)odds=99;
+ const risk=s.wounds*9+Math.ceil(Math.max(0,35-s.focus)/10)*3+agePenalty;
+ return clamp(clamp(odds,5,99)-risk-(mode==='bold'?12:0),5,99);
 }
 function quality(s){return manualPower(s)*2+springPower(s)*2+s.foundation*2+s.foundationGrades.reduce((n,g)=>n+Math.max(0,g-1),0)+s.root+(s.talent==='clarity'?1:0)+(s.manual===4&&s.wit>=6?1:0)+springHarmony(s).quality-s.wounds*2;}
 function grade(s,roll,mode){

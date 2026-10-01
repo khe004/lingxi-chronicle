@@ -610,7 +610,7 @@ for(const origin of ['scholar','merchant','herbalist']){
  prepared.spring=origin==='scholar'?3:origin==='merchant'?4:5;
  prepared.stage=3;prepared.foundation=3;prepared.foundationGrades=[2,2,2];prepared.insight=8;prepared.totalProgress=240;prepared.focus=100;prepared.wounds=0;
  assert.equal(G.chance({...prepared,talent:'meridian'})-G.chance(prepared),5,origin);
- assert.ok(G.chance({...prepared,talent:'meridian'})<=84);
+ assert.ok(G.chance({...prepared,talent:'meridian'})<=99);
 }
 const savedV6=G.create();savedV6.version=6;delete savedV6.manualId;delete savedV6.springId;delete savedV6.manualIds;delete savedV6.story.luHeard;savedV6.books=[{year:1,lines:['旧卷原文'],stage:'入门吐纳'}];
 const savedV7=G.migrate(savedV6);assert.equal(savedV7.version,12);assert.deepEqual(savedV7.books,savedV6.books);assert.equal(savedV7.manualId,'breath');assert.equal(savedV7.npcFavor.lu,0);

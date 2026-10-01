@@ -1,5 +1,5 @@
 {
-  "ruleVersion": "2.49",
+  "ruleVersion": "2.52",
   "scope": "Nine complete public-action first-chapter to second-chapter runs; supplies obtained through actual mountain gathering, no injected chapter-two stock",
   "records": [
     {
@@ -60,11 +60,11 @@
     {
       "origin": "merchant",
       "route": "green",
-      "seed": 3,
-      "openingMonth": 102,
+      "seed": 2,
+      "openingMonth": 112,
       "months": 45,
       "grade": "上中品",
-      "remaining": 849,
+      "remaining": 839,
       "grain": 45,
       "wounds": 0
     },
