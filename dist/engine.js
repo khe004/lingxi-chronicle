@@ -1,6 +1,6 @@
 (function(root,factory){const game=factory();if(typeof module==='object'&&module.exports)module.exports=game;else root.LingxiEngine=game;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const RULE_VERSION='2.51';
+const RULE_VERSION='2.52';
 const KEY='lingxi-opening-v2';
 const CHECKPOINT_KEY='lingxi-opening-checkpoint-v1';
 const ELEMENTS={wood:'木',fire:'火',earth:'土',metal:'金',water:'水'};
@@ -249,7 +249,7 @@ function finishSpar(s,result){const c=s.combat,storyEncounter=c.storyEncounter,r
   record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']=(record[result==='胜出'?'wins':result==='失手'?'losses':result==='平局'?'draws':'withdrawals']||0)+1;
   record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity}};
   s.story.arenaFirstWins=s.story.arenaFirstWins||{};let reward='';
-  if(result==='胜出'&&!s.story.arenaFirstWins[c.id]){s.story.arenaFirstWins[c.id]=true;if(c.id==='novice'){s.story.arenaLessons=(s.story.arenaLessons||0)+1;reward='演武见闻 +1';}else if(c.id==='keeper'){gainAptitude(s,'dao',3,'与护台人反复印证守势');reward='道心历练';}else if(c.id==='swift'){add(s,{silver:4});reward='银钱 +4';}if(reward){c.history[c.history.length-1]+=`守坪弟子记下你的首次胜绩，并送上演武首胜之礼（${reward}）。`;record.last.history=c.history.slice();}}
+  if(result==='胜出'&&!s.story.arenaFirstWins[c.id]){s.story.arenaFirstWins[c.id]=true;if(['novice','keeper','swift'].includes(c.id))reward=arenaReward(s,c.id,true);if(reward){c.history[c.history.length-1]+=`守坪弟子记下你的首次胜绩，并送上演武首胜之礼（${reward}）。`;record.last.history=c.history.slice();}}
   note(s,`你将这个月的大半闲暇用在演武坪。与${c.enemy.name}正式换招后，又调息养气、复盘得失，并以数次短练印证这一战。`,'演武',`耗时 1 月${reward?' · 首胜 '+reward:''}`);turn(s);
  }
  if(storyEncounter)record.last={opponent:c.enemy.name,result,rounds:c.round,history:c.history.slice(),qi:c.player.currentQi,nei:c.player.currentNei,playerAspect:c.player.attackAspect,enemyAspect:{elements:c.enemy.elements,polarity:c.enemy.polarity},storyEncounter};
@@ -374,13 +374,22 @@ function upgradeStory(s){
  s.story={yeRoute:route,yeMonth:Number.isFinite(encounter?.month)?encounter.month:s.month,yeFollowup:null,yeClue:null,guReacted:false,chengReacted:false,trueTextReady:false,trueTextNextMonth:0};
  s.version=6;return s;
 }
+function arenaReward(s,id,apply=false){
+ const key={novice:'root',keeper:'dao'}[id];let amount=0;
+ if(key&&s[key]<APTITUDE_CAPS[key]){let remaining=-(s.aptitudeXp?.[key]||0);for(let level=s[key];level<APTITUDE_CAPS[key];level++)remaining+=aptitudeNeed(key,level);amount=Math.max(0,Math.min(3,remaining));}
+ let reward;
+ if(amount){reward=`${APTITUDE_NAMES[key]}历练 +${amount}（积累后提升属性）`;if(apply)gainAptitude(s,key,amount,'演武首胜的实修印证');}
+ else {const silver=id==='swift'?4:2;reward=key?`${APTITUDE_NAMES[key]}已满，银钱 +${silver}`:`银钱 +${silver}`;if(apply)add(s,{silver});}
+ if(apply&&id==='novice')s.story.arenaNoviceRewardGranted=true;
+ return reward;
+}
 function migrate(input){if(!input||!Array.isArray(input.logs)||!Array.isArray(input.books)||!Number.isFinite(input.ageMonths))return null;
  if(input.version===12||input.version===11||input.version===10||input.version===9||input.version===8||input.version===7){input.version=12;input.chapter=input.chapter||'opening';input.world=input.world||{continent:'donghua',region:LOCATIONS[input.location]?.region||'cangwu'};ensureLifeHistory(input);input.techniquePractice=input.techniquePractice||{};input.aptitudeXp=input.aptitudeXp||{root:0,wit:Math.max(0,input.studyWork||0),body:0,dao:0,social:0};input.studyWork=input.aptitudeXp.wit||0;input.affinityTraining=Array.from({length:ITEMS.manual.length},(_,i)=>input.affinityTraining?.[i]||0);input.npcFavor={gu:0,ye:0,cheng:0,lu:0,wen:0,...input.npcFavor};input.elixirBoost=Number.isFinite(input.elixirBoost)?input.elixirBoost:(input.flags?.elixir?6:0);
   if(!input.affinityPoints||'plain' in input.affinityPoints||'harmony' in input.affinityPoints){input=upgradeAffinity(copy(input));}
   input.story=input.story||{};input.story.ordeal=input.story.ordeal||null;input.foundationPolish=Number.isFinite(input.foundationPolish)?input.foundationPolish:0;input.insight=0;input.decodedManuals=input.decodedManuals||[...new Set([0,...(input.manuals||[])])];input.decodeWork=input.decodeWork||Array(ITEMS.manual.length).fill(0);input.codex=input.codex||{};input.codex.combatants=input.codex.combatants||[];input.codex.combatantNotes=input.codex.combatantNotes||{};input.codex.elixirs=(input.codex.elixirs||[]).filter(id=>id!=='yangyuan');
   for(const id of input.codex.beasts||[]){if(!input.codex.combatants.includes(id)){input.codex.combatants.push(id);const foe=SPAR_OPPONENTS[id],seenArts=foe?.innate?Object.keys(FOE_ARTS).filter(art=>FOE_ARTS[art].name===foe.innate):[];input.codex.combatantNotes[id]={kind:'beast',seenArts,seenGear:[]};}}
   const visitedMarket=input.location==='market'||input.flags?.elixir||input.logs.some(e=>e.text==='你来到山下集市。');
-  if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);if(input.chapter!=='mingqi')ensureOrdeal(input);if(input.ending?.kind==='success'&&input.chapter==='opening'){enterMingqi(input,input.ending.grade,true);sealOpeningCheckpoint(input);}return input;
+  if(visitedMarket&&!input.codex.elixirs.includes(ITEMS.elixir.id))input.codex.elixirs.push(ITEMS.elixir.id);if(!input.ending&&input.story.arenaFirstWins?.novice&&!input.story.arenaNoviceRewardGranted){const reward=arenaReward(input,'novice',true);note(input,`许砚首胜旧记录已核对，补发实修首胜之礼：${reward}。`,'演武',reward);}if(input.chapter!=='mingqi')ensureOrdeal(input);if(input.ending?.kind==='success'&&input.chapter==='opening'){enterMingqi(input,input.ending.grade,true);sealOpeningCheckpoint(input);}return input;
  }
  if(input.version===6)return migrate(upgradeRoutes(copy(input)));
  if(input.version===5)return migrate(upgradeRoutes(upgradeStory(copy(input))));
@@ -647,7 +656,7 @@ function rawOptions(s){
  return [];
 }
 function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];if(s.chapter==='mingqi')return mingqiAvailable(s);
- if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...(ordealVisitorAvailable(s)?[{id:'ordealDuel',label:`破碍切磋 · ${SPAR_OPPONENTS.ordealVisitor.name}`,detail:`${SPAR_OPPONENTS.ordealVisitor.rank} · 约在第 ${s.story.ordeal.visitorUntil} 月离山；胜出可借战破除气机逆乱，失败只耗正常演武时间`}]:[]),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':' · 首胜另有奖励'}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
+ if(s.location==='arena'){const arenaIds=['novice','keeper','swift'];return [...Object.entries(TECHNIQUES).filter(([id,t])=>s.stage>=t.stage&&!s.knownTechniques?.includes(id)).map(([id,t])=>({id:`learn-${id}`,label:`习得 · ${t.name}`,detail:`${t.detail}；耗内息 ${t.cost}；${techniqueMissing(s,id).join('、')||'功法与兵器契合'}。研习、揣摩并练至可用，耗时一月`,disabled:techniqueMissing(s,id).length>0 })),...(ordealVisitorAvailable(s)?[{id:'ordealDuel',label:`破碍切磋 · ${SPAR_OPPONENTS.ordealVisitor.name}`,detail:`${SPAR_OPPONENTS.ordealVisitor.rank} · 约在第 ${s.story.ordeal.visitorUntil} 月离山；胜出可借战破除气机逆乱，失败只耗正常演武时间`}]:[]),...arenaIds.map(id=>[id,SPAR_OPPONENTS[id]]).filter(([,foe])=>foe).map(([id,foe])=>({id:`spar-${id}`,label:`切磋 · ${foe.name}`,detail:`${foe.rank}对手 · 气血 ${foe.qi}／内息 ${foe.nei} · ${foe.text}演武、调息与复盘合计耗时一月${s.story?.arenaFirstWins?.[id]?' · 首胜奖励已得':` · 首胜：${arenaReward(s,id)}`}`})),...[['staff','试锋木杖','攻势 +3'],['vest','护心藤甲','护体 +4'],['talisman','试法铜符','内息上限 +5；可催动护身一次'],['shoes','逐风履','闪避 +5']].map(([id,label,effect])=>({id:`kit-${id}`,label:`${s.trainingGear?.[id]?'归还':'借用'}${label}`,detail:`开脉前试器 · ${effect} · ${affinityMissing(s,GEAR_AFFINITIES[id]?EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]:{}).join('、')||'属性已契合'} · 战前切换不耗时`,disabled:!s.trainingGear?.[id]&&affinityMissing(s,EQUIPMENT[{'staff':'weapon','vest':'armor','shoes':'shoes','talisman':'relic'}[id]][1]).length>0}))];}
  const batchRisk=s.lifeLimitMonths-s.ageMonths<=12||s.wounds>=4;
  const blocked=ordealActive(s);
  const base=[{id:'secludeYear',label:'闭关修炼',detail:blocked?'气机逆乱中：闭关只会尝试一个月并立即中断':batchRisk?'已接近本章期限或暗伤过重，请逐月决定行动':'自动逐月结算，至多一年；满额、事件、缺粮或危险即停；后山可采药补给',disabled:s.progress>=cap(s)||batchRisk},{id:'cultivate',label:'吐纳修炼',detail:blocked?`一月、口粮 1、心神 −22 · 气机逆乱未解，功行 +0`:`一月、口粮 1、心神 −22 · 功行约 +${cultivationGain(s)}，本层上限 ${cap(s)}`,disabled:s.focus<18||s.progress>=cap(s)},{id:'manual',label:'切换功法',detail:`打开菜单不耗月份 · 已得 ${s.manuals.length} 门，未参透的法卷须先参悟`},{id:'rest',label:'静养调息',detail:`一月、口粮 1 · 心神约 +${48+(effectiveBody(s)-3)*4+(s.talent==='vitality'?12:0)}、暗伤 −${effectiveBody(s)>=5?2:1}`}];
