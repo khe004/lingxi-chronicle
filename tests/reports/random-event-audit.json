@@ -1,0 +1,941 @@
+{
+  "ruleVersion": "2.51",
+  "scenes": 20,
+  "rows": [
+    {
+      "scene": "templeLamp",
+      "capped": false,
+      "choice": "keep",
+      "label": "守灯辨字",
+      "detail": "刚才的行动已耗一月；心神 −12、悟性历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "witPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeLamp",
+      "capped": false,
+      "choice": "rest",
+      "label": "熄灯静养",
+      "detail": "刚才的行动已耗一月；心神 +16、口粮 −1",
+      "disabled": false,
+      "gains": {
+        "focus": 16
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeLamp",
+      "capped": true,
+      "choice": "keep",
+      "label": "守灯辨字",
+      "detail": "刚才的行动已耗一月；心神 −12；悟性已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "templeLamp",
+      "capped": true,
+      "choice": "rest",
+      "label": "熄灯静养",
+      "detail": "刚才的行动已耗一月；心神 +0、口粮 −1",
+      "disabled": true
+    },
+    {
+      "scene": "templeLedger",
+      "capped": false,
+      "choice": "audit",
+      "label": "核对粮册",
+      "detail": "刚才的行动已耗一月；心神 −12、口粮 +3、悟性历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "grain": 3,
+        "witPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeLedger",
+      "capped": false,
+      "choice": "deliver",
+      "label": "替人送粮",
+      "detail": "刚才的行动已耗一月；口粮 −2、银钱 +7、处世历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 7,
+        "socialPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeLedger",
+      "capped": true,
+      "choice": "audit",
+      "label": "核对粮册",
+      "detail": "刚才的行动已耗一月；心神 −12、口粮 +3；悟性已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "grain": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeLedger",
+      "capped": true,
+      "choice": "deliver",
+      "label": "替人送粮",
+      "detail": "刚才的行动已耗一月；口粮 −2、银钱 +7；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 7
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffDebate",
+      "capped": false,
+      "choice": "argue",
+      "label": "参与辩经",
+      "detail": "刚才的行动已耗一月；心神 −14、处世历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "socialPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffDebate",
+      "capped": false,
+      "choice": "listen",
+      "label": "静听两家辩论",
+      "detail": "刚才的行动已耗一月；心神 +12、悟性历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "focus": 12,
+        "witPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffDebate",
+      "capped": true,
+      "choice": "argue",
+      "label": "参与辩经",
+      "detail": "刚才的行动已耗一月；心神 −14；处世已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "cliffDebate",
+      "capped": true,
+      "choice": "listen",
+      "label": "静听两家辩论",
+      "detail": "刚才的行动已耗一月；心神 +0；悟性已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "cliffWind",
+      "capped": false,
+      "choice": "trace",
+      "label": "循风探石刻",
+      "detail": "刚才的行动已耗一月；心神 −16、灵草 +2、体魄历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "herbs": 2,
+        "bodyPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffWind",
+      "capped": false,
+      "choice": "shelter",
+      "label": "回避风口",
+      "detail": "刚才的行动已耗一月；心神 +12、口粮 +1",
+      "disabled": false,
+      "gains": {
+        "grain": 1,
+        "focus": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffWind",
+      "capped": true,
+      "choice": "trace",
+      "label": "循风探石刻",
+      "detail": "刚才的行动已耗一月；心神 −16、灵草 +2；体魄已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "herbs": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffWind",
+      "capped": true,
+      "choice": "shelter",
+      "label": "回避风口",
+      "detail": "刚才的行动已耗一月；心神 +0、口粮 +1",
+      "disabled": false,
+      "gains": {
+        "grain": 1
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainHerbs",
+      "capped": false,
+      "choice": "engageApe",
+      "label": "循着灵草气息进药圃",
+      "detail": "刚才的行动已耗一月；可能立即发生战斗；与护地妖兽交手，胜负将影响采集与伤势",
+      "disabled": false,
+      "gains": {},
+      "battle": true
+    },
+    {
+      "scene": "mountainHerbs",
+      "capped": false,
+      "choice": "bypassApe",
+      "label": "绕过猿影，另寻药株",
+      "detail": "刚才的行动已耗一月；平安离开这片药圃，口粮 +1",
+      "disabled": false,
+      "gains": {
+        "grain": 1
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainHerbs",
+      "capped": true,
+      "choice": "engageApe",
+      "label": "循着灵草气息进药圃",
+      "detail": "刚才的行动已耗一月；可能立即发生战斗；与护地妖兽交手，胜负将影响采集与伤势",
+      "disabled": false,
+      "gains": {},
+      "battle": true
+    },
+    {
+      "scene": "mountainHerbs",
+      "capped": true,
+      "choice": "bypassApe",
+      "label": "绕过猿影，另寻药株",
+      "detail": "刚才的行动已耗一月；平安离开这片药圃，口粮 +1",
+      "disabled": false,
+      "gains": {
+        "grain": 1
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainMist",
+      "capped": false,
+      "choice": "shortcut",
+      "label": "穿雾抄近道",
+      "detail": "刚才的行动已耗一月；心神 −15、银钱 +5；体魄低时暗伤 +1、体魄历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 5,
+        "bodyPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainMist",
+      "capped": false,
+      "choice": "wait",
+      "label": "避雾候晴",
+      "detail": "刚才的行动已耗一月；口粮 +2、心神 +12",
+      "disabled": false,
+      "gains": {
+        "grain": 2,
+        "focus": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainMist",
+      "capped": true,
+      "choice": "shortcut",
+      "label": "穿雾抄近道",
+      "detail": "刚才的行动已耗一月；心神 −15、银钱 +5；体魄低时暗伤 +1；体魄已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 5
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainMist",
+      "capped": true,
+      "choice": "wait",
+      "label": "避雾候晴",
+      "detail": "刚才的行动已耗一月；口粮 +2、心神 +0",
+      "disabled": false,
+      "gains": {
+        "grain": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketGrain",
+      "capped": false,
+      "choice": "bargain",
+      "label": "帮商户核算粮价",
+      "detail": "刚才的行动已耗一月；银钱 +4、心神 −12、处世历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 4,
+        "socialPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketGrain",
+      "capped": false,
+      "choice": "stock",
+      "label": "换取陈谷",
+      "detail": "刚才的行动已耗一月；银钱 −2、口粮 +5",
+      "disabled": false,
+      "gains": {
+        "grain": 5
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketGrain",
+      "capped": true,
+      "choice": "bargain",
+      "label": "帮商户核算粮价",
+      "detail": "刚才的行动已耗一月；银钱 +4、心神 −12；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 4
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketGrain",
+      "capped": true,
+      "choice": "stock",
+      "label": "换取陈谷",
+      "detail": "刚才的行动已耗一月；银钱 −2、口粮 +5",
+      "disabled": false,
+      "gains": {
+        "grain": 5
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketTome",
+      "capped": false,
+      "choice": "decode",
+      "label": "辨认摊头拓本",
+      "detail": "刚才的行动已耗一月；银钱 −2、悟性历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "witPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketTome",
+      "capped": false,
+      "choice": "sell",
+      "label": "替摊主叫卖",
+      "detail": "刚才的行动已耗一月；银钱 +5、心神 −10",
+      "disabled": false,
+      "gains": {
+        "silver": 5
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketTome",
+      "capped": true,
+      "choice": "decode",
+      "label": "辨认摊头拓本",
+      "detail": "刚才的行动已耗一月；银钱 −2；悟性已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "marketTome",
+      "capped": true,
+      "choice": "sell",
+      "label": "替摊主叫卖",
+      "detail": "刚才的行动已耗一月；银钱 +5、心神 −10",
+      "disabled": false,
+      "gains": {
+        "silver": 5
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeMeridian",
+      "capped": false,
+      "choice": "sortPulse",
+      "label": "替同门理顺行气",
+      "detail": "刚才的行动已耗一月；心神 −18、悟性历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "witPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeMeridian",
+      "capped": false,
+      "choice": "sortStore",
+      "label": "调度观中资粮",
+      "detail": "刚才的行动已耗一月；心神 −10、口粮 +6、处世历练 +2（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "grain": 6,
+        "socialPractice": 2
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeMeridian",
+      "capped": true,
+      "choice": "sortPulse",
+      "label": "替同门理顺行气",
+      "detail": "刚才的行动已耗一月；心神 −18；悟性已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "templeMeridian",
+      "capped": true,
+      "choice": "sortStore",
+      "label": "调度观中资粮",
+      "detail": "刚才的行动已耗一月；心神 −10、口粮 +6；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "grain": 6
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffPulse",
+      "capped": false,
+      "choice": "readPulse",
+      "label": "辨认岩中灵息",
+      "detail": "刚才的行动已耗一月；心神 −18、本层功行 +8、悟性历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "progress": 8,
+        "witPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffPulse",
+      "capped": false,
+      "choice": "leadGroup",
+      "label": "带人登岩寻路",
+      "detail": "刚才的行动已耗一月；心神 −10、银钱 +8、处世历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 8,
+        "socialPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffPulse",
+      "capped": true,
+      "choice": "readPulse",
+      "label": "辨认岩中灵息",
+      "detail": "刚才的行动已耗一月；心神 −18、本层功行 +8；悟性已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "progress": 8
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffPulse",
+      "capped": true,
+      "choice": "leadGroup",
+      "label": "带人登岩寻路",
+      "detail": "刚才的行动已耗一月；心神 −10、银钱 +8；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 8
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainVein",
+      "capped": false,
+      "choice": "tapVein",
+      "label": "探寻新药脉",
+      "detail": "刚才的行动已耗一月；心神 −18、灵草 +3、体魄历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "herbs": 3,
+        "bodyPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainVein",
+      "capped": false,
+      "choice": "drawVein",
+      "label": "借山势行气",
+      "detail": "刚才的行动已耗一月；口粮 −2、本层功行 +7",
+      "disabled": false,
+      "gains": {
+        "progress": 7
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainVein",
+      "capped": true,
+      "choice": "tapVein",
+      "label": "探寻新药脉",
+      "detail": "刚才的行动已耗一月；心神 −18、灵草 +3；体魄已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "herbs": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainVein",
+      "capped": true,
+      "choice": "drawVein",
+      "label": "借山势行气",
+      "detail": "刚才的行动已耗一月；口粮 −2、本层功行 +7",
+      "disabled": false,
+      "gains": {
+        "progress": 7
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketScript",
+      "capped": false,
+      "choice": "buyScript",
+      "label": "购下完整拓本",
+      "detail": "刚才的行动已耗一月；银钱 −5、本层功行 +9",
+      "disabled": false,
+      "gains": {
+        "progress": 9
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketScript",
+      "capped": false,
+      "choice": "sellScript",
+      "label": "替书商鉴定残篇",
+      "detail": "刚才的行动已耗一月；灵草 −1、银钱 +8",
+      "disabled": false,
+      "gains": {
+        "silver": 8
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketScript",
+      "capped": true,
+      "choice": "buyScript",
+      "label": "购下完整拓本",
+      "detail": "刚才的行动已耗一月；银钱 −5、本层功行 +9",
+      "disabled": false,
+      "gains": {
+        "progress": 9
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketScript",
+      "capped": true,
+      "choice": "sellScript",
+      "label": "替书商鉴定残篇",
+      "detail": "刚才的行动已耗一月；灵草 −1、银钱 +8",
+      "disabled": false,
+      "gains": {
+        "silver": 8
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeSeal",
+      "capped": false,
+      "choice": "repairSeal",
+      "label": "封合元基裂隙",
+      "detail": "刚才的行动已耗一月；灵草 −1、心神 −18、裂隙 −1、道心历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "repaired": 1,
+        "daoPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeSeal",
+      "capped": false,
+      "choice": "readSeal",
+      "label": "参悟观中旧印",
+      "detail": "刚才的行动已耗一月；心神 −20、本层功行 +11、悟性历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "progress": 11,
+        "witPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeSeal",
+      "capped": true,
+      "choice": "repairSeal",
+      "label": "封合元基裂隙",
+      "detail": "刚才的行动已耗一月；灵草 −1、心神 −18、裂隙 −1；道心已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "templeSeal",
+      "capped": true,
+      "choice": "readSeal",
+      "label": "参悟观中旧印",
+      "detail": "刚才的行动已耗一月；心神 −20、本层功行 +11；悟性已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "progress": 11
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffFormation",
+      "capped": false,
+      "choice": "forceFlow",
+      "label": "催动灵息破阵",
+      "detail": "刚才的行动已耗一月；暗伤 +1、本层功行 +12；暗伤达到 6 则身死、根骨历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "progress": 12,
+        "rootPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffFormation",
+      "capped": false,
+      "choice": "holdArray",
+      "label": "守住阵眼静候",
+      "detail": "刚才的行动已耗一月；心神 +20",
+      "disabled": false,
+      "gains": {
+        "focus": 20
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffFormation",
+      "capped": true,
+      "choice": "forceFlow",
+      "label": "催动灵息破阵",
+      "detail": "刚才的行动已耗一月；暗伤 +1、本层功行 +12；暗伤达到 6 则身死；根骨已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "progress": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffFormation",
+      "capped": true,
+      "choice": "holdArray",
+      "label": "守住阵眼静候",
+      "detail": "刚才的行动已耗一月；心神 +0",
+      "disabled": true
+    },
+    {
+      "scene": "mountainCave",
+      "capped": false,
+      "choice": "healCave",
+      "label": "洞中引泉疗伤",
+      "detail": "刚才的行动已耗一月；灵草 −2、暗伤 −2、体魄历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "healed": 2,
+        "bodyPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainCave",
+      "capped": false,
+      "choice": "seekCave",
+      "label": "深入洞中采药",
+      "detail": "刚才的行动已耗一月；心神 −20、灵草 +4、体魄历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "herbs": 4,
+        "bodyPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainCave",
+      "capped": true,
+      "choice": "healCave",
+      "label": "洞中引泉疗伤",
+      "detail": "刚才的行动已耗一月；灵草 −2、暗伤 −0；体魄已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "mountainCave",
+      "capped": true,
+      "choice": "seekCave",
+      "label": "深入洞中采药",
+      "detail": "刚才的行动已耗一月；心神 −20、灵草 +4；体魄已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "herbs": 4
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketPact",
+      "capped": false,
+      "choice": "buyPact",
+      "label": "换取冲关注解",
+      "detail": "刚才的行动已耗一月；银钱 −6、本层功行 +12",
+      "disabled": false,
+      "gains": {
+        "progress": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketPact",
+      "capped": false,
+      "choice": "tradePact",
+      "label": "替商队护送道书",
+      "detail": "刚才的行动已耗一月；心神 −22、银钱 +10、处世历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 10,
+        "socialPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketPact",
+      "capped": true,
+      "choice": "buyPact",
+      "label": "换取冲关注解",
+      "detail": "刚才的行动已耗一月；银钱 −6、本层功行 +12",
+      "disabled": false,
+      "gains": {
+        "progress": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketPact",
+      "capped": true,
+      "choice": "tradePact",
+      "label": "替商队护送道书",
+      "detail": "刚才的行动已耗一月；心神 −22、银钱 +10；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 10
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeBreath",
+      "capped": false,
+      "choice": "closeBreath",
+      "label": "收束真息疗伤",
+      "detail": "刚才的行动已耗一月；灵草 −1、心神 +35、暗伤 −1、根骨历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "focus": 35,
+        "healed": 1,
+        "rootPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeBreath",
+      "capped": false,
+      "choice": "openBreath",
+      "label": "引真息贯通元脉",
+      "detail": "刚才的行动已耗一月；心神 −24、本层功行 +15、根骨历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "progress": 15,
+        "rootPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "templeBreath",
+      "capped": true,
+      "choice": "closeBreath",
+      "label": "收束真息疗伤",
+      "detail": "刚才的行动已耗一月；灵草 −1、心神 +0、暗伤 −0；根骨已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "templeBreath",
+      "capped": true,
+      "choice": "openBreath",
+      "label": "引真息贯通元脉",
+      "detail": "刚才的行动已耗一月；心神 −24、本层功行 +15；根骨已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "progress": 15
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffVision",
+      "capped": false,
+      "choice": "observeSky",
+      "label": "登岩观象",
+      "detail": "刚才的行动已耗一月；心神 −20、悟性历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "witPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffVision",
+      "capped": false,
+      "choice": "guideSky",
+      "label": "带弟子踏勘岩脉",
+      "detail": "刚才的行动已耗一月；心神 −20、银钱 +12、处世历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 12,
+        "socialPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "cliffVision",
+      "capped": true,
+      "choice": "observeSky",
+      "label": "登岩观象",
+      "detail": "刚才的行动已耗一月；心神 −20；悟性已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "cliffVision",
+      "capped": true,
+      "choice": "guideSky",
+      "label": "带弟子踏勘岩脉",
+      "detail": "刚才的行动已耗一月；心神 −20、银钱 +12；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 12
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainSpring",
+      "capped": false,
+      "choice": "washSpring",
+      "label": "借山泉洗去旧伤",
+      "detail": "刚才的行动已耗一月；灵草 −2、暗伤 −2、心神 +20、体魄历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "focus": 20,
+        "healed": 2,
+        "bodyPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainSpring",
+      "capped": false,
+      "choice": "gatherSpring",
+      "label": "采下泉畔灵材",
+      "detail": "刚才的行动已耗一月；心神 −20、灵草 +4、体魄历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "herbs": 4,
+        "bodyPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "mountainSpring",
+      "capped": true,
+      "choice": "washSpring",
+      "label": "借山泉洗去旧伤",
+      "detail": "刚才的行动已耗一月；灵草 −2、暗伤 −0、心神 +0；体魄已达上限，本次无历练收益",
+      "disabled": true
+    },
+    {
+      "scene": "mountainSpring",
+      "capped": true,
+      "choice": "gatherSpring",
+      "label": "采下泉畔灵材",
+      "detail": "刚才的行动已耗一月；心神 −20、灵草 +4；体魄已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "herbs": 4
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketExchange",
+      "capped": false,
+      "choice": "buyRations",
+      "label": "购置长关资粮",
+      "detail": "刚才的行动已耗一月；银钱 −7、口粮 +16",
+      "disabled": false,
+      "gains": {
+        "grain": 16
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketExchange",
+      "capped": false,
+      "choice": "sellGoods",
+      "label": "售出积存灵材",
+      "detail": "刚才的行动已耗一月；灵草 −2、银钱 +12、处世历练 +3（积累后提升属性）",
+      "disabled": false,
+      "gains": {
+        "silver": 12,
+        "socialPractice": 3
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketExchange",
+      "capped": true,
+      "choice": "buyRations",
+      "label": "购置长关资粮",
+      "detail": "刚才的行动已耗一月；银钱 −7、口粮 +16",
+      "disabled": false,
+      "gains": {
+        "grain": 16
+      },
+      "battle": false
+    },
+    {
+      "scene": "marketExchange",
+      "capped": true,
+      "choice": "sellGoods",
+      "label": "售出积存灵材",
+      "detail": "刚才的行动已耗一月；灵草 −2、银钱 +12；处世已达上限，本次无历练收益",
+      "disabled": false,
+      "gains": {
+        "silver": 12
+      },
+      "battle": false
+    }
+  ],
+  "scope": "All 20 random encounter scenes, 40 choices, normal and capped recovery/aptitude states. Combat entry is a warned risk, not a guaranteed reward."
+}

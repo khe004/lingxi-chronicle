@@ -1,0 +1,7 @@
+{
+  "ruleVersion": "2.51",
+  "runs": 270,
+  "attempts": 270,
+  "structuralFailures": 0,
+  "note": "Five fixed seeds per 54 origin/talent/route/policy combinations. Smoke validation after random-event changes; does not claim full historical 5400-record equivalence."
+}
