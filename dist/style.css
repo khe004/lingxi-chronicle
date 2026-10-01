@@ -263,7 +263,8 @@
 @media(max-width:767px){
  .ui-redesign .location-controls{position:relative;top:auto;right:auto}
  .ui-redesign .narrative-head{display:block;padding:8px 4px 12px;border:0}
- .ui-redesign .narrative-head #date,.ui-redesign .narrative-head #restart{display:none}
+ .ui-redesign .narrative-head #date{display:none}
+ .ui-redesign .narrative-head #restart{display:block;min-height:44px;margin:8px 0 0 auto}
  .ui-redesign .mobile-location{margin:0;gap:8px}
  .ui-redesign .location-copy h1{font-size:21px;margin:0 0 5px}
  .ui-redesign .location-copy .subtle{font-size:13px;line-height:1.55}
