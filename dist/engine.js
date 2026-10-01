@@ -700,8 +700,18 @@ function rawAvailable(s){if(s.ending||s.pending||s.combat)return [];if(s.chapter
  if(s.location==='market')return base.filter(a=>!['secludeYear','cultivate','manual','rest'].includes(a.id));
  return base;
 }
-function available(s){return rawAvailable(s).map(o=>legacyRequirementDiagnostics(s,o));}
-function options(s){return rawOptions(s).map(o=>legacyRequirementDiagnostics(s,o));}
+function completedOffer(s,o){
+ if(!s.pending){
+  if(o.id==='buymanual')return s.manuals.includes(1);
+  if(o.id==='spring')return s.spring>=3;
+  if(o.id==='buyelixir')return s.elixirBoost>0;
+ }
+ if(s.pending==='mentor')return o.id==='serve'?!!s.flags.mentor:o.id==='guidance'?s.manuals.includes(2):false;
+ if(s.pending==='spring'){const tier={common:1,deep:2,hidden:3,stone:3,sealed:3}[o.id];return !!tier&&s.spring>=tier;}
+ return false;
+}
+function available(s){return rawAvailable(s).filter(o=>!completedOffer(s,o)).map(o=>legacyRequirementDiagnostics(s,o));}
+function options(s){return rawOptions(s).filter(o=>!completedOffer(s,o)).map(o=>legacyRequirementDiagnostics(s,o));}
 function batchCultivate(initial,limit,rng){let s=initial,trained=0,rested=0,gathered=0,reason='约定的闭关期限已满';
  const start={month:s.month,progress:s.progress,root:s.root,wit:s.wit,body:s.body,dao:s.dao,grain:s.grain,herbs:s.herbs,affinity:{...points(s)}};
  s.batchActive=true;
